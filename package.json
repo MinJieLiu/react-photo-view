@@ -1,0 +1,51 @@
+{
+  "name": "react-photo-view",
+  "version": "0.0.1",
+  "description": "React photo preview",
+  "keywords": [
+    "react",
+    "react-component",
+    "react-photo-view",
+    "photo"
+  ],
+  "scripts": {
+    "watch-tsc": "rc-tools run watch-tsc",
+    "dist": "rc-tools run dist",
+    "build": "rc-tools run build",
+    "gh-pages": "rc-tools run gh-pages",
+    "start": "rc-tools run server",
+    "compile": "rc-tools run compile --babel-runtime",
+    "pub": "rc-tools run pub --babel-runtime",
+    "lint": "rc-tools run lint",
+    "karma": "rc-test run karma",
+    "saucelabs": "rc-test run saucelabs",
+    "test": "rc-test run test",
+    "prepublish": "rc-tools run guard",
+    "chrome-test": "rc-test run chrome-test",
+    "coverage": "rc-test run coverage"
+  },
+  "config": {
+    "port": 8001
+  },
+  "files": [
+    "lib"
+  ],
+  "main": "./lib",
+  "module": "./es",
+  "author": "LMY",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/react": "^16.4.6",
+    "@types/react-dom": "^16.0.6",
+    "babel-polyfill": "^6.23.0",
+    "prettier": "^1.13.7",
+    "rc-test": "^6.0.9",
+    "rc-tools": "^8.1.1",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "styled-components": "^3.3.3"
+  },
+  "dependencies": {
+    "prop-types": "^15.5.10"
+  }
+}
