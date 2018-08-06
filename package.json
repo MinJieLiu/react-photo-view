@@ -42,10 +42,9 @@
     "rc-test": "^6.0.9",
     "rc-tools": "^8.1.1",
     "react": "^16.4.1",
-    "react-dom": "^16.4.1",
-    "styled-components": "^3.3.3"
+    "react-dom": "^16.4.1"
   },
   "dependencies": {
-    "prop-types": "^15.5.10"
+    "styled-components": "^3.0.1"
   }
 }
