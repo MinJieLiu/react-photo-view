@@ -1,8 +1,14 @@
 import React from 'react';
 
-export default function Spinner(props) {
+export default function Spinner() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="64" height="64" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 32 32"
+      width="64"
+      height="64"
+      fill="white"
+    >
       <path
         opacity=".25"
         d="M16 0 A16 16 0 0 0 16 32 A16 16 0 0 0 16 0 M16 4 A12 12 0 0 1 16 28 A12 12 0 0 1 16 4"
@@ -13,7 +19,7 @@ export default function Spinner(props) {
           type="rotate"
           from="0 16 16"
           to="360 16 16"
-          dur="0.4s"
+          dur="0.6s"
           repeatCount="indefinite"
         />
       </path>

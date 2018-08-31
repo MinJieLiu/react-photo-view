@@ -1,6 +1,6 @@
 import React from 'react';
-import styled from 'styled-components';
 import Spinner from './Spinner';
+import { getSuitableImageSize } from './util';
 
 export interface IPhotoProps {
   src: string;
@@ -14,12 +14,11 @@ type ImageProps = {
 
 type PhotoState = ImageProps & {
   broken: boolean;
+  naturalWidth: number;
+  naturalHeight: number;
+  width: number;
+  height: number;
 };
-
-const Image = styled.img<ImageProps>`
-  opacity: ${props => +props.loaded};
-  transition: opacity 0.4s ease-out;
-`;
 
 export default class Photo extends React.Component<IPhotoProps, PhotoState> {
   static displayName = 'Photo';
@@ -27,11 +26,28 @@ export default class Photo extends React.Component<IPhotoProps, PhotoState> {
   readonly state = {
     loaded: false,
     broken: false,
+    naturalWidth: 0,
+    naturalHeight: 0,
+    width: 0,
+    height: 0,
   };
 
-  handleImageLoaded = () => {
+  constructor(props) {
+    super(props);
+
+    const currPhoto = new Image();
+    currPhoto.src = props.src;
+    currPhoto.onload = this.handleImageLoaded;
+    currPhoto.onerror = this.handleImageBroken;
+  }
+
+  handleImageLoaded = (e) => {
+    const { naturalWidth, naturalHeight } = e.target;
     this.setState({
       loaded: true,
+      naturalWidth,
+      naturalHeight,
+      ...getSuitableImageSize(naturalWidth, naturalHeight),
     });
   }
 
@@ -43,19 +59,21 @@ export default class Photo extends React.Component<IPhotoProps, PhotoState> {
 
   render() {
     const { src, loadingElement, brokenElement, ...restProps } = this.props;
-    const { loaded, broken } = this.state;
+    const { loaded, broken, width, height } = this.state;
 
-    return src && !broken ? (
-      <React.Fragment>
-        {loaded ? undefined : loadingElement || <Spinner fill="white" />}
-        <Image
-          src={src}
-          {...restProps}
-          loaded={loaded}
-          onLoad={this.handleImageLoaded}
-          onError={this.handleImageBroken}
-        />
-      </React.Fragment>
-    ) : brokenElement || null;
+    if (src && !broken) {
+      if (loaded) {
+        return (
+          <img
+            src={src}
+            width={width}
+            height={height}
+            {...restProps}
+          />
+        );
+      }
+      return loadingElement || <Spinner />;
+    }
+    return brokenElement || null;
   }
 }
