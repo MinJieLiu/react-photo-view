@@ -1,4 +1,5 @@
-import { animationTimeBase } from './variables';
+import { animationType } from './types';
+import { maxTouchTime, defaultAnimationConfig } from './variables';
 
 /**
  * 获取图片合适的大小
@@ -42,6 +43,32 @@ export const getSuitableImageSize = (
   };
 };
 
+export const getPositionOnScale = ({
+  x,
+  y,
+  pageX,
+  pageY,
+  toScale,
+}: {
+  x: number;
+  y: number;
+  pageX: number;
+  pageY: number;
+  toScale: number;
+}): {
+  distanceX: number;
+  distanceY: number;
+} => {
+  const { innerWidth, innerHeight } = window;
+  const scale = toScale - 1;
+  const distanceX = (innerWidth / 2 - x - pageX) * scale;
+  const distanceY = (innerHeight / 2 - y - pageY) * scale;
+  return {
+    distanceX: Math.floor(distanceX),
+    distanceY: Math.floor(distanceY),
+  };
+};
+
 export const slideToPosition = ({
   x,
   y,
@@ -57,54 +84,65 @@ export const slideToPosition = ({
 }): {
   endX: number;
   endY: number;
-  slideTime: number;
-} => {
+} & animationType => {
   const moveTime = Date.now() - touchedTime;
   const speedX = (x - offsetX) / moveTime;
   const speedY = (y - offsetY) / moveTime;
   const maxSpeed = Math.max(speedX, speedY);
-  const currentAnimationTime =
-    Math.abs(maxSpeed < 200 ? maxSpeed : 200) * animationTimeBase +
-    animationTimeBase;
+  const slideTime = moveTime < maxTouchTime ? Math.abs(maxSpeed) * 10 + 400 : 0;
   return {
-    endX: Math.floor(x + speedX * currentAnimationTime),
-    endY: Math.floor(y + speedY * currentAnimationTime),
-    slideTime: Math.floor(currentAnimationTime),
+    endX: Math.floor(x + speedX * slideTime),
+    endY: Math.floor(y + speedY * slideTime),
+    animation: {
+      stiffness: 170,
+      damping: 32,
+    },
   };
 };
 
 /**
  * 跳转到合适的图片偏移量
- * @param endX x 滑动后距离
- * @param endY y 滑动后距离
- * @param width 图片宽度
- * @param height 图片高度
- * @param scale 缩放
- * @param slideTime 动画时间
- * @return 坐标
  */
 export const jumpToSuitableOffset = ({
-  endX,
-  endY,
+  x,
+  y,
+  offsetX,
+  offsetY,
   width,
   height,
   scale,
-  slideTime,
+  touchedTime,
+  hasMove,
 }: {
-  endX: number;
-  endY: number;
+  x: number;
+  y: number;
+  offsetX: number;
+  offsetY: number;
   width: number;
   height: number;
   scale: number;
-  slideTime: number;
+  touchedTime: number;
+  hasMove: boolean;
 }): {
   x: number;
   y: number;
-  animationTime: number;
-} => {
+} & animationType => {
+  // 没有移动图片
+  if (!hasMove) {
+    return {
+      x,
+      y,
+      animation: defaultAnimationConfig,
+    };
+  }
+
   const { innerWidth, innerHeight } = window;
+  // 图片超出的长度
   const outOffsetX = (width * scale - innerWidth) / 2;
   const outOffsetY = (height * scale - innerHeight) / 2;
+
+  // 滑动到结果的位置
+  const { endX, endY, animation } = slideToPosition({ x, y, offsetX, offsetY, touchedTime });
 
   let currentX = endX;
   let currentY = endY;
@@ -129,6 +167,6 @@ export const jumpToSuitableOffset = ({
   return {
     x: currentX,
     y: currentY,
-    animationTime: isSlide ? slideTime : animationTimeBase,
+    animation: isSlide ? defaultAnimationConfig : animation,
   };
 };

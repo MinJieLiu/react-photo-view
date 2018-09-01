@@ -1,10 +1,11 @@
 import React from 'react';
-import styled from 'styled-components';
+import { Motion, spring } from 'react-motion';
 import throttle from 'lodash.throttle';
 import Photo from './Photo';
 import { PhotoContainer, Backdrop } from './StyledElements';
-import { slideToPosition, jumpToSuitableOffset } from './util';
-import { animationDefault, animationTimeBase } from './variables';
+import { getPositionOnScale, jumpToSuitableOffset } from './utils';
+import { defaultAnimationConfig } from './variables';
+import { animationType } from './types';
 
 export interface IPhotoViewProps {
   src: string;
@@ -29,25 +30,14 @@ type PhotoViewState = {
   offsetY: number;
   // 触摸开始时时间
   touchedTime: number;
-  // 动画名称
-  animationName: string | null;
-  // 动画时间
-  animationTime: number;
-};
-
-const DragPhoto = styled(Photo)<React.HTMLAttributes<any>>`
-  will-change: transform;
-  cursor: -webkit-grab;
-
-  &:active {
-    cursor: -webkit-grabbing;
-  }
-`;
+} & animationType;
 
 export default class PhotoView extends React.Component<
   IPhotoViewProps,
   PhotoViewState
 > {
+  static displayName = 'PhotoView';
+
   readonly state = {
     x: 0,
     y: 0,
@@ -59,8 +49,8 @@ export default class PhotoView extends React.Component<
     offsetX: 0,
     offsetY: 0,
     touchedTime: 0,
-    animationName: animationDefault,
-    animationTime: animationTimeBase,
+
+    animation: defaultAnimationConfig,
   };
 
   private photoRef;
@@ -107,12 +97,36 @@ export default class PhotoView extends React.Component<
     }
   }
 
-  handleDoubleClick = () => {
-    this.setState(prevState => ({
-      scale: prevState.scale > 1 ? 1 : 3,
-      animationName: animationDefault,
-      animationTime: animationTimeBase,
-    }));
+  handleDoubleClick = (e) => {
+    const { pageX, pageY } = e;
+    this.setState(({ x, y, scale }) => {
+      const toScale = scale > 1 ? 1 : 4;
+      const { distanceX, distanceY } = getPositionOnScale({ x, y, pageX, pageY, toScale });
+      return {
+        x: distanceX,
+        y: distanceY,
+        pageX,
+        pageY,
+        scale: toScale,
+      };
+    });
+  }
+
+  handleWheel = (e) => {
+    const { pageX, pageY, deltaY } = e;
+    this.setState(({ x, y, scale }) => {
+      const toScale = scale + deltaY / 100;
+      const { distanceX, distanceY } = getPositionOnScale({ x, y, pageX, pageY, toScale });
+
+      return {
+        x: distanceX,
+        y: distanceY,
+        pageX,
+        pageY,
+        scale: toScale,
+        animation: defaultAnimationConfig,
+      };
+    });
   }
 
   handleTouchStart = e => {
@@ -133,7 +147,8 @@ export default class PhotoView extends React.Component<
     this.handleMove(e.pageX, e.pageY);
   }
 
-  handleMouseUp = () => {
+  handleMouseUp = (e) => {
+    const { pageX, pageY } = e;
     const { width, height } = this.photoRef.state;
     this.setState(({
       x,
@@ -142,20 +157,21 @@ export default class PhotoView extends React.Component<
       offsetY,
       scale,
       touchedTime,
+      ...restPrevState
     }) => {
+      const hasMove: boolean = pageX !== restPrevState.pageX || pageY !== restPrevState.pageY;
       return {
         touched: false,
         ...jumpToSuitableOffset({
+          x,
+          y,
+          offsetX,
+          offsetY,
           width,
           height,
           scale,
-          ...slideToPosition({
-            x,
-            y,
-            offsetX,
-            offsetY,
-            touchedTime,
-          }),
+          touchedTime,
+          hasMove,
         }),
       };
     });
@@ -167,26 +183,35 @@ export default class PhotoView extends React.Component<
 
   render() {
     const { src } = this.props;
-    const { x, y, scale, touched, animationName, animationTime } = this.state;
-    const transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
+    const { x, y, scale, touched, animation } = this.state;
+    const style = {
+      currX: touched ? x : spring(x, animation),
+      currY: touched ? y : spring(y, animation),
+      currScale: spring(scale, animation),
+    };
 
     return (
       <PhotoContainer>
         <Backdrop />
-        <DragPhoto
-          src={src}
-          innerRef={this.handlePhotoRef}
-          onDoubleClick={this.handleDoubleClick}
-          onMouseDown={this.handleMouseDown}
-          onTouchStart={this.handleTouchStart}
-          style={{
-            WebkitTransform: transform,
-            transform,
-            transition: touched
-              ? undefined
-              : `transform ${animationTime}ms ${animationName}`,
+        <Motion style={style}>
+          {({ currX, currY, currScale }) => {
+            const transform = `translate3d(${currX}px, ${currY}px, 0) scale(${currScale})`;
+            return (
+              <Photo
+                src={src}
+                ref={this.handlePhotoRef}
+                onDoubleClick={this.handleDoubleClick}
+                onMouseDown={this.handleMouseDown}
+                onTouchStart={this.handleTouchStart}
+                onWheel={this.handleWheel}
+                style={{
+                  WebkitTransform: transform,
+                  transform,
+                }}
+              />
+            );
           }}
-        />
+        </Motion>
       </PhotoContainer>
     );
   }

@@ -1,24 +1,31 @@
 import React from 'react';
+import styled from 'styled-components';
 import Spinner from './Spinner';
-import { getSuitableImageSize } from './util';
+import { getSuitableImageSize } from './utils';
 
-export interface IPhotoProps {
+export interface IPhotoProps extends React.HTMLAttributes<any> {
   src: string;
   loadingElement?: JSX.Element;
   brokenElement?: JSX.Element;
 }
 
-type ImageProps = {
+type PhotoState = {
   loaded: boolean;
-};
-
-type PhotoState = ImageProps & {
   broken: boolean;
   naturalWidth: number;
   naturalHeight: number;
   width: number;
   height: number;
 };
+
+const PhotoImage = styled.img`
+  will-change: transform;
+  cursor: -webkit-grab;
+
+  &:active {
+    cursor: -webkit-grabbing;
+  }
+`;
 
 export default class Photo extends React.Component<IPhotoProps, PhotoState> {
   static displayName = 'Photo';
@@ -41,7 +48,7 @@ export default class Photo extends React.Component<IPhotoProps, PhotoState> {
     currPhoto.onerror = this.handleImageBroken;
   }
 
-  handleImageLoaded = (e) => {
+  handleImageLoaded = e => {
     const { naturalWidth, naturalHeight } = e.target;
     this.setState({
       loaded: true,
@@ -58,13 +65,18 @@ export default class Photo extends React.Component<IPhotoProps, PhotoState> {
   }
 
   render() {
-    const { src, loadingElement, brokenElement, ...restProps } = this.props;
+    const {
+      src,
+      loadingElement,
+      brokenElement,
+      ...restProps
+    } = this.props;
     const { loaded, broken, width, height } = this.state;
 
     if (src && !broken) {
       if (loaded) {
         return (
-          <img
+          <PhotoImage
             src={src}
             width={width}
             height={height}
