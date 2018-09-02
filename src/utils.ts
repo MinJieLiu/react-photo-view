@@ -48,8 +48,6 @@ export const getPositionOnScale = ({
   y,
   pageX,
   pageY,
-  lastPageX,
-  lastPageY,
   fromScale,
   toScale,
 }: {
@@ -57,15 +55,11 @@ export const getPositionOnScale = ({
   y: number;
   pageX: number;
   pageY: number;
-  lastPageX: number | undefined;
-  lastPageY: number | undefined;
   fromScale: number;
   toScale: number;
 }): {
   x: number;
   y: number;
-  lastPageX: number;
-  lastPageY: number;
   scale: number;
 } => {
   const { innerWidth, innerHeight } = window;
@@ -81,6 +75,10 @@ export const getPositionOnScale = ({
     // 缩放距离计算
     const centerPageX = pageX - innerWidth / 2;
     const centerPageY = pageY - innerHeight / 2;
+
+    const touchedImageX = (centerPageX - x) / fromScale;
+    const touchedImageY = (centerPageY - y) / fromScale;
+
     const scale = endScale - fromScale;
 
     distanceX = x - centerPageX * scale;
@@ -89,8 +87,6 @@ export const getPositionOnScale = ({
   return {
     x: distanceX,
     y: distanceY,
-    lastPageX: pageX,
-    lastPageY: pageY,
     scale: endScale,
   };
 };
