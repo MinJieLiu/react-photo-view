@@ -48,46 +48,72 @@ export const getPositionOnScale = ({
   y,
   pageX,
   pageY,
+  lastPageX,
+  lastPageY,
+  fromScale,
   toScale,
 }: {
   x: number;
   y: number;
   pageX: number;
   pageY: number;
+  lastPageX: number | undefined;
+  lastPageY: number | undefined;
+  fromScale: number;
   toScale: number;
 }): {
-  distanceX: number;
-  distanceY: number;
+  x: number;
+  y: number;
+  lastPageX: number;
+  lastPageY: number;
+  scale: number;
 } => {
   const { innerWidth, innerHeight } = window;
-  const scale = toScale - 1;
-  const distanceX = (innerWidth / 2 - x - pageX) * scale;
-  const distanceY = (innerHeight / 2 - y - pageY) * scale;
+  let endScale = toScale;
+  let distanceX = x;
+  let distanceY = y;
+  // 缩放限制
+  if (toScale < 0.5) {
+    endScale = 0.5;
+  } else if (toScale > 5) {
+    endScale = 5;
+  } else {
+    // 缩放距离计算
+    const centerPageX = pageX - innerWidth / 2;
+    const centerPageY = pageY - innerHeight / 2;
+    const scale = endScale - fromScale;
+
+    distanceX = x - centerPageX * scale;
+    distanceY = y - centerPageY * scale;
+  }
   return {
-    distanceX: Math.floor(distanceX),
-    distanceY: Math.floor(distanceY),
+    x: distanceX,
+    y: distanceY,
+    lastPageX: pageX,
+    lastPageY: pageY,
+    scale: endScale,
   };
 };
 
 export const slideToPosition = ({
   x,
   y,
-  offsetX,
-  offsetY,
+  lastX,
+  lastY,
   touchedTime,
 }: {
   x: number;
   y: number;
-  offsetX: number;
-  offsetY: number;
+  lastX: number;
+  lastY: number;
   touchedTime: number;
 }): {
   endX: number;
   endY: number;
 } & animationType => {
   const moveTime = Date.now() - touchedTime;
-  const speedX = (x - offsetX) / moveTime;
-  const speedY = (y - offsetY) / moveTime;
+  const speedX = (x - lastX) / moveTime;
+  const speedY = (y - lastY) / moveTime;
   const maxSpeed = Math.max(speedX, speedY);
   const slideTime = moveTime < maxTouchTime ? Math.abs(maxSpeed) * 10 + 400 : 0;
   return {
@@ -106,8 +132,8 @@ export const slideToPosition = ({
 export const jumpToSuitableOffset = ({
   x,
   y,
-  offsetX,
-  offsetY,
+  lastX,
+  lastY,
   width,
   height,
   scale,
@@ -116,8 +142,8 @@ export const jumpToSuitableOffset = ({
 }: {
   x: number;
   y: number;
-  offsetX: number;
-  offsetY: number;
+  lastX: number;
+  lastY: number;
   width: number;
   height: number;
   scale: number;
@@ -142,7 +168,7 @@ export const jumpToSuitableOffset = ({
   const outOffsetY = (height * scale - innerHeight) / 2;
 
   // 滑动到结果的位置
-  const { endX, endY, animation } = slideToPosition({ x, y, offsetX, offsetY, touchedTime });
+  const { endX, endY, animation } = slideToPosition({ x, y, lastX, lastY, touchedTime });
 
   let currentX = endX;
   let currentY = endY;

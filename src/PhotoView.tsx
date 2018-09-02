@@ -25,9 +25,13 @@ type PhotoViewState = {
   // 触摸开始时 y 原始坐标
   pageY: number;
   // 触摸开始时图片 x 偏移量
-  offsetX: number;
+  lastX: number;
   // 触摸开始时图片 y 偏移量
-  offsetY: number;
+  lastY: number;
+  // 上一次触摸开始时 x 原始坐标
+  lastPageX: number | undefined;
+  // 上一次触摸开始时 y 原始坐标
+  lastPageY: number | undefined;
   // 触摸开始时时间
   touchedTime: number;
 } & animationType;
@@ -46,8 +50,12 @@ export default class PhotoView extends React.Component<
 
     pageX: 0,
     pageY: 0,
-    offsetX: 0,
-    offsetY: 0,
+
+    lastX: 0,
+    lastY: 0,
+
+    lastPageX: undefined,
+    lastPageY: undefined,
     touchedTime: 0,
 
     animation: defaultAnimationConfig,
@@ -80,18 +88,18 @@ export default class PhotoView extends React.Component<
       touched: true,
       pageX,
       pageY,
-      offsetX: prevState.x,
-      offsetY: prevState.y,
+      lastX: prevState.x,
+      lastY: prevState.y,
       touchedTime: Date.now(),
     }));
   }
 
   handleMove = (newPageX, newPageY) => {
     if (this.state.touched) {
-      this.setState(({ pageX, pageY, offsetX, offsetY }) => {
+      this.setState(({ pageX, pageY, lastX, lastY }) => {
         return {
-          x: newPageX - pageX + offsetX,
-          y: newPageY - pageY + offsetY,
+          x: newPageX - pageX + lastX,
+          y: newPageY - pageY + lastY,
         };
       });
     }
@@ -99,31 +107,40 @@ export default class PhotoView extends React.Component<
 
   handleDoubleClick = (e) => {
     const { pageX, pageY } = e;
-    this.setState(({ x, y, scale }) => {
-      const toScale = scale > 1 ? 1 : 4;
-      const { distanceX, distanceY } = getPositionOnScale({ x, y, pageX, pageY, toScale });
+    this.setState(({ x, y, scale, lastPageX, lastPageY }) => {
       return {
-        x: distanceX,
-        y: distanceY,
         pageX,
         pageY,
-        scale: toScale,
+        ...getPositionOnScale({
+          x,
+          y,
+          pageX,
+          pageY,
+          lastPageX,
+          lastPageY,
+          fromScale: scale,
+          toScale: scale > 1 ? 1 : 2,
+        }),
       };
     });
   }
 
   handleWheel = (e) => {
     const { pageX, pageY, deltaY } = e;
-    this.setState(({ x, y, scale }) => {
-      const toScale = scale + deltaY / 100;
-      const { distanceX, distanceY } = getPositionOnScale({ x, y, pageX, pageY, toScale });
-
+    this.setState(({ x, y, scale, lastPageX, lastPageY }) => {
       return {
-        x: distanceX,
-        y: distanceY,
         pageX,
         pageY,
-        scale: toScale,
+        ...getPositionOnScale({
+          x,
+          y,
+          pageX,
+          pageY,
+          lastPageX,
+          lastPageY,
+          fromScale: scale,
+          toScale: scale - deltaY / 100 / 2,
+        }),
         animation: defaultAnimationConfig,
       };
     });
@@ -153,20 +170,20 @@ export default class PhotoView extends React.Component<
     this.setState(({
       x,
       y,
-      offsetX,
-      offsetY,
+      lastX,
+      lastY,
       scale,
       touchedTime,
       ...restPrevState
     }) => {
-      const hasMove: boolean = pageX !== restPrevState.pageX || pageY !== restPrevState.pageY;
+      const hasMove = pageX !== restPrevState.pageX || pageY !== restPrevState.pageY;
       return {
         touched: false,
         ...jumpToSuitableOffset({
           x,
           y,
-          offsetX,
-          offsetY,
+          lastX,
+          lastY,
           width,
           height,
           scale,
