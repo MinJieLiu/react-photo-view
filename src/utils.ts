@@ -50,6 +50,8 @@ export const getPositionOnScale = ({
   pageY,
   originX,
   originY,
+  originTranslateX,
+  originTranslateY,
   fromScale,
   toScale,
 }: {
@@ -59,6 +61,8 @@ export const getPositionOnScale = ({
   pageY: number;
   originX: number;
   originY: number;
+  originTranslateX: number;
+  originTranslateY: number;
   fromScale: number;
   toScale: number;
 }): {
@@ -66,6 +70,8 @@ export const getPositionOnScale = ({
   y: number;
   originX: number;
   originY: number;
+  originTranslateX: number;
+  originTranslateY: number;
   scale: number;
 } => {
   const { innerWidth, innerHeight } = window;
@@ -76,12 +82,20 @@ export const getPositionOnScale = ({
   const offsetX = pageX - imageCenterX;
   const offsetY = pageY - imageCenterY;
 
+  const currentTranslateX = x + (offsetX - originX * fromScale);
+  const currentTranslateY = y + (offsetY - originY * fromScale);
+
+  const currentOriginX = offsetX / fromScale;
+  const currentOriginY = offsetY / fromScale;
+
   return {
-    x: x + (offsetX - originX * fromScale),
-    y: y + (offsetY - originY * fromScale),
+    x: 0,
+    y: 0,
+    originTranslateX: currentTranslateX,
+    originTranslateY: currentTranslateY,
     scale: Math.max(Math.min(toScale, 5), 1),
-    originX: offsetX / fromScale,
-    originY: offsetY / fromScale,
+    originX: currentOriginX,
+    originY: currentOriginY,
   };
 };
 
