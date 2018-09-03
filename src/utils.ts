@@ -48,6 +48,8 @@ export const getPositionOnScale = ({
   y,
   pageX,
   pageY,
+  originX,
+  originY,
   fromScale,
   toScale,
 }: {
@@ -55,39 +57,31 @@ export const getPositionOnScale = ({
   y: number;
   pageX: number;
   pageY: number;
+  originX: number;
+  originY: number;
   fromScale: number;
   toScale: number;
 }): {
   x: number;
   y: number;
+  originX: number;
+  originY: number;
   scale: number;
 } => {
   const { innerWidth, innerHeight } = window;
-  let endScale = toScale;
-  let distanceX = x;
-  let distanceY = y;
-  // 缩放限制
-  if (toScale < 0.5) {
-    endScale = 0.5;
-  } else if (toScale > 5) {
-    endScale = 5;
-  } else {
-    // 缩放距离计算
-    const centerPageX = pageX - innerWidth / 2;
-    const centerPageY = pageY - innerHeight / 2;
+  // 缩放距离计算
+  const imageCenterX = innerWidth / 2 + x;
+  const imageCenterY = innerHeight / 2 + y;
 
-    const touchedImageX = (centerPageX - x) / fromScale;
-    const touchedImageY = (centerPageY - y) / fromScale;
+  const offsetX = pageX - imageCenterX;
+  const offsetY = pageY - imageCenterY;
 
-    const scale = endScale - fromScale;
-
-    distanceX = x - centerPageX * scale;
-    distanceY = y - centerPageY * scale;
-  }
   return {
-    x: distanceX,
-    y: distanceY,
-    scale: endScale,
+    x: x + (offsetX - originX * fromScale),
+    y: y + (offsetY - originY * fromScale),
+    scale: Math.max(Math.min(toScale, 5), 1),
+    originX: offsetX / fromScale,
+    originY: offsetY / fromScale,
   };
 };
 

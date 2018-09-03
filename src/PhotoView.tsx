@@ -28,6 +28,8 @@ type PhotoViewState = {
   lastX: number;
   // 触摸开始时图片 y 偏移量
   lastY: number;
+  originX: number;
+  originY: number;
   // 触摸开始时时间
   touchedTime: number;
 } & animationType;
@@ -50,6 +52,8 @@ export default class PhotoView extends React.Component<
     lastX: 0,
     lastY: 0,
 
+    originX: 0,
+    originY: 0,
     touchedTime: 0,
     animation: defaultAnimationConfig,
   };
@@ -100,7 +104,7 @@ export default class PhotoView extends React.Component<
 
   handleDoubleClick = (e) => {
     const { pageX, pageY } = e;
-    this.setState(({ x, y, scale }) => {
+    this.setState(({ x, y, scale, originX, originY }) => {
       return {
         pageX,
         pageY,
@@ -109,6 +113,8 @@ export default class PhotoView extends React.Component<
           y,
           pageX,
           pageY,
+          originX,
+          originY,
           fromScale: scale,
           toScale: scale > 1 ? 1 : 2,
         }),
@@ -118,7 +124,7 @@ export default class PhotoView extends React.Component<
 
   handleWheel = (e) => {
     const { pageX, pageY, deltaY } = e;
-    this.setState(({ x, y, scale }) => {
+    this.setState(({ x, y, scale, originX, originY }) => {
       return {
         pageX,
         pageY,
@@ -127,6 +133,8 @@ export default class PhotoView extends React.Component<
           y,
           pageX,
           pageY,
+          originX,
+          originY,
           fromScale: scale,
           toScale: scale - deltaY / 100 / 2,
         }),
