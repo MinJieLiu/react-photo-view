@@ -18,7 +18,7 @@ class Example extends React.Component {
     return (
       <Container>
         <Header>React 图片预览组件</Header>
-        <PhotoView src="https://assets-cdn.github.com/images/modules/explore/resources/campus_experts.png" />
+        <PhotoView src="example.png" />
       </Container>
     );
   }
