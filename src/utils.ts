@@ -2,6 +2,11 @@ import { animationType } from './types';
 import { maxTouchTime, defaultAnimationConfig } from './variables';
 
 /**
+ * 是否为移动端设备
+ */
+export const isMobile: boolean = window.navigator.userAgent.includes('Mobile');
+
+/**
  * 获取图片合适的大小
  * @param naturalWidth 图片真实宽度
  * @param naturalHeight 图片真实高度
@@ -48,10 +53,6 @@ export const getPositionOnScale = ({
   y,
   pageX,
   pageY,
-  originX,
-  originY,
-  originTranslateX,
-  originTranslateY,
   fromScale,
   toScale,
 }: {
@@ -59,43 +60,46 @@ export const getPositionOnScale = ({
   y: number;
   pageX: number;
   pageY: number;
-  originX: number;
-  originY: number;
-  originTranslateX: number;
-  originTranslateY: number;
   fromScale: number;
   toScale: number;
 }): {
   x: number;
   y: number;
-  originX: number;
-  originY: number;
-  originTranslateX: number;
-  originTranslateY: number;
   scale: number;
 } => {
   const { innerWidth, innerHeight } = window;
-  // 缩放距离计算
-  const imageCenterX = innerWidth / 2 + x;
-  const imageCenterY = innerHeight / 2 + y;
+  let endScale = toScale;
+  let currentX = x;
+  let currentY = y;
+  // 缩放限制
+  if (toScale < 0.5) {
+    endScale = 0.5;
+  } else if (toScale > 5) {
+    endScale = 5;
+  } else {
+    const centerPageX = pageX - innerWidth / 2;
+    const centerPageY = pageY - innerHeight / 2;
 
-  const offsetX = pageX - imageCenterX;
-  const offsetY = pageY - imageCenterY;
+    const scale = endScale - fromScale;
 
-  const currentTranslateX = x + (offsetX - originX * fromScale);
-  const currentTranslateY = y + (offsetY - originY * fromScale);
+    currentX = x - centerPageX * scale;
+    currentY = y - centerPageY * scale;
 
-  const currentOriginX = offsetX / fromScale;
-  const currentOriginY = offsetY / fromScale;
-
+    // const imageCenterX = innerWidth / 2 + x;
+    // const imageCenterY = innerHeight / 2 + y;
+    //
+    // const offsetX = pageX - imageCenterX;
+    // const offsetY = pageY - imageCenterY;
+    //
+    // const scale = endScale - fromScale;
+    //
+    // currentX = x - offsetX * scale;
+    // currentY = y - offsetY * scale;
+  }
   return {
-    x: 0,
-    y: 0,
-    originTranslateX: currentTranslateX,
-    originTranslateY: currentTranslateY,
-    scale: Math.max(Math.min(toScale, 5), 1),
-    originX: currentOriginX,
-    originY: currentOriginY,
+    x: currentX,
+    y: currentY,
+    scale: endScale,
   };
 };
 

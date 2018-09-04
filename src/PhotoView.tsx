@@ -3,7 +3,7 @@ import { Motion, spring } from 'react-motion';
 import throttle from 'lodash.throttle';
 import Photo from './Photo';
 import { PhotoContainer, Backdrop } from './StyledElements';
-import { getPositionOnScale, jumpToSuitableOffset } from './utils';
+import { isMobile, getPositionOnScale, jumpToSuitableOffset } from './utils';
 import { defaultAnimationConfig } from './variables';
 import { animationType } from './types';
 
@@ -28,11 +28,6 @@ type PhotoViewState = {
   lastX: number;
   // 触摸开始时图片 y 偏移量
   lastY: number;
-
-  originX: number;
-  originY: number;
-  originTranslateX: number;
-  originTranslateY: number;
 
   // 触摸开始时时间
   touchedTime: number;
@@ -73,17 +68,23 @@ export default class PhotoView extends React.Component<
   }
 
   componentDidMount() {
-    window.addEventListener('touchmove', this.handleTouchMove);
-    window.addEventListener('touchend', this.handleMouseUp);
-    window.addEventListener('mousemove', this.handleMouseMove);
-    window.addEventListener('mouseup', this.handleMouseUp);
+    if (isMobile) {
+      window.addEventListener('touchmove', this.handleTouchMove);
+      window.addEventListener('touchend', this.handleTouchEnd);
+    } else {
+      window.addEventListener('mousemove', this.handleMouseMove);
+      window.addEventListener('mouseup', this.handleMouseUp);
+    }
   }
 
   componentWillUnmount() {
-    window.removeEventListener('touchmove', this.handleTouchMove);
-    window.removeEventListener('touchend', this.handleMouseUp);
-    window.removeEventListener('mousemove', this.handleMouseMove);
-    window.removeEventListener('mouseup', this.handleMouseUp);
+    if (isMobile) {
+      window.removeEventListener('touchmove', this.handleTouchMove);
+      window.removeEventListener('touchend', this.handleTouchEnd);
+    } else {
+      window.removeEventListener('mousemove', this.handleMouseMove);
+      window.removeEventListener('mouseup', this.handleMouseUp);
+    }
   }
 
   handleStart = e => {
@@ -111,7 +112,7 @@ export default class PhotoView extends React.Component<
 
   handleDoubleClick = (e) => {
     const { pageX, pageY } = e;
-    this.setState(({ x, y, scale, originX, originY, originTranslateX, originTranslateY }) => {
+    this.setState(({ x, y, scale }) => {
       return {
         pageX,
         pageY,
@@ -120,12 +121,8 @@ export default class PhotoView extends React.Component<
           y,
           pageX,
           pageY,
-          originX,
-          originY,
-          originTranslateX,
-          originTranslateY,
           fromScale: scale,
-          toScale: scale > 1 ? 1 : 2,
+          toScale: scale !== 1 ? 1 : 2,
         }),
       };
     });
@@ -133,7 +130,7 @@ export default class PhotoView extends React.Component<
 
   handleWheel = (e) => {
     const { pageX, pageY, deltaY } = e;
-    this.setState(({ x, y, scale, originX, originY, originTranslateX, originTranslateY }) => {
+    this.setState(({ x, y, scale }) => {
       return {
         pageX,
         pageY,
@@ -142,10 +139,6 @@ export default class PhotoView extends React.Component<
           y,
           pageX,
           pageY,
-          originX,
-          originY,
-          originTranslateX,
-          originTranslateY,
           fromScale: scale,
           toScale: scale - deltaY / 100 / 2,
         }),
@@ -172,8 +165,7 @@ export default class PhotoView extends React.Component<
     this.handleMove(e.pageX, e.pageY);
   }
 
-  handleMouseUp = (e) => {
-    const { pageX, pageY } = e;
+  handleUp = (pageX, pageY) => {
     const { width, height } = this.photoRef.state;
     this.setState(({
       x,
@@ -202,6 +194,16 @@ export default class PhotoView extends React.Component<
     });
   }
 
+  handleTouchEnd = (e) => {
+    const { pageX, pageY } = e.changedTouches[0];
+    this.handleUp(pageX, pageY);
+  }
+
+  handleMouseUp = (e) => {
+    const { pageX, pageY } = e;
+    this.handleUp(pageX, pageY);
+  }
+
   handlePhotoRef = (ref) => {
     this.photoRef = ref;
   }
@@ -226,8 +228,8 @@ export default class PhotoView extends React.Component<
                 src={src}
                 ref={this.handlePhotoRef}
                 onDoubleClick={this.handleDoubleClick}
-                onMouseDown={this.handleMouseDown}
-                onTouchStart={this.handleTouchStart}
+                onMouseDown={isMobile ? undefined : this.handleMouseDown}
+                onTouchStart={isMobile ? this.handleTouchStart : undefined}
                 onWheel={this.handleWheel}
                 style={{
                   WebkitTransform: transform,
