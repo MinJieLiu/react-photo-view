@@ -3,7 +3,12 @@ import { Motion, spring } from 'react-motion';
 import throttle from 'lodash.throttle';
 import Photo from './Photo';
 import { PhotoContainer, Backdrop } from './StyledElements';
-import { isMobile, getPositionOnScale, jumpToSuitableOffset } from './utils';
+import {
+  isMobile,
+  getTouchCenter,
+  getPositionOnScale,
+  jumpToSuitableOffset,
+} from './utils';
 import { defaultAnimationConfig } from './variables';
 import { animationType } from './types';
 
@@ -87,8 +92,7 @@ export default class PhotoView extends React.Component<
     }
   }
 
-  handleStart = e => {
-    const { pageX, pageY } = e;
+  handleStart = (pageX, pageY) => {
     this.setState(prevState => ({
       touched: true,
       pageX,
@@ -124,6 +128,7 @@ export default class PhotoView extends React.Component<
           fromScale: scale,
           toScale: scale < 4 ? scale * 2 : 1,
         }),
+        animation: defaultAnimationConfig,
       };
     });
   }
@@ -148,16 +153,22 @@ export default class PhotoView extends React.Component<
   }
 
   handleTouchStart = e => {
-    this.handleStart(e.touches[0]);
+    const { pageX, pageY } = e.touches.length >= 2
+      ? getTouchCenter(e)
+      : e.touches[0];
+    this.handleStart(pageX, pageY);
   }
 
   handleMouseDown = e => {
-    this.handleStart(e);
+    this.handleStart(e.pageX, e.pageY);
   }
 
-  handleTouchMove = evt => {
-    const e = evt.touches[0];
-    this.handleMove(e.pageX, e.pageY);
+  handleTouchMove = e => {
+    e.preventDefault();
+    const { pageX, pageY } = e.touches.length >= 2
+      ? getTouchCenter(e)
+      : e.touches[0];
+    this.handleMove(pageX, pageY);
   }
 
   handleMouseMove = e => {
@@ -176,7 +187,8 @@ export default class PhotoView extends React.Component<
       touchedTime,
       ...restPrevState
     }) => {
-      const hasMove = pageX !== restPrevState.pageX || pageY !== restPrevState.pageY;
+      const hasMove = pageX !== restPrevState.pageX
+        || pageY !== restPrevState.pageY;
       return {
         touched: false,
         ...jumpToSuitableOffset({

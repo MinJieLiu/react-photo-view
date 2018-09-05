@@ -1,3 +1,4 @@
+import React from 'react';
 import { animationType } from './types';
 import { maxTouchTime, defaultAnimationConfig } from './variables';
 
@@ -5,6 +6,23 @@ import { maxTouchTime, defaultAnimationConfig } from './variables';
  * 是否为移动端设备
  */
 export const isMobile: boolean = window.navigator.userAgent.includes('Mobile');
+
+/**
+ * 从 Touch 事件中获取双指中心点
+ */
+export const getTouchCenter = (evt: React.TouchEvent): {
+  pageX: number;
+  pageY: number;
+} => {
+  const firstTouch = evt.touches[0];
+  const secondTouch = evt.touches[1];
+  const pageX = (firstTouch.pageX + secondTouch.pageX) / 2;
+  const pageY = (firstTouch.pageY + secondTouch.pageY) / 2;
+  return {
+    pageX,
+    pageY,
+  };
+};
 
 /**
  * 获取图片合适的大小
@@ -122,7 +140,7 @@ export const slideToPosition = ({
   const speedX = (x - lastX) / moveTime;
   const speedY = (y - lastY) / moveTime;
   const maxSpeed = Math.max(speedX, speedY);
-  const slideTime = moveTime < maxTouchTime ? Math.abs(maxSpeed) * 10 + 400 : 0;
+  const slideTime = moveTime < maxTouchTime ? Math.abs(maxSpeed) * 20 + 400 : 0;
   return {
     endX: Math.floor(x + speedX * slideTime),
     endY: Math.floor(y + speedY * slideTime),
