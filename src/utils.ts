@@ -102,16 +102,8 @@ export const getPositionOnScale = ({
     const lastPositionY = centerPageY + y;
 
     // 放大偏移量
-    const offsetScale = endScale - fromScale;
-
-    if (offsetScale > 0) {
-      const scale = Math.abs(endScale / fromScale - 1);
-      nextX = pageX - (pageX - lastPositionX) * Math.pow(2, scale) - centerPageX;
-      nextY = pageY - (pageY - lastPositionY) * Math.pow(2, scale) - centerPageY;
-    } else {
-      nextX = pageX - (pageX - lastPositionX) / (1 - offsetScale) - centerPageX;
-      nextY = pageY - (pageY - lastPositionY) / (1 - offsetScale) - centerPageY;
-    }
+    nextX = pageX - (pageX - lastPositionX) * (endScale / fromScale) - centerPageX;
+    nextY = pageY - (pageY - lastPositionY) * (endScale / fromScale) - centerPageY;
   }
   return {
     x: nextX,
