@@ -122,7 +122,7 @@ export default class PhotoView extends React.Component<
           pageX,
           pageY,
           fromScale: scale,
-          toScale: scale !== 1 ? 1 : 2,
+          toScale: scale < 4 ? scale * 2 : 1,
         }),
       };
     });

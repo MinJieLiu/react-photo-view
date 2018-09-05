@@ -69,36 +69,35 @@ export const getPositionOnScale = ({
 } => {
   const { innerWidth, innerHeight } = window;
   let endScale = toScale;
-  let currentX = x;
-  let currentY = y;
+  let nextX = x;
+  let nextY = y;
   // 缩放限制
   if (toScale < 0.5) {
     endScale = 0.5;
   } else if (toScale > 5) {
     endScale = 5;
   } else {
-    const centerPageX = pageX - innerWidth / 2;
-    const centerPageY = pageY - innerHeight / 2;
+    const centerPageX = innerWidth / 2;
+    const centerPageY = innerHeight / 2;
+    // 坐标偏移
+    const lastPositionX = centerPageX + x;
+    const lastPositionY = centerPageY + y;
 
-    const scale = endScale - fromScale;
+    // 放大偏移量
+    const offsetScale = endScale - fromScale;
 
-    currentX = x - centerPageX * scale;
-    currentY = y - centerPageY * scale;
-
-    // const imageCenterX = innerWidth / 2 + x;
-    // const imageCenterY = innerHeight / 2 + y;
-    //
-    // const offsetX = pageX - imageCenterX;
-    // const offsetY = pageY - imageCenterY;
-    //
-    // const scale = endScale - fromScale;
-    //
-    // currentX = x - offsetX * scale;
-    // currentY = y - offsetY * scale;
+    if (offsetScale > 0) {
+      const scale = Math.abs(endScale / fromScale - 1);
+      nextX = pageX - (pageX - lastPositionX) * Math.pow(2, scale) - centerPageX;
+      nextY = pageY - (pageY - lastPositionY) * Math.pow(2, scale) - centerPageY;
+    } else {
+      nextX = pageX - (pageX - lastPositionX) / (1 - offsetScale) - centerPageX;
+      nextY = pageY - (pageY - lastPositionY) / (1 - offsetScale) - centerPageY;
+    }
   }
   return {
-    x: currentX,
-    y: currentY,
+    x: nextX,
+    y: nextY,
     scale: endScale,
   };
 };
