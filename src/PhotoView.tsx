@@ -5,8 +5,8 @@ import Photo from './Photo';
 import { PhotoContainer, Backdrop } from './StyledElements';
 import {
   isMobile,
-  getTouchCenter,
-  getPositionOnScale,
+  getMultipleTouchPosition,
+  getPositionOnMoveOrScale,
   jumpToSuitableOffset,
 } from './utils';
 import { defaultAnimationConfig } from './variables';
@@ -33,6 +33,8 @@ type PhotoViewState = {
   lastX: number;
   // 触摸开始时图片 y 偏移量
   lastY: number;
+  // 两指间距
+  lastTouchLength: number;
 
   // 触摸开始时时间
   touchedTime: number;
@@ -62,6 +64,7 @@ export default class PhotoView extends React.Component<
     originTranslateY: 0,
 
     touchedTime: 0,
+    lastTouchLength: 0,
     animation: defaultAnimationConfig,
   };
 
@@ -92,23 +95,31 @@ export default class PhotoView extends React.Component<
     }
   }
 
-  handleStart = (pageX, pageY) => {
+  handleStart = (pageX: number, pageY: number, touchLength: number = 0) => {
     this.setState(prevState => ({
       touched: true,
       pageX,
       pageY,
       lastX: prevState.x,
       lastY: prevState.y,
+      lastTouchLength: touchLength,
       touchedTime: Date.now(),
     }));
   }
 
-  handleMove = (newPageX, newPageY) => {
+  handleMove = (newPageX: number, newPageY: number, touchLength: number = 0) => {
     if (this.state.touched) {
-      this.setState(({ pageX, pageY, lastX, lastY }) => {
+      this.setState(({ pageX, pageY, lastX, lastY, scale, lastTouchLength }) => {
         return {
-          x: newPageX - pageX + lastX,
-          y: newPageY - pageY + lastY,
+          lastTouchLength: touchLength,
+          ...getPositionOnMoveOrScale({
+            x: newPageX - pageX + lastX,
+            y: newPageY - pageY + lastY,
+            pageX,
+            pageY,
+            fromScale: scale,
+            toScale: scale + (touchLength - lastTouchLength) * 4 / window.innerWidth,
+          }),
         };
       });
     }
@@ -120,13 +131,13 @@ export default class PhotoView extends React.Component<
       return {
         pageX,
         pageY,
-        ...getPositionOnScale({
+        ...getPositionOnMoveOrScale({
           x,
           y,
           pageX,
           pageY,
           fromScale: scale,
-          toScale: scale < 4 ? scale * 2 : 1,
+          toScale: scale !== 1 ? 1 : 2,
         }),
         animation: defaultAnimationConfig,
       };
@@ -139,7 +150,7 @@ export default class PhotoView extends React.Component<
       return {
         pageX,
         pageY,
-        ...getPositionOnScale({
+        ...getPositionOnMoveOrScale({
           x,
           y,
           pageX,
@@ -153,10 +164,10 @@ export default class PhotoView extends React.Component<
   }
 
   handleTouchStart = e => {
-    const { pageX, pageY } = e.touches.length >= 2
-      ? getTouchCenter(e)
+    const { pageX, pageY, touchLength } = e.touches.length >= 2
+      ? getMultipleTouchPosition(e)
       : e.touches[0];
-    this.handleStart(pageX, pageY);
+    this.handleStart(pageX, pageY, touchLength);
   }
 
   handleMouseDown = e => {
@@ -165,10 +176,10 @@ export default class PhotoView extends React.Component<
 
   handleTouchMove = e => {
     e.preventDefault();
-    const { pageX, pageY } = e.touches.length >= 2
-      ? getTouchCenter(e)
+    const { pageX, pageY, touchLength } = e.touches.length >= 2
+      ? getMultipleTouchPosition(e)
       : e.touches[0];
-    this.handleMove(pageX, pageY);
+    this.handleMove(pageX, pageY, touchLength);
   }
 
   handleMouseMove = e => {
@@ -176,7 +187,7 @@ export default class PhotoView extends React.Component<
     this.handleMove(e.pageX, e.pageY);
   }
 
-  handleUp = (pageX, pageY) => {
+  handleUp = (newPageX: number, newPageY: number) => {
     const { width, height } = this.photoRef.state;
     this.setState(({
       x,
@@ -185,10 +196,10 @@ export default class PhotoView extends React.Component<
       lastY,
       scale,
       touchedTime,
-      ...restPrevState
+      pageX,
+      pageY,
     }) => {
-      const hasMove = pageX !== restPrevState.pageX
-        || pageY !== restPrevState.pageY;
+      const hasMove = pageX !== newPageX || pageY !== newPageY;
       return {
         touched: false,
         ...jumpToSuitableOffset({
@@ -226,7 +237,7 @@ export default class PhotoView extends React.Component<
     const style = {
       currX: touched ? x : spring(x, animation),
       currY: touched ? y : spring(y, animation),
-      currScale: spring(scale, animation),
+      currScale: touched ? scale : spring(scale, animation),
     };
 
     return (

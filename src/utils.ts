@@ -8,19 +8,23 @@ import { maxTouchTime, defaultAnimationConfig } from './variables';
 export const isMobile: boolean = window.navigator.userAgent.includes('Mobile');
 
 /**
- * 从 Touch 事件中获取双指中心点
+ * 从 Touch 事件中获取多个触控位置
  */
-export const getTouchCenter = (evt: React.TouchEvent): {
+export const getMultipleTouchPosition = (
+  evt: React.TouchEvent,
+): {
   pageX: number;
   pageY: number;
+  touchLength: number;
 } => {
-  const firstTouch = evt.touches[0];
-  const secondTouch = evt.touches[1];
-  const pageX = (firstTouch.pageX + secondTouch.pageX) / 2;
-  const pageY = (firstTouch.pageY + secondTouch.pageY) / 2;
+  const { pageX, pageY } = evt.touches[0];
+  const { pageX: nextPageX, pageY: nextPageY } = evt.touches[1];
   return {
-    pageX,
-    pageY,
+    pageX: (pageX + nextPageX) / 2,
+    pageY: (pageY + nextPageY) / 2,
+    touchLength: Math.sqrt(
+      Math.pow(nextPageX - pageX, 2) + Math.pow(nextPageY - pageY, 2),
+    ),
   };
 };
 
@@ -66,7 +70,7 @@ export const getSuitableImageSize = (
   };
 };
 
-export const getPositionOnScale = ({
+export const getPositionOnMoveOrScale = ({
   x,
   y,
   pageX,
@@ -94,7 +98,7 @@ export const getPositionOnScale = ({
     endScale = 0.5;
   } else if (toScale > 5) {
     endScale = 5;
-  } else {
+  } else if (toScale - fromScale !== 0) { // 有缩放的情况下
     const centerPageX = innerWidth / 2;
     const centerPageY = innerHeight / 2;
     // 坐标偏移
@@ -185,7 +189,13 @@ export const jumpToSuitableOffset = ({
   const outOffsetY = (height * scale - innerHeight) / 2;
 
   // 滑动到结果的位置
-  const { endX, endY, animation } = slideToPosition({ x, y, lastX, lastY, touchedTime });
+  const { endX, endY, animation } = slideToPosition({
+    x,
+    y,
+    lastX,
+    lastY,
+    touchedTime,
+  });
 
   let currentX = endX;
   let currentY = endY;
