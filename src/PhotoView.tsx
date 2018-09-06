@@ -7,7 +7,7 @@ import {
   isMobile,
   getMultipleTouchPosition,
   getPositionOnMoveOrScale,
-  jumpToSuitableOffset,
+  slideToSuitableOffset,
 } from './utils';
 import { defaultAnimationConfig } from './variables';
 import { animationType } from './types';
@@ -33,7 +33,7 @@ type PhotoViewState = {
   lastX: number;
   // 触摸开始时图片 y 偏移量
   lastY: number;
-  // 两指间距
+  // 多指触控间距
   lastTouchLength: number;
 
   // 触摸开始时时间
@@ -109,7 +109,14 @@ export default class PhotoView extends React.Component<
 
   handleMove = (newPageX: number, newPageY: number, touchLength: number = 0) => {
     if (this.state.touched) {
-      this.setState(({ pageX, pageY, lastX, lastY, scale, lastTouchLength }) => {
+      this.setState(({
+        pageX,
+        pageY,
+        lastX,
+        lastY,
+        scale,
+        lastTouchLength
+      }) => {
         return {
           lastTouchLength: touchLength,
           ...getPositionOnMoveOrScale({
@@ -118,7 +125,7 @@ export default class PhotoView extends React.Component<
             pageX,
             pageY,
             fromScale: scale,
-            toScale: scale + (touchLength - lastTouchLength) * 4 / window.innerWidth,
+            toScale: scale + (touchLength - lastTouchLength) / (window.innerHeight / 2) * scale,
           }),
         };
       });
@@ -164,10 +171,13 @@ export default class PhotoView extends React.Component<
   }
 
   handleTouchStart = e => {
-    const { pageX, pageY, touchLength } = e.touches.length >= 2
-      ? getMultipleTouchPosition(e)
-      : e.touches[0];
-    this.handleStart(pageX, pageY, touchLength);
+    if (e.touches.length >= 2) {
+      const { pageX, pageY, touchLength } = getMultipleTouchPosition(e);
+      this.handleStart(pageX, pageY, touchLength);
+    } else {
+      const { pageX, pageY } = e.touches[0];
+      this.handleStart(pageX, pageY);
+    }
   }
 
   handleMouseDown = e => {
@@ -176,10 +186,13 @@ export default class PhotoView extends React.Component<
 
   handleTouchMove = e => {
     e.preventDefault();
-    const { pageX, pageY, touchLength } = e.touches.length >= 2
-      ? getMultipleTouchPosition(e)
-      : e.touches[0];
-    this.handleMove(pageX, pageY, touchLength);
+    if (e.touches.length >= 2) {
+      const { pageX, pageY, touchLength } = getMultipleTouchPosition(e);
+      this.handleMove(pageX, pageY, touchLength);
+    } else {
+      const { pageX, pageY } = e.touches[0];
+      this.handleMove(pageX, pageY);
+    }
   }
 
   handleMouseMove = e => {
@@ -202,7 +215,7 @@ export default class PhotoView extends React.Component<
       const hasMove = pageX !== newPageX || pageY !== newPageY;
       return {
         touched: false,
-        ...jumpToSuitableOffset({
+        ...slideToSuitableOffset({
           x,
           y,
           lastX,

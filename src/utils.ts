@@ -94,11 +94,11 @@ export const getPositionOnMoveOrScale = ({
   let nextX = x;
   let nextY = y;
   // 缩放限制
-  if (toScale < 0.5) {
-    endScale = 0.5;
-  } else if (toScale > 5) {
-    endScale = 5;
-  } else if (toScale - fromScale !== 0) { // 有缩放的情况下
+  if (toScale < 1) {
+    endScale = 1;
+  } else if (toScale > 6) {
+    endScale = 6;
+  } else { // 有缩放的情况下
     const centerPageX = innerWidth / 2;
     const centerPageY = innerHeight / 2;
     // 坐标偏移
@@ -148,9 +148,9 @@ export const slideToPosition = ({
 };
 
 /**
- * 跳转到合适的图片偏移量
+ * 适应到合适的图片偏移量
  */
-export const jumpToSuitableOffset = ({
+export const slideToSuitableOffset = ({
   x,
   y,
   lastX,
@@ -215,11 +215,11 @@ export const jumpToSuitableOffset = ({
     currentY = -outOffsetY;
   }
 
-  const isSlide = currentX === endX || currentY === endY;
+  const isBumpEdge = currentX !== endX || currentY !== endY;
 
   return {
     x: currentX,
     y: currentY,
-    animation: isSlide ? defaultAnimationConfig : animation,
+    animation: isBumpEdge ? defaultAnimationConfig : animation,
   };
 };
