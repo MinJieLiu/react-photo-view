@@ -91,14 +91,14 @@ export const getPositionOnMoveOrScale = ({
 } => {
   const { innerWidth, innerHeight } = window;
   let endScale = toScale;
-  let nextX = x;
-  let nextY = y;
+  let originX = x;
+  let originY = y;
   // 缩放限制
   if (toScale < 1) {
     endScale = 1;
   } else if (toScale > 6) {
     endScale = 6;
-  } else { // 有缩放的情况下
+  } else {
     const centerPageX = innerWidth / 2;
     const centerPageY = innerHeight / 2;
     // 坐标偏移
@@ -106,12 +106,14 @@ export const getPositionOnMoveOrScale = ({
     const lastPositionY = centerPageY + y;
 
     // 放大偏移量
-    nextX = pageX - (pageX - lastPositionX) * (endScale / fromScale) - centerPageX;
-    nextY = pageY - (pageY - lastPositionY) * (endScale / fromScale) - centerPageY;
+    const offsetScale = endScale / fromScale;
+    // 偏移位置
+    originX = pageX - (pageX - lastPositionX) * offsetScale - centerPageX;
+    originY = pageY - (pageY - lastPositionY) * offsetScale - centerPageY;
   }
   return {
-    x: nextX,
-    y: nextY,
+    x: originX,
+    y: originY,
     scale: endScale,
   };
 };

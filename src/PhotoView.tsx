@@ -58,11 +58,6 @@ export default class PhotoView extends React.Component<
     lastX: 0,
     lastY: 0,
 
-    originX: 0,
-    originY: 0,
-    originTranslateX: 0,
-    originTranslateY: 0,
-
     touchedTime: 0,
     lastTouchLength: 0,
     animation: defaultAnimationConfig,
@@ -115,8 +110,9 @@ export default class PhotoView extends React.Component<
         lastX,
         lastY,
         scale,
-        lastTouchLength
+        lastTouchLength,
       }) => {
+        const toScale = scale + (touchLength - lastTouchLength) / 100 / 2 * scale;
         return {
           lastTouchLength: touchLength,
           ...getPositionOnMoveOrScale({
@@ -125,7 +121,7 @@ export default class PhotoView extends React.Component<
             pageX,
             pageY,
             fromScale: scale,
-            toScale: scale + (touchLength - lastTouchLength) / (window.innerHeight / 2) * scale,
+            toScale,
           }),
         };
       });
