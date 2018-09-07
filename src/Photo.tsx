@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import throttle from 'lodash.throttle';
-import Spinner from './Spinner';
-import { getSuitableImageSize } from './utils';
+import Spinner from './components/Spinner';
+import getSuitableImageSize from './utils/getSuitableImageSize';
 
 export interface IPhotoProps extends React.HTMLAttributes<any> {
   src: string;

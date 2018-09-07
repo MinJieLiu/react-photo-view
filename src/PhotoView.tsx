@@ -2,13 +2,11 @@ import React from 'react';
 import { Motion, spring } from 'react-motion';
 import throttle from 'lodash.throttle';
 import Photo from './Photo';
-import { PhotoContainer, Backdrop } from './PhotoElements';
-import {
-  isMobile,
-  getMultipleTouchPosition,
-  getPositionOnMoveOrScale,
-  slideToSuitableOffset,
-} from './utils';
+import PhotoWrap from './components/PhotoWrap';
+import isMobile from './utils/isMobile';
+import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
+import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
+import slideToSuitableOffset from './utils/slideToSuitableOffset';
 import { defaultAnimationConfig } from './variables';
 
 export interface IPhotoViewProps {
@@ -18,6 +16,8 @@ export interface IPhotoViewProps {
   wrapClassName?: string;
   // 图片类名
   className?: string;
+  // 自定义容器
+  overlay?: React.ReactNode;
 
   // 到达顶部滑动事件
   onReachTopMove?: Function;
@@ -249,7 +249,7 @@ export default class PhotoView extends React.Component<
   }
 
   render() {
-    const { src, wrapClassName, className } = this.props;
+    const { src, wrapClassName, className, overlay } = this.props;
     const { x, y, scale, touched, animation } = this.state;
     const style = {
       currX: touched ? x : spring(x, animation),
@@ -258,8 +258,7 @@ export default class PhotoView extends React.Component<
     };
 
     return (
-      <PhotoContainer className={wrapClassName}>
-        <Backdrop />
+      <PhotoWrap className={wrapClassName}>
         <Motion style={style}>
           {({ currX, currY, currScale }) => {
             const transform = `translate3d(${currX}px, ${currY}px, 0) scale(${currScale})`;
@@ -281,7 +280,8 @@ export default class PhotoView extends React.Component<
             );
           }}
         </Motion>
-      </PhotoContainer>
+        {overlay}
+      </PhotoWrap>
     );
   }
 }
