@@ -1,10 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
+import throttle from 'lodash.throttle';
 import Spinner from './Spinner';
 import { getSuitableImageSize } from './utils';
 
 export interface IPhotoProps extends React.HTMLAttributes<any> {
   src: string;
+  onPhotoResize: () => void;
   loadingElement?: JSX.Element;
   brokenElement?: JSX.Element;
 }
@@ -46,6 +48,16 @@ export default class Photo extends React.Component<IPhotoProps, PhotoState> {
     currPhoto.src = props.src;
     currPhoto.onload = this.handleImageLoaded;
     currPhoto.onerror = this.handleImageBroken;
+
+    this.handleResize = throttle(this.handleResize, 8);
+  }
+
+  componentDidMount() {
+    window.addEventListener('resize', this.handleResize);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
   }
 
   handleImageLoaded = e => {
@@ -62,6 +74,16 @@ export default class Photo extends React.Component<IPhotoProps, PhotoState> {
     this.setState({
       broken: true,
     });
+  }
+
+  handleResize = () => {
+    const { loaded, naturalWidth, naturalHeight } = this.state;
+    if (loaded) {
+      this.setState(
+        getSuitableImageSize(naturalWidth, naturalHeight),
+        this.props.onPhotoResize,
+      );
+    }
   }
 
   render() {

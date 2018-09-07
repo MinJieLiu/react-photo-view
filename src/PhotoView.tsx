@@ -2,7 +2,7 @@ import React from 'react';
 import { Motion, spring } from 'react-motion';
 import throttle from 'lodash.throttle';
 import Photo from './Photo';
-import { PhotoContainer, Backdrop } from './StyledElements';
+import { PhotoContainer, Backdrop } from './PhotoElements';
 import {
   isMobile,
   getMultipleTouchPosition,
@@ -10,58 +10,60 @@ import {
   slideToSuitableOffset,
 } from './utils';
 import { defaultAnimationConfig } from './variables';
-import { animationType } from './types';
 
 export interface IPhotoViewProps {
+  // 图片地址
   src: string;
+  // 容器类名
+  wrapClassName?: string;
+  // 图片类名
+  className?: string;
+
+  // 到达顶部滑动事件
+  onReachTopMove?: Function;
+  // 到达右部滑动事件
+  onReachRightMove?: Function;
+  // 到达底部滑动事件
+  onReachBottomMove?: Function;
+  // 到达左部滑动事件
+  onReachLeftMove?: Function;
 }
 
-type PhotoViewState = {
+const initialState = {
   // 图片 X 偏移量
-  x: number;
+  x: 0,
   // 图片 y 偏移量
-  y: number;
+  y: 0,
   // 图片缩放程度
-  scale: number;
+  scale: 1,
   // 图片处于触摸的状态
-  touched: boolean;
+  touched: false,
+
   // 触摸开始时 x 原始坐标
-  pageX: number;
+  pageX: 0,
   // 触摸开始时 y 原始坐标
-  pageY: number;
+  pageY: 0,
+
   // 触摸开始时图片 x 偏移量
-  lastX: number;
+  lastX: 0,
   // 触摸开始时图片 y 偏移量
-  lastY: number;
-  // 多指触控间距
-  lastTouchLength: number;
+  lastY: 0,
 
   // 触摸开始时时间
-  touchedTime: number;
-} & animationType;
+  touchedTime: 0,
+  // 多指触控间距
+  lastTouchLength: 0,
+  // 动画类型
+  animation: defaultAnimationConfig,
+};
 
 export default class PhotoView extends React.Component<
   IPhotoViewProps,
-  PhotoViewState
+  typeof initialState
 > {
   static displayName = 'PhotoView';
 
-  readonly state = {
-    x: 0,
-    y: 0,
-    scale: 1,
-    touched: false,
-
-    pageX: 0,
-    pageY: 0,
-
-    lastX: 0,
-    lastY: 0,
-
-    touchedTime: 0,
-    lastTouchLength: 0,
-    animation: defaultAnimationConfig,
-  };
+  readonly state = initialState;
 
   private photoRef;
 
@@ -238,12 +240,16 @@ export default class PhotoView extends React.Component<
     this.handleUp(pageX, pageY);
   }
 
+  handleResize = () => {
+    this.setState(initialState);
+  }
+
   handlePhotoRef = (ref) => {
     this.photoRef = ref;
   }
 
   render() {
-    const { src } = this.props;
+    const { src, wrapClassName, className } = this.props;
     const { x, y, scale, touched, animation } = this.state;
     const style = {
       currX: touched ? x : spring(x, animation),
@@ -252,19 +258,21 @@ export default class PhotoView extends React.Component<
     };
 
     return (
-      <PhotoContainer>
+      <PhotoContainer className={wrapClassName}>
         <Backdrop />
         <Motion style={style}>
           {({ currX, currY, currScale }) => {
             const transform = `translate3d(${currX}px, ${currY}px, 0) scale(${currScale})`;
             return (
               <Photo
+                className={className}
                 src={src}
                 ref={this.handlePhotoRef}
                 onDoubleClick={this.handleDoubleClick}
                 onMouseDown={isMobile ? undefined : this.handleMouseDown}
                 onTouchStart={isMobile ? this.handleTouchStart : undefined}
                 onWheel={this.handleWheel}
+                onPhotoResize={this.handleResize}
                 style={{
                   WebkitTransform: transform,
                   transform,
