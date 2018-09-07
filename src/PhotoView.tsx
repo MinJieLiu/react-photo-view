@@ -105,6 +105,8 @@ export default class PhotoView extends React.Component<
   handleMove = (newPageX: number, newPageY: number, touchLength: number = 0) => {
     if (this.state.touched) {
       this.setState(({
+        x,
+        y,
         pageX,
         pageY,
         lastX,
@@ -112,16 +114,16 @@ export default class PhotoView extends React.Component<
         scale,
         lastTouchLength,
       }) => {
-        const toScale = scale + (touchLength - lastTouchLength) / 100 / 2 * scale;
+        const offsetScale = (touchLength - lastTouchLength) / 100 / 2 * scale;
         return {
           lastTouchLength: touchLength,
           ...getPositionOnMoveOrScale({
-            x: newPageX - pageX + lastX,
-            y: newPageY - pageY + lastY,
-            pageX,
-            pageY,
+            x: touchLength ? x : newPageX - pageX + lastX,
+            y: touchLength ? y : newPageY - pageY + lastY,
+            pageX: newPageX,
+            pageY: newPageY,
             fromScale: scale,
-            toScale,
+            toScale: scale + offsetScale,
           }),
         };
       });
