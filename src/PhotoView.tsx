@@ -7,6 +7,7 @@ import isMobile from './utils/isMobile';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import slideToSuitableOffset from './utils/slideToSuitableOffset';
+import { getClosedHorizontal, getClosedVertical } from './utils/getCloseEdge';
 import { defaultAnimationConfig } from './variables';
 
 export interface IPhotoViewProps {
@@ -16,6 +17,8 @@ export interface IPhotoViewProps {
   wrapClassName?: string;
   // 图片类名
   className?: string;
+  // style
+  style?: object;
   // 自定义容器
   overlay?: React.ReactNode;
 
@@ -116,7 +119,14 @@ export default class PhotoView extends React.Component<
         scale,
         lastTouchLength,
       }) => {
+        if (touchLength === 0) {
+          const isStopMove = this.handleReachCallback(x, y, scale);
+          if (isStopMove) {
+            return null;
+          }
+        }
         const offsetScale = (touchLength - lastTouchLength) / 100 / 2 * scale;
+
         return {
           lastTouchLength: touchLength,
           ...getPositionOnMoveOrScale({
@@ -244,22 +254,44 @@ export default class PhotoView extends React.Component<
     this.setState(initialState);
   }
 
+  handleReachCallback = (x: number, y: number, scale: number): boolean => {
+    const { width, height } = this.photoRef.state;
+
+    const horizontalType = getClosedHorizontal(x, scale, width);
+    const verticalType = getClosedVertical(y, scale, height);
+    const { onReachTopMove, onReachRightMove, onReachBottomMove, onReachLeftMove } = this.props;
+    //  触碰到边缘
+    if (verticalType && onReachTopMove && y > 0) {
+      onReachTopMove(y);
+    } else if (verticalType && onReachBottomMove && y < 0) {
+      onReachBottomMove(y);
+    } else if (horizontalType && onReachLeftMove && x > 0) {
+      onReachLeftMove(x);
+      return true;
+    } else if (horizontalType && onReachRightMove && x < 0) {
+      onReachRightMove(x);
+      return true;
+    }
+    return false;
+  }
+
   handlePhotoRef = (ref) => {
     this.photoRef = ref;
   }
 
   render() {
-    const { src, wrapClassName, className, overlay } = this.props;
+    const { src, wrapClassName, className, style, overlay } = this.props;
     const { x, y, scale, touched, animation } = this.state;
-    const style = {
-      currX: touched ? x : spring(x, animation),
-      currY: touched ? y : spring(y, animation),
-      currScale: touched ? scale : spring(scale, animation),
-    };
 
     return (
-      <PhotoWrap className={wrapClassName}>
-        <Motion style={style}>
+      <PhotoWrap className={wrapClassName} style={style}>
+        <Motion
+          style={{
+            currX: touched ? x : spring(x, animation),
+            currY: touched ? y : spring(y, animation),
+            currScale: touched ? scale : spring(scale, animation),
+          }}
+        >
           {({ currX, currY, currScale }) => {
             const transform = `translate3d(${currX}px, ${currY}px, 0) scale(${currScale})`;
             return (

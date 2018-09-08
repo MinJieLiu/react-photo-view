@@ -17,6 +17,8 @@ export interface IPhotoSliderProps {
 }
 
 type PhotoSliderState = {
+  translateX: number;
+  photoIndex: number;
 };
 
 export default class PhotoSlider extends React.Component<
@@ -26,6 +28,8 @@ export default class PhotoSlider extends React.Component<
   static displayName = 'PhotoSlider';
 
   readonly state = {
+    translateX: 0,
+    photoIndex: 0,
   };
 
   componentDidMount() {
@@ -38,29 +42,46 @@ export default class PhotoSlider extends React.Component<
   }
 
   handleReachLeftMove = () => {
+    this.setState({
+      photoIndex: 0,
+    });
   }
 
   handleReachRightMove = () => {
+    this.setState({
+      photoIndex: 1,
+    });
   }
 
   render() {
     const { images, visible } = this.props;
+    const { photoIndex } = this.state;
+    const { innerWidth } = window;
 
     if (visible) {
       return (
         <SlideWrap>
           <Backdrop />
-          {images.map((src, index) => (
-            <PhotoView
-              key={src + index}
-              src={src}
-              onReachTopMove={this.handleReachTopMove}
-              onReachRightMove={index < images.length
-                ? this.handleReachRightMove
-                : undefined}
-              onReachLeftMove={index > 0 ? this.handleReachLeftMove : undefined}
-            />
-          ))}
+          {images.map((src, index) => {
+            const transform = `translate3d(-${photoIndex * innerWidth}px, 0px, 0)`;
+            return (
+              <PhotoView
+                key={src + index}
+                src={src}
+                onReachTopMove={this.handleReachTopMove}
+                onReachRightMove={index < images.length - 1
+                  ? this.handleReachRightMove
+                  : undefined}
+                onReachLeftMove={index > 0 ? this.handleReachLeftMove : undefined}
+                style={{
+                  left: `${innerWidth * index}px`,
+                  WebkitTransform: transform,
+                  transform,
+                  transition: 'transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                }}
+              />
+            );
+          })}
         </SlideWrap>
       );
     }

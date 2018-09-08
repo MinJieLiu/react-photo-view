@@ -1,36 +1,7 @@
 import { animationType } from '../types';
-import { maxTouchTime, defaultAnimationConfig } from '../variables';
-
-const slideToPosition = ({
-  x,
-  y,
-  lastX,
-  lastY,
-  touchedTime,
-}: {
-  x: number;
-  y: number;
-  lastX: number;
-  lastY: number;
-  touchedTime: number;
-}): {
-  endX: number;
-  endY: number;
-} & animationType => {
-  const moveTime = Date.now() - touchedTime;
-  const speedX = (x - lastX) / moveTime;
-  const speedY = (y - lastY) / moveTime;
-  const maxSpeed = Math.max(speedX, speedY);
-  const slideTime = moveTime < maxTouchTime ? Math.abs(maxSpeed) * 20 + 400 : 0;
-  return {
-    endX: Math.floor(x + speedX * slideTime),
-    endY: Math.floor(y + speedY * slideTime),
-    animation: {
-      stiffness: 170,
-      damping: 32,
-    },
-  };
-};
+import { defaultAnimationConfig } from '../variables';
+import slideToPosition from './slideToPosition';
+import { getClosedHorizontal, getClosedVertical } from './getCloseEdge';
 
 /**
  * 适应到合适的图片偏移量
@@ -67,12 +38,6 @@ const slideToSuitableOffset = ({
       animation: defaultAnimationConfig,
     };
   }
-
-  const { innerWidth, innerHeight } = window;
-  // 图片超出的长度
-  const outOffsetX = (width * scale - innerWidth) / 2;
-  const outOffsetY = (height * scale - innerHeight) / 2;
-
   // 滑动到结果的位置
   const { endX, endY, animation } = slideToPosition({
     x,
@@ -85,27 +50,37 @@ const slideToSuitableOffset = ({
   let currentX = endX;
   let currentY = endY;
 
-  if (width * scale <= innerWidth) {
+  const { innerWidth, innerHeight } = window;
+  // 图片超出的长度
+  const outOffsetX = (width * scale - innerWidth) / 2;
+  const outOffsetY = (height * scale - innerHeight) / 2;
+
+  const horizontalType = getClosedHorizontal(endX, scale, width);
+  const verticalType = getClosedVertical(endY, scale, height);
+
+  // x
+  if (horizontalType === 1) {
     currentX = 0;
-  } else if (endX > 0 && outOffsetX - endX <= 0) {
+  } else if (horizontalType === 2) {
     currentX = outOffsetX;
-  } else if (endX < 0 && outOffsetX + endX <= 0) {
+  } else if (horizontalType === 3) {
     currentX = -outOffsetX;
   }
-  if (height * scale <= innerHeight) {
+  // y
+  if (verticalType === 1) {
     currentY = 0;
-  } else if (endY > 0 && outOffsetY - endY <= 0) {
+  } else if (verticalType === 2) {
     currentY = outOffsetY;
-  } else if (endY < 0 && outOffsetY + endY <= 0) {
+  } else if (verticalType === 3) {
     currentY = -outOffsetY;
   }
 
-  const isBumpEdge = currentX !== endX || currentY !== endY;
+  const isClosedEdge = horizontalType !== 0 || verticalType !== 0;
 
   return {
     x: currentX,
     y: currentY,
-    animation: isBumpEdge ? defaultAnimationConfig : animation,
+    animation: isClosedEdge ? defaultAnimationConfig : animation,
   };
 };
 
