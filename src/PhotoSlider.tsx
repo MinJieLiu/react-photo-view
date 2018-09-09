@@ -101,7 +101,10 @@ export default class PhotoSlider extends React.Component<
       return {
         touched: true,
         lastPageY,
-        backdropOpacity: Math.max(Math.min(0.6, 0.6 - (offsetPageY / 100)), 0.2),
+        backdropOpacity: Math.max(
+          Math.min(defaultOpacity, defaultOpacity - (offsetPageY / 100)),
+          defaultOpacity / 6,
+        ),
       };
     });
   }
