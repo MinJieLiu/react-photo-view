@@ -8,7 +8,9 @@ import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import slideToSuitableOffset from './utils/slideToSuitableOffset';
 import { getClosedHorizontal, getClosedVertical } from './utils/getCloseEdge';
-import { defaultAnimationConfig } from './variables';
+import { defaultAnimationConfig, minReachOffset } from './variables';
+
+type ReachFunction = (pageX: number, pageY: number) => void;
 
 export interface IPhotoViewProps {
   // 图片地址
@@ -19,17 +21,19 @@ export interface IPhotoViewProps {
   className?: string;
   // style
   style?: object;
-  // 自定义容器
-  overlay?: React.ReactNode;
 
   // 到达顶部滑动事件
-  onReachTopMove?: Function;
+  onReachTopMove?: ReachFunction;
   // 到达右部滑动事件
-  onReachRightMove?: Function;
+  onReachRightMove?: ReachFunction;
   // 到达底部滑动事件
-  onReachBottomMove?: Function;
+  onReachBottomMove?: ReachFunction;
   // 到达左部滑动事件
-  onReachLeftMove?: Function;
+  onReachLeftMove?: ReachFunction;
+  // 触摸解除事件
+  onReachUp?: ReachFunction;
+
+  onPhotoResize?: () => void;
 }
 
 const initialState = {
@@ -119,8 +123,12 @@ export default class PhotoView extends React.Component<
         scale,
         lastTouchLength,
       }) => {
+        let currentX = x;
+        let currentY = y;
         if (touchLength === 0) {
-          const isStopMove = this.handleReachCallback(x, y, scale);
+          currentX = newPageX - pageX + lastX;
+          currentY = newPageY - pageY + lastY;
+          const isStopMove = this.handleReachCallback(currentX, currentY, scale, newPageX, newPageY);
           if (isStopMove) {
             return null;
           }
@@ -130,8 +138,8 @@ export default class PhotoView extends React.Component<
         return {
           lastTouchLength: touchLength,
           ...getPositionOnMoveOrScale({
-            x: touchLength ? x : newPageX - pageX + lastX,
-            y: touchLength ? y : newPageY - pageY + lastY,
+            x: currentX,
+            y: currentY,
             pageX: newPageX,
             pageY: newPageY,
             fromScale: scale,
@@ -154,7 +162,7 @@ export default class PhotoView extends React.Component<
           pageX,
           pageY,
           fromScale: scale,
-          toScale: scale !== 1 ? 1 : 2,
+          toScale: scale !== 1 ? 1 : 4,
         }),
         animation: defaultAnimationConfig,
       };
@@ -211,33 +219,39 @@ export default class PhotoView extends React.Component<
   }
 
   handleUp = (newPageX: number, newPageY: number) => {
-    const { width, height } = this.photoRef.state;
-    this.setState(({
-      x,
-      y,
-      lastX,
-      lastY,
-      scale,
-      touchedTime,
-      pageX,
-      pageY,
-    }) => {
-      const hasMove = pageX !== newPageX || pageY !== newPageY;
-      return {
-        touched: false,
-        ...slideToSuitableOffset({
-          x,
-          y,
-          lastX,
-          lastY,
-          width,
-          height,
-          scale,
-          touchedTime,
-          hasMove,
-        }),
-      };
-    });
+    if (this.state.touched) {
+      const { onReachUp } = this.props;
+      const { width, height } = this.photoRef.state;
+      this.setState(({
+        x,
+        y,
+        lastX,
+        lastY,
+        scale,
+        touchedTime,
+        pageX,
+        pageY,
+      }) => {
+        if (onReachUp) {
+          onReachUp(newPageX, newPageY);
+        }
+        const hasMove = pageX !== newPageX || pageY !== newPageY;
+        return {
+          touched: false,
+          ...slideToSuitableOffset({
+            x,
+            y,
+            lastX,
+            lastY,
+            width,
+            height,
+            scale,
+            touchedTime,
+            hasMove,
+          }),
+        };
+      });
+    }
   }
 
   handleTouchEnd = (e) => {
@@ -252,25 +266,40 @@ export default class PhotoView extends React.Component<
 
   handleResize = () => {
     this.setState(initialState);
+    const { onPhotoResize } = this.props;
+    if (onPhotoResize) {
+      onPhotoResize();
+    }
   }
 
-  handleReachCallback = (x: number, y: number, scale: number): boolean => {
+  handleReachCallback = (
+    x: number,
+    y: number,
+    scale: number,
+    newPageX: number,
+    newPageY: number,
+  ): boolean => {
     const { width, height } = this.photoRef.state;
 
     const horizontalType = getClosedHorizontal(x, scale, width);
     const verticalType = getClosedVertical(y, scale, height);
-    const { onReachTopMove, onReachRightMove, onReachBottomMove, onReachLeftMove } = this.props;
+    const {
+      onReachTopMove,
+      onReachRightMove,
+      onReachBottomMove,
+      onReachLeftMove,
+    } = this.props;
     //  触碰到边缘
-    if (verticalType && onReachTopMove && y > 0) {
-      onReachTopMove(y);
-    } else if (verticalType && onReachBottomMove && y < 0) {
-      onReachBottomMove(y);
-    } else if (horizontalType && onReachLeftMove && x > 0) {
-      onReachLeftMove(x);
+    if (horizontalType && onReachLeftMove && x > minReachOffset) {
+      onReachLeftMove(newPageX, newPageY);
       return true;
-    } else if (horizontalType && onReachRightMove && x < 0) {
-      onReachRightMove(x);
+    } else if (horizontalType && onReachRightMove && x < -minReachOffset) {
+      onReachRightMove(newPageX, newPageY);
       return true;
+    } else if (verticalType && onReachTopMove && y > minReachOffset) {
+      onReachTopMove(newPageX, newPageY);
+    } else if (verticalType && onReachBottomMove && y < -minReachOffset) {
+      onReachBottomMove(newPageX, newPageY);
     }
     return false;
   }
@@ -280,7 +309,7 @@ export default class PhotoView extends React.Component<
   }
 
   render() {
-    const { src, wrapClassName, className, style, overlay } = this.props;
+    const { src, wrapClassName, className, style } = this.props;
     const { x, y, scale, touched, animation } = this.state;
 
     return (
@@ -312,7 +341,6 @@ export default class PhotoView extends React.Component<
             );
           }}
         </Motion>
-        {overlay}
       </PhotoWrap>
     );
   }

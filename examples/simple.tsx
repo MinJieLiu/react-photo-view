@@ -15,8 +15,9 @@ const Header = styled.header`
 
 class Example extends React.Component {
   state = {
-    photoImages: ['1.png', '2.jpg'],
+    photoImages: ['1.png', '2.jpg', '1.png'],
     photoVisible: true,
+    photoIndex: 1,
   };
 
   handlePhotoClose = () => {
@@ -25,13 +26,25 @@ class Example extends React.Component {
     });
   }
 
+  handleVisibleChange = (photoIndex) => {
+    this.setState({
+      photoIndex,
+    });
+  }
+
   render() {
-    const { photoImages, photoVisible } = this.state;
+    const { photoImages, photoVisible, photoIndex } = this.state;
 
     return (
       <Container>
         <Header>React 图片预览组件</Header>
-        <PhotoSlider images={photoImages} visible={photoVisible} onClose={this.handlePhotoClose} />
+        <PhotoSlider
+          images={photoImages}
+          index={photoIndex}
+          onIndexChange={this.handleVisibleChange}
+          visible={photoVisible}
+          onClose={this.handlePhotoClose}
+        />
       </Container>
     );
   }

@@ -2,6 +2,7 @@ import React from 'react';
 import PhotoView from './PhotoView';
 import SlideWrap from './components/SlideWrap';
 import Backdrop from './components/Backdrop';
+import { maxMoveOffset, closePageOffset, defaultOpacity } from './variables';
 
 export interface IPhotoSliderProps {
   // 图片列表
@@ -14,11 +15,24 @@ export interface IPhotoSliderProps {
   onClose: Function;
   // 索引改变回调
   onIndexChange?: Function;
+  // 自定义容器
+  overlay?: React.ReactNode;
 }
 
 type PhotoSliderState = {
+  // 偏移量
   translateX: number;
+  // 图片当前的 index
   photoIndex: number;
+
+  // 图片处于触摸的状态
+  touched: boolean,
+  // Reach 开始时 x 坐标
+  lastPageX: number | undefined;
+  // Reach 开始时 y 坐标
+  lastPageY: number | undefined;
+  // 背景透明度
+  backdropOpacity: number;
 };
 
 export default class PhotoSlider extends React.Component<
@@ -27,61 +41,163 @@ export default class PhotoSlider extends React.Component<
 > {
   static displayName = 'PhotoSlider';
 
-  readonly state = {
+  static defaultProps = {
+    index: 0,
     translateX: 0,
-    photoIndex: 0,
   };
 
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.index !== undefined && nextProps.index !== prevState.photoIndex) {
+      return {
+        photoIndex: nextProps.index,
+        translateX: window.innerWidth * nextProps.index,
+      };
+    }
+    return null;
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      translateX: props.index * window.innerWidth,
+      photoIndex: props.index || 0,
+      touched: false,
+
+      lastPageX: undefined,
+      lastPageY: undefined,
+      backdropOpacity: defaultOpacity,
+    };
+  }
+
   componentDidMount() {
+    window.addEventListener('resize', this.handleResize);
   }
 
   componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
   }
 
-  handleReachTopMove = () => {
-  }
-
-  handleReachLeftMove = () => {
-    this.setState({
-      photoIndex: 0,
+  handleResize = () => {
+    const { innerWidth } = window;
+    this.setState(({ photoIndex }) => {
+      return {
+        translateX: innerWidth * photoIndex,
+        lastPageX: undefined,
+        lastPageY: undefined,
+      };
     });
   }
 
-  handleReachRightMove = () => {
+  handleReachTopMove = (pageX, pageY) => {
+    this.setState(({ lastPageY, backdropOpacity }) => {
+      if (lastPageY === undefined) {
+        return {
+          touched: true,
+          lastPageY: pageY,
+          backdropOpacity,
+        };
+      }
+      const offsetPageY = pageY - lastPageY;
+      return {
+        touched: true,
+        lastPageY,
+        backdropOpacity: Math.max(Math.min(0.6, 0.6 - (offsetPageY / 100)), 0.2),
+      };
+    });
+  }
+
+  handleReachHorizontalMove = (pageX) => {
+    const { innerWidth } = window;
+    this.setState(({ lastPageX, translateX, photoIndex }) => {
+      if (lastPageX === undefined) {
+        return {
+          touched: true,
+          lastPageX: pageX,
+          translateX,
+        };
+      }
+      const offsetPageX = pageX - lastPageX;
+      return {
+        touched: true,
+        lastPageX: lastPageX,
+        translateX: innerWidth * photoIndex - offsetPageX,
+      };
+    });
+  }
+
+  handleReachUp = (pageX, pageY) => {
+    const { innerWidth } = window;
+    const { images, onIndexChange, onClose } = this.props;
+    const { lastPageX = pageX, lastPageY = pageY, photoIndex } = this.state;
+
+    const offsetPageX = pageX - lastPageX;
+    const offsetPageY = pageY - lastPageY;
+
+    if (offsetPageY > closePageOffset) {
+      onClose();
+      return;
+    }
+    // 当前偏移
+    let currentTranslateX = innerWidth * photoIndex;
+    let currentPhotoIndex = photoIndex;
+    // 下一张
+    if (offsetPageX < - maxMoveOffset && photoIndex < images.length - 1) {
+      currentPhotoIndex = photoIndex + 1;
+      currentTranslateX = innerWidth * currentPhotoIndex;
+      if (onIndexChange) {
+        onIndexChange(currentPhotoIndex);
+      }
+      // 上一张
+    } else if (offsetPageX > maxMoveOffset && photoIndex > 0) {
+      currentPhotoIndex = photoIndex - 1;
+      currentTranslateX = innerWidth * currentPhotoIndex;
+      if (onIndexChange) {
+        onIndexChange(currentPhotoIndex);
+      }
+    }
     this.setState({
-      photoIndex: 1,
+      touched: false,
+      translateX: currentTranslateX,
+      photoIndex: currentPhotoIndex,
+      lastPageX: undefined,
+      lastPageY: undefined,
+      backdropOpacity: defaultOpacity,
     });
   }
 
   render() {
-    const { images, visible } = this.props;
-    const { photoIndex } = this.state;
+    const { images, visible, overlay } = this.props;
+    const { translateX, touched, backdropOpacity } = this.state;
     const { innerWidth } = window;
+    const transform = `translate3d(-${translateX}px, 0px, 0)`;
 
     if (visible) {
       return (
         <SlideWrap>
-          <Backdrop />
+          <Backdrop style={{ opacity: backdropOpacity }} />
           {images.map((src, index) => {
-            const transform = `translate3d(-${photoIndex * innerWidth}px, 0px, 0)`;
             return (
               <PhotoView
                 key={src + index}
                 src={src}
                 onReachTopMove={this.handleReachTopMove}
                 onReachRightMove={index < images.length - 1
-                  ? this.handleReachRightMove
+                  ? this.handleReachHorizontalMove
                   : undefined}
-                onReachLeftMove={index > 0 ? this.handleReachLeftMove : undefined}
+                onReachLeftMove={index > 0 ? this.handleReachHorizontalMove : undefined}
+                onReachUp={this.handleReachUp}
                 style={{
                   left: `${innerWidth * index}px`,
                   WebkitTransform: transform,
                   transform,
-                  transition: 'transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                  transition: touched
+                    ? undefined
+                    : 'transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)',
                 }}
               />
             );
           })}
+          {overlay}
         </SlideWrap>
       );
     }
