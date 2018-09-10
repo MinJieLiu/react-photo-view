@@ -21,31 +21,21 @@ const getPositionOnMoveOrScale = ({
   scale: number;
 } => {
   const { innerWidth, innerHeight } = window;
-  let endScale = toScale;
-  let originX = x;
-  let originY = y;
-  // 缩放限制
-  if (toScale < 1) {
-    endScale = 1;
-  } else if (toScale > 6) {
-    endScale = 6;
-  } else {
-    const centerPageX = innerWidth / 2;
-    const centerPageY = innerHeight / 2;
-    // 坐标偏移
-    const lastPositionX = centerPageX + x;
-    const lastPositionY = centerPageY + y;
+  const centerPageX = innerWidth / 2;
+  const centerPageY = innerHeight / 2;
+  // 坐标偏移
+  const lastPositionX = centerPageX + x;
+  const lastPositionY = centerPageY + y;
 
-    // 放大偏移量
-    const offsetScale = endScale / fromScale;
-    // 偏移位置
-    originX = pageX - (pageX - lastPositionX) * offsetScale - centerPageX;
-    originY = pageY - (pageY - lastPositionY) * offsetScale - centerPageY;
-  }
+  // 放大偏移量
+  const offsetScale = toScale / fromScale;
+  // 偏移位置
+  const originX = pageX - (pageX - lastPositionX) * offsetScale - centerPageX;
+  const originY = pageY - (pageY - lastPositionY) * offsetScale - centerPageY;
   return {
     x: originX,
     y: originY,
-    scale: endScale,
+    scale: toScale,
   };
 };
 

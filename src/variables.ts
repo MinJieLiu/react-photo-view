@@ -6,17 +6,17 @@ import { springType } from './types';
 export const maxTouchTime: number = 200;
 
 /**
- * 最大切换滑动距离
+ * 最大滑动切换图片距离
  */
 export const maxMoveOffset: number = 40;
 
 /**
- * 最小触发边缘距离
+ * 最小触发边缘事件距离
  */
 export const minReachOffset: number = 40;
 
 /**
- * 关闭页面触发距离
+ * 下拉关闭页面触发距离
  */
 export const closePageOffset: number = 60;
 
@@ -24,6 +24,21 @@ export const closePageOffset: number = 60;
  * 默认背景透明度
  */
 export const defaultOpacity: number = 0.6;
+
+/**
+ * 最小缩放度
+ */
+export const minScale: number = 1;
+
+/**
+ * 最大缩放度（若图片足够大，则会被忽略）
+ */
+export const maxScale: number = 6;
+
+/**
+ * 缩放弹性缓冲
+ */
+export const scaleBuffer = 0.2;
 
 /**
  * 默认动画参数

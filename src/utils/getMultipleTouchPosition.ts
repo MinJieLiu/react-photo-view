@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * 从 Touch 事件中获取多个触控位置
+ * 从 Touch 事件中获取多个触控中心位置
  */
 const getMultipleTouchPosition = (
   evt: React.TouchEvent,

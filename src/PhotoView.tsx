@@ -8,7 +8,13 @@ import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import slideToSuitableOffset from './utils/slideToSuitableOffset';
 import { getClosedHorizontal, getClosedVertical } from './utils/getCloseEdge';
-import { defaultAnimationConfig, minReachOffset } from './variables';
+import {
+  defaultAnimationConfig,
+  minReachOffset,
+  minScale,
+  maxScale,
+  scaleBuffer,
+} from './variables';
 
 type ReachFunction = (pageX: number, pageY: number) => void;
 
@@ -81,7 +87,7 @@ export default class PhotoView extends React.Component<
 
   componentDidMount() {
     if (isMobile) {
-      window.addEventListener('touchmove', this.handleTouchMove);
+      window.addEventListener('touchmove', this.handleTouchMove, { passive: false });
       window.addEventListener('touchend', this.handleTouchEnd);
     } else {
       window.addEventListener('mousemove', this.handleMouseMove);
@@ -113,6 +119,7 @@ export default class PhotoView extends React.Component<
 
   handleMove = (newPageX: number, newPageY: number, touchLength: number = 0) => {
     if (this.state.touched) {
+      const { width, naturalWidth } = this.photoRef.state;
       this.setState(({
         x,
         y,
@@ -133,8 +140,15 @@ export default class PhotoView extends React.Component<
             return null;
           }
         }
-        const offsetScale = (touchLength - lastTouchLength) / 100 / 2 * scale;
-
+        const endScale = scale + (touchLength - lastTouchLength) / 100 / 2 * scale;
+        // 限制最大倍数和最小倍数
+        const toScale = Math.max(
+          Math.min(
+            endScale,
+            Math.max(maxScale, naturalWidth / width)
+          ),
+          minScale - scaleBuffer,
+        );
         return {
           lastTouchLength: touchLength,
           ...getPositionOnMoveOrScale({
@@ -143,7 +157,7 @@ export default class PhotoView extends React.Component<
             pageX: newPageX,
             pageY: newPageY,
             fromScale: scale,
-            toScale: scale + offsetScale,
+            toScale,
           }),
         };
       });
@@ -152,6 +166,7 @@ export default class PhotoView extends React.Component<
 
   handleDoubleClick = (e) => {
     const { pageX, pageY } = e;
+    const { width, naturalWidth } = this.photoRef.state;
     this.setState(({ x, y, scale }) => {
       return {
         pageX,
@@ -162,7 +177,8 @@ export default class PhotoView extends React.Component<
           pageX,
           pageY,
           fromScale: scale,
-          toScale: scale !== 1 ? 1 : 4,
+          // 若图片足够大，则放大适应的倍数
+          toScale: scale !== 1 ? 1 : Math.max(2, naturalWidth / width),
         }),
         animation: defaultAnimationConfig,
       };
@@ -171,7 +187,17 @@ export default class PhotoView extends React.Component<
 
   handleWheel = (e) => {
     const { pageX, pageY, deltaY } = e;
+    const { width, naturalWidth } = this.photoRef.state;
     this.setState(({ x, y, scale }) => {
+      const endScale = scale - deltaY / 100 / 2;
+      // 限制最大倍数和最小倍数
+      const toScale = Math.max(
+        Math.min(
+          endScale,
+          Math.max(maxScale, naturalWidth / width)
+        ),
+        minScale,
+      );
       return {
         pageX,
         pageY,
@@ -181,7 +207,7 @@ export default class PhotoView extends React.Component<
           pageX,
           pageY,
           fromScale: scale,
-          toScale: scale - deltaY / 100 / 2,
+          toScale,
         }),
         animation: defaultAnimationConfig,
       };
@@ -199,6 +225,7 @@ export default class PhotoView extends React.Component<
   }
 
   handleMouseDown = e => {
+    e.preventDefault();
     this.handleStart(e.pageX, e.pageY);
   }
 
@@ -236,8 +263,17 @@ export default class PhotoView extends React.Component<
           onReachUp(newPageX, newPageY);
         }
         const hasMove = pageX !== newPageX || pageY !== newPageY;
+        // 缩放弹性效果
+        const toScale = Math.max(
+          Math.min(
+            scale,
+            maxScale,
+          ),
+          minScale,
+        );
         return {
           touched: false,
+          scale: toScale,
           ...slideToSuitableOffset({
             x,
             y,
