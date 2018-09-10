@@ -13,12 +13,12 @@ export const maxMoveOffset: number = 40;
 /**
  * 最小触发边缘事件距离
  */
-export const minReachOffset: number = 40;
+export const minReachOffset: number = 20;
 
 /**
  * 下拉关闭页面触发距离
  */
-export const closePageOffset: number = 60;
+export const closePageOffset: number = 80;
 
 /**
  * 默认背景透明度

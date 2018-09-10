@@ -17,8 +17,8 @@ export default class SlideWrap extends React.Component<{
 }> {
   static displayName = 'SlideWrap';
 
-  dialogNode;
-  originalOverflow;
+  private dialogNode;
+  private originalOverflow;
 
   constructor(props) {
     super(props);

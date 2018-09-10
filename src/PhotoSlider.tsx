@@ -33,6 +33,8 @@ type PhotoSliderState = {
   lastPageY: number | undefined;
   // 背景透明度
   backdropOpacity: number;
+  // 缩放度
+  photoScale: number;
 };
 
 export default class PhotoSlider extends React.Component<
@@ -66,6 +68,7 @@ export default class PhotoSlider extends React.Component<
       lastPageX: undefined,
       lastPageY: undefined,
       backdropOpacity: defaultOpacity,
+      photoScale: 1,
     };
   }
 
@@ -95,6 +98,7 @@ export default class PhotoSlider extends React.Component<
           touched: true,
           lastPageY: pageY,
           backdropOpacity,
+          photoScale: 1,
         };
       }
       const offsetPageY = pageY - lastPageY;
@@ -102,8 +106,12 @@ export default class PhotoSlider extends React.Component<
         touched: true,
         lastPageY,
         backdropOpacity: Math.max(
-          Math.min(defaultOpacity, defaultOpacity - (offsetPageY / 100)),
+          Math.min(defaultOpacity, defaultOpacity - (offsetPageY / 100 / 2)),
           defaultOpacity / 6,
+        ),
+        photoScale: Math.max(
+          Math.min(1, 1 - (offsetPageY / 100 / 10)),
+          0.6,
         ),
       };
     });
@@ -165,19 +173,26 @@ export default class PhotoSlider extends React.Component<
       lastPageX: undefined,
       lastPageY: undefined,
       backdropOpacity: defaultOpacity,
+      photoScale: 1,
     });
   }
 
   render() {
-    const { images, visible, overlay } = this.props;
-    const { translateX, touched, backdropOpacity } = this.state;
     const { innerWidth } = window;
+    const { images, visible, overlay } = this.props;
+    const {
+      translateX,
+      touched,
+      photoIndex,
+      backdropOpacity,
+      photoScale,
+    } = this.state;
     const transform = `translate3d(-${translateX}px, 0px, 0)`;
 
     if (visible) {
       return (
         <SlideWrap>
-          <Backdrop style={{ opacity: backdropOpacity }} />
+          <Backdrop style={{ background: `rgba(0, 0, 0, ${backdropOpacity})` }} />
           {images.map((src, index) => {
             return (
               <PhotoView
@@ -189,6 +204,7 @@ export default class PhotoSlider extends React.Component<
                   : undefined}
                 onReachLeftMove={index > 0 ? this.handleReachHorizontalMove : undefined}
                 onReachUp={this.handleReachUp}
+                photoScale={photoIndex === index ? photoScale : 1}
                 style={{
                   left: `${innerWidth * index}px`,
                   WebkitTransform: transform,

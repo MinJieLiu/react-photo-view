@@ -27,6 +27,8 @@ export interface IPhotoViewProps {
   className?: string;
   // style
   style?: object;
+  // 缩放，用于下拉关闭变小的效果
+  photoScale?: number;
 
   // 到达顶部滑动事件
   onReachTopMove?: ReachFunction;
@@ -68,6 +70,9 @@ const initialState = {
   lastTouchLength: 0,
   // 动画类型
   animation: defaultAnimationConfig,
+
+  // 当前边缘触发状态，0: 未触发，1: x 轴，2: y 轴
+  reachState: 0,
 };
 
 export default class PhotoView extends React.Component<
@@ -120,7 +125,7 @@ export default class PhotoView extends React.Component<
   handleMove = (newPageX: number, newPageY: number, touchLength: number = 0) => {
     if (this.state.touched) {
       const { width, naturalWidth } = this.photoRef.state;
-      this.setState(({
+      const {
         x,
         y,
         pageX,
@@ -129,17 +134,32 @@ export default class PhotoView extends React.Component<
         lastY,
         scale,
         lastTouchLength,
-      }) => {
-        let currentX = x;
-        let currentY = y;
-        if (touchLength === 0) {
-          currentX = newPageX - pageX + lastX;
-          currentY = newPageY - pageY + lastY;
-          const isStopMove = this.handleReachCallback(currentX, currentY, scale, newPageX, newPageY);
-          if (isStopMove) {
-            return null;
-          }
-        }
+        reachState,
+      } = this.state;
+      let currentX = x;
+      let currentY = y;
+      // 边缘状态
+      let currentReachState = 0;
+      if (touchLength === 0) {
+        currentX = newPageX - pageX + lastX;
+        currentY = newPageY - pageY + lastY;
+        // 边缘触发检测
+        currentReachState = this.handleReachCallback(
+          currentX,
+          currentY,
+          scale,
+          newPageX,
+          newPageY,
+          reachState,
+        );
+      }
+      // 横向边缘触发禁用当前滑动
+      if (currentReachState === 1) {
+        this.setState({
+          reachState: 1,
+        });
+      } else {
+        // 目标倍数
         const endScale = scale + (touchLength - lastTouchLength) / 100 / 2 * scale;
         // 限制最大倍数和最小倍数
         const toScale = Math.max(
@@ -149,8 +169,9 @@ export default class PhotoView extends React.Component<
           ),
           minScale - scaleBuffer,
         );
-        return {
+        this.setState({
           lastTouchLength: touchLength,
+          reachState: currentReachState,
           ...getPositionOnMoveOrScale({
             x: currentX,
             y: currentY,
@@ -159,8 +180,8 @@ export default class PhotoView extends React.Component<
             fromScale: scale,
             toScale,
           }),
-        };
-      });
+        });
+      }
     }
   }
 
@@ -186,6 +207,7 @@ export default class PhotoView extends React.Component<
   }
 
   handleWheel = (e) => {
+    e.preventDefault();
     const { pageX, pageY, deltaY } = e;
     const { width, naturalWidth } = this.photoRef.state;
     this.setState(({ x, y, scale }) => {
@@ -274,6 +296,7 @@ export default class PhotoView extends React.Component<
         return {
           touched: false,
           scale: toScale,
+          reachState: 0, // 重置触发状态
           ...slideToSuitableOffset({
             x,
             y,
@@ -314,7 +337,8 @@ export default class PhotoView extends React.Component<
     scale: number,
     newPageX: number,
     newPageY: number,
-  ): boolean => {
+    reachState: number,
+  ): number => {
     const { width, height } = this.photoRef.state;
 
     const horizontalType = getClosedHorizontal(x, scale, width);
@@ -326,18 +350,44 @@ export default class PhotoView extends React.Component<
       onReachLeftMove,
     } = this.props;
     //  触碰到边缘
-    if (horizontalType && onReachLeftMove && x > minReachOffset) {
+    if (
+      onReachLeftMove
+      && (horizontalType
+      && x > minReachOffset
+      && reachState === 0
+      || reachState === 1)
+    ) {
       onReachLeftMove(newPageX, newPageY);
-      return true;
-    } else if (horizontalType && onReachRightMove && x < -minReachOffset) {
+      return 1;
+    } else if (
+      onReachRightMove
+      && (horizontalType
+      && x < -minReachOffset
+      && reachState === 0
+      || reachState === 1)
+    ) {
       onReachRightMove(newPageX, newPageY);
-      return true;
-    } else if (verticalType && onReachTopMove && y > minReachOffset) {
+      return 1;
+    } else if (
+      onReachTopMove
+      && (verticalType
+      && y > minReachOffset
+      && reachState === 0
+      || reachState === 2)
+    ) {
       onReachTopMove(newPageX, newPageY);
-    } else if (verticalType && onReachBottomMove && y < -minReachOffset) {
+      return 2;
+    } else if (
+      onReachBottomMove
+      && (verticalType
+      && y < -minReachOffset
+      && reachState === 0
+      || reachState === 2)
+    ) {
       onReachBottomMove(newPageX, newPageY);
+      return 2;
     }
-    return false;
+    return 0;
   }
 
   handlePhotoRef = (ref) => {
@@ -345,7 +395,7 @@ export default class PhotoView extends React.Component<
   }
 
   render() {
-    const { src, wrapClassName, className, style } = this.props;
+    const { src, wrapClassName, className, style, photoScale = 1 } = this.props;
     const { x, y, scale, touched, animation } = this.state;
 
     return (
@@ -358,7 +408,7 @@ export default class PhotoView extends React.Component<
           }}
         >
           {({ currX, currY, currScale }) => {
-            const transform = `translate3d(${currX}px, ${currY}px, 0) scale(${currScale})`;
+            const transform = `translate3d(${currX}px, ${currY}px, 0) scale(${currScale * photoScale})`;
             return (
               <Photo
                 className={className}
