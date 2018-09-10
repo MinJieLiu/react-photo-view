@@ -8,3 +8,11 @@ export type springType = {
 export type animationType = {
   animation: springType;
 };
+
+/**
+ * 图片 item 类型
+ */
+export type dataType = {
+  dataKey: string;
+  src: string;
+};

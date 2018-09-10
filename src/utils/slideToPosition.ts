@@ -24,7 +24,7 @@ const slideToPosition = ({
   const speedX = (x - lastX) / moveTime;
   const speedY = (y - lastY) / moveTime;
   const maxSpeed = Math.max(speedX, speedY);
-  const slideTime = moveTime < maxTouchTime ? Math.abs(maxSpeed) * 20 + 400 : 0;
+  const slideTime = moveTime < maxTouchTime ? Math.abs(maxSpeed) * 20 + maxTouchTime : 0;
   return {
     endX: Math.floor(x + speedX * slideTime),
     endY: Math.floor(y + speedY * slideTime),

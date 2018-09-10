@@ -15,7 +15,6 @@ const slideToSuitableOffset = ({
   height,
   scale,
   touchedTime,
-  hasMove,
 }: {
   x: number;
   y: number;
@@ -25,19 +24,10 @@ const slideToSuitableOffset = ({
   height: number;
   scale: number;
   touchedTime: number;
-  hasMove: boolean;
 }): {
   x: number;
   y: number;
 } & animationType => {
-  // 没有移动图片
-  if (!hasMove) {
-    return {
-      x,
-      y,
-      animation: defaultAnimationConfig,
-    };
-  }
   // 滑动到结果的位置
   const { endX, endY, animation } = slideToPosition({
     x,

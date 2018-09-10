@@ -13,6 +13,7 @@ const Container = styled.div`
 `;
 
 export default class SlideWrap extends React.Component<{
+  className?: string;
   children: any;
 }> {
   static displayName = 'SlideWrap';
@@ -52,10 +53,10 @@ export default class SlideWrap extends React.Component<{
   }
 
   render() {
-    const { children } = this.props;
+    const { className, children } = this.props;
 
     return createPortal(
-      <Container>{children}</Container>,
+      <Container className={className}>{children}</Container>,
       this.dialogNode,
     );
   }

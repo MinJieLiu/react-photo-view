@@ -2,7 +2,8 @@ import React from 'react';
 import PhotoView from './PhotoView';
 import SlideWrap from './components/SlideWrap';
 import Backdrop from './components/Backdrop';
-import { maxMoveOffset, closePageOffset, defaultOpacity } from './variables';
+import { dataType } from './types';
+import { maxMoveOffset, defaultOpacity } from './variables';
 
 export interface IPhotoSliderProps {
   // 图片列表
@@ -17,6 +18,14 @@ export interface IPhotoSliderProps {
   onIndexChange?: Function;
   // 自定义容器
   overlay?: React.ReactNode;
+  // className
+  className?: string;
+  // 遮罩 className
+  maskClassName?: string;
+  // 图片容器 className
+  viewClassName?: string;
+  // 图片 className
+  imageClassName?: string;
 }
 
 type PhotoSliderState = {
@@ -43,16 +52,11 @@ export default class PhotoSlider extends React.Component<
 > {
   static displayName = 'PhotoSlider';
 
-  static defaultProps = {
-    index: 0,
-    translateX: 0,
-  };
-
   static getDerivedStateFromProps(nextProps, prevState) {
     if (nextProps.index !== undefined && nextProps.index !== prevState.photoIndex) {
       return {
         photoIndex: nextProps.index,
-        translateX: window.innerWidth * nextProps.index,
+        translateX: -window.innerWidth * nextProps.index,
       };
     }
     return null;
@@ -60,9 +64,10 @@ export default class PhotoSlider extends React.Component<
 
   constructor(props) {
     super(props);
+    const { index = 0 } = props;
     this.state = {
-      translateX: props.index * window.innerWidth,
-      photoIndex: props.index || 0,
+      translateX: index * -window.innerWidth,
+      photoIndex: index,
       touched: false,
 
       lastPageX: undefined,
@@ -84,14 +89,14 @@ export default class PhotoSlider extends React.Component<
     const { innerWidth } = window;
     this.setState(({ photoIndex }) => {
       return {
-        translateX: innerWidth * photoIndex,
+        translateX: -innerWidth * photoIndex,
         lastPageX: undefined,
         lastPageY: undefined,
       };
     });
   }
 
-  handleReachTopMove = (pageX, pageY) => {
+  handleReachVerticalMove = (pageX, pageY) => {
     this.setState(({ lastPageY, backdropOpacity }) => {
       if (lastPageY === undefined) {
         return {
@@ -101,7 +106,7 @@ export default class PhotoSlider extends React.Component<
           photoScale: 1,
         };
       }
-      const offsetPageY = pageY - lastPageY;
+      const offsetPageY = Math.abs(pageY - lastPageY);
       return {
         touched: true,
         lastPageY,
@@ -131,37 +136,37 @@ export default class PhotoSlider extends React.Component<
       return {
         touched: true,
         lastPageX: lastPageX,
-        translateX: innerWidth * photoIndex - offsetPageX,
+        translateX: -innerWidth * photoIndex + offsetPageX,
       };
     });
   }
 
   handleReachUp = (pageX, pageY) => {
-    const { innerWidth } = window;
+    const { innerWidth, innerHeight } = window;
     const { images, onIndexChange, onClose } = this.props;
     const { lastPageX = pageX, lastPageY = pageY, photoIndex } = this.state;
 
     const offsetPageX = pageX - lastPageX;
     const offsetPageY = pageY - lastPageY;
 
-    if (offsetPageY > closePageOffset) {
+    if (Math.abs(offsetPageY) > innerHeight * 0.14) {
       onClose();
       return;
     }
     // 当前偏移
-    let currentTranslateX = innerWidth * photoIndex;
+    let currentTranslateX = -innerWidth * photoIndex;
     let currentPhotoIndex = photoIndex;
     // 下一张
     if (offsetPageX < - maxMoveOffset && photoIndex < images.length - 1) {
       currentPhotoIndex = photoIndex + 1;
-      currentTranslateX = innerWidth * currentPhotoIndex;
+      currentTranslateX = -innerWidth * currentPhotoIndex;
       if (onIndexChange) {
         onIndexChange(currentPhotoIndex);
       }
       // 上一张
     } else if (offsetPageX > maxMoveOffset && photoIndex > 0) {
       currentPhotoIndex = photoIndex - 1;
-      currentTranslateX = innerWidth * currentPhotoIndex;
+      currentTranslateX = -innerWidth * currentPhotoIndex;
       if (onIndexChange) {
         onIndexChange(currentPhotoIndex);
       }
@@ -179,7 +184,15 @@ export default class PhotoSlider extends React.Component<
 
   render() {
     const { innerWidth } = window;
-    const { images, visible, overlay } = this.props;
+    const {
+      images,
+      visible,
+      overlay,
+      className,
+      maskClassName,
+      viewClassName,
+      imageClassName,
+    } = this.props;
     const {
       translateX,
       touched,
@@ -187,24 +200,30 @@ export default class PhotoSlider extends React.Component<
       backdropOpacity,
       photoScale,
     } = this.state;
-    const transform = `translate3d(-${translateX}px, 0px, 0)`;
+    const transform = `translate3d(${translateX}px, 0px, 0)`;
 
     if (visible) {
       return (
-        <SlideWrap>
-          <Backdrop style={{ background: `rgba(0, 0, 0, ${backdropOpacity})` }} />
+        <SlideWrap className={className}>
+          <Backdrop
+            className={maskClassName}
+            style={{ background: `rgba(0, 0, 0, ${backdropOpacity})` }}
+          />
           {images.map((src, index) => {
             return (
               <PhotoView
                 key={src + index}
                 src={src}
-                onReachTopMove={this.handleReachTopMove}
+                onReachTopMove={this.handleReachVerticalMove}
+                onReachBottomMove={this.handleReachVerticalMove}
                 onReachRightMove={index < images.length - 1
                   ? this.handleReachHorizontalMove
                   : undefined}
                 onReachLeftMove={index > 0 ? this.handleReachHorizontalMove : undefined}
                 onReachUp={this.handleReachUp}
                 photoScale={photoIndex === index ? photoScale : 1}
+                wrapClassName={viewClassName}
+                className={imageClassName}
                 style={{
                   left: `${innerWidth * index}px`,
                   WebkitTransform: transform,

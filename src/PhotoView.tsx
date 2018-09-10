@@ -297,17 +297,21 @@ export default class PhotoView extends React.Component<
           touched: false,
           scale: toScale,
           reachState: 0, // 重置触发状态
-          ...slideToSuitableOffset({
-            x,
-            y,
-            lastX,
-            lastY,
-            width,
-            height,
-            scale,
-            touchedTime,
-            hasMove,
-          }),
+          ...hasMove
+            ? slideToSuitableOffset({
+              x,
+              y,
+              lastX,
+              lastY,
+              width,
+              height,
+              scale,
+              touchedTime,
+            }) : {
+              x,
+              y,
+              animation: defaultAnimationConfig,
+            },
         };
       });
     }
