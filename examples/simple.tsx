@@ -30,7 +30,7 @@ const SmallImage = styled.img`
 
 class Example extends React.Component {
   state = {
-    photoImages: ['1.png', '2.jpg', '1.png'],
+    photoImages: ['1.png', '2.jpg', '3.jpg', '4.jpg', '5.jpg', '6.jpg'],
   };
 
   render() {
@@ -43,7 +43,7 @@ class Example extends React.Component {
           <ImageList>
             {photoImages.map((item, index) => (
               <PhotoConsumer key={index} src={item}>
-                <SmallImage src={item} />
+                <SmallImage />
               </PhotoConsumer>
             ))}
           </ImageList>

@@ -40,10 +40,16 @@ class PhotoViewItem extends React.Component<IPhotoViewItem> {
   }
 
   render() {
-    const { children } = this.props;
+    const { src, children } = this.props;
     if (children) {
       return React.cloneElement(children, {
         onClick: this.handleShow,
+        // 子节点若不传 src 则覆盖
+        ...children.props.src === undefined
+          ? {
+            src,
+          }
+          : undefined,
       });
     }
     return null;

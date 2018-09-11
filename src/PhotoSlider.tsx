@@ -149,15 +149,14 @@ export default class PhotoSlider extends React.Component<
     const offsetPageX = pageX - lastPageX;
     const offsetPageY = pageY - lastPageY;
 
-    if (Math.abs(offsetPageY) > innerHeight * 0.14) {
-      onClose();
-      return;
-    }
     // 当前偏移
     let currentTranslateX = -innerWidth * photoIndex;
     let currentPhotoIndex = photoIndex;
-    // 下一张
-    if (offsetPageX < -maxMoveOffset && photoIndex < images.length - 1) {
+
+    if (Math.abs(offsetPageY) > innerHeight * 0.14) {
+      onClose();
+      // 下一张
+    } else if (offsetPageX < -maxMoveOffset && photoIndex < images.length - 1) {
       currentPhotoIndex = photoIndex + 1;
       currentTranslateX = -innerWidth * currentPhotoIndex;
       if (onIndexChange) {
@@ -200,6 +199,7 @@ export default class PhotoSlider extends React.Component<
       backdropOpacity,
       photoScale,
     } = this.state;
+    const imageLength = images.length;
     const transform = `translate3d(${translateX}px, 0px, 0)`;
 
     if (visible) {
@@ -210,32 +210,40 @@ export default class PhotoSlider extends React.Component<
             style={{ background: `rgba(0, 0, 0, ${backdropOpacity})` }}
           />
           {images
+            .slice( // 加载相邻三张
+              Math.max(photoIndex - 1, 0),
+              Math.min(photoIndex + 2, imageLength + 1)
+            )
             .map((item: string | dataType, index) => {
               const isStrItem = typeof item === 'string';
+              // 截取之前的索引位置
+              const realIndex = photoIndex === 0
+                ? photoIndex + index
+                : photoIndex - 1 + index;
               return (
                 <PhotoView
                   key={
                     isStrItem
-                      ? (item as string) + index
+                      ? (item as string) + realIndex
                       : (item as dataType).dataKey
                   }
                   src={isStrItem ? (item as string) : (item as dataType).src}
                   onReachTopMove={this.handleReachVerticalMove}
                   onReachBottomMove={this.handleReachVerticalMove}
                   onReachRightMove={
-                    index < images.length - 1
+                    realIndex < imageLength - 1
                       ? this.handleReachHorizontalMove
                       : undefined
                   }
                   onReachLeftMove={
-                    index > 0 ? this.handleReachHorizontalMove : undefined
+                    realIndex > 0 ? this.handleReachHorizontalMove : undefined
                   }
                   onReachUp={this.handleReachUp}
-                  photoScale={photoIndex === index ? photoScale : 1}
+                  photoScale={photoIndex === realIndex ? photoScale : 1}
                   wrapClassName={viewClassName}
                   className={imageClassName}
                   style={{
-                    left: `${innerWidth * index}px`,
+                    left: `${innerWidth * realIndex}px`,
                     WebkitTransform: transform,
                     transform,
                     transition: touched
