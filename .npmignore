@@ -1,0 +1,9 @@
+.DS_STORE
+*.log
+node_modules
+/build
+/examples
+coverage
+.nyc_output
+yarn.lock
+.idea/

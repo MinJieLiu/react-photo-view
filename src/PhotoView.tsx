@@ -270,7 +270,7 @@ export default class PhotoView extends React.Component<
   handleUp = (newPageX: number, newPageY: number) => {
     if (this.state.touched) {
       const { onReachUp } = this.props;
-      const { width, height } = this.photoRef.state;
+      const { width, naturalWidth, height } = this.photoRef.state;
       this.setState(({
         x,
         y,
@@ -289,7 +289,7 @@ export default class PhotoView extends React.Component<
         const toScale = Math.max(
           Math.min(
             scale,
-            maxScale,
+            Math.max(maxScale, naturalWidth / width),
           ),
           minScale,
         );
