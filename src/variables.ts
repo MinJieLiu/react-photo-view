@@ -11,6 +11,11 @@ export const maxTouchTime: number = 200;
 export const maxMoveOffset: number = 40;
 
 /**
+ * 图片的间隔
+ */
+export const horizontalOffset: number = 40;
+
+/**
  * 最小触发边缘事件距离
  */
 export const minReachOffset: number = 20;
@@ -18,7 +23,7 @@ export const minReachOffset: number = 20;
 /**
  * 默认背景透明度
  */
-export const defaultOpacity: number = 0.6;
+export const defaultOpacity: number = 0.8;
 
 /**
  * 最小缩放度

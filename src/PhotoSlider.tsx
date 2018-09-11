@@ -3,7 +3,7 @@ import PhotoView from './PhotoView';
 import SlideWrap from './components/SlideWrap';
 import Backdrop from './components/Backdrop';
 import { dataType } from './types';
-import { maxMoveOffset, defaultOpacity } from './variables';
+import { maxMoveOffset, defaultOpacity, horizontalOffset } from './variables';
 
 export interface IPhotoSliderProps {
   // 图片列表
@@ -59,7 +59,7 @@ export default class PhotoSlider extends React.Component<
     ) {
       return {
         photoIndex: nextProps.index,
-        translateX: -window.innerWidth * nextProps.index,
+        translateX: -(window.innerWidth + horizontalOffset) * nextProps.index,
       };
     }
     return null;
@@ -69,7 +69,7 @@ export default class PhotoSlider extends React.Component<
     super(props);
     const { index = 0 } = props;
     this.state = {
-      translateX: index * -window.innerWidth,
+      translateX: index * -(window.innerWidth + horizontalOffset),
       photoIndex: index,
       touched: false,
 
@@ -92,7 +92,7 @@ export default class PhotoSlider extends React.Component<
     const { innerWidth } = window;
     this.setState(({ photoIndex }) => {
       return {
-        translateX: -innerWidth * photoIndex,
+        translateX: -(innerWidth + horizontalOffset) * photoIndex,
         lastPageX: undefined,
         lastPageY: undefined,
       };
@@ -115,7 +115,7 @@ export default class PhotoSlider extends React.Component<
         lastPageY,
         backdropOpacity: Math.max(
           Math.min(defaultOpacity, defaultOpacity - offsetPageY / 100 / 2),
-          defaultOpacity / 6,
+          0,
         ),
         photoScale: Math.max(Math.min(1, 1 - offsetPageY / 100 / 10), 0.6),
       };
@@ -136,7 +136,7 @@ export default class PhotoSlider extends React.Component<
       return {
         touched: true,
         lastPageX: lastPageX,
-        translateX: -innerWidth * photoIndex + offsetPageX,
+        translateX: -(innerWidth + horizontalOffset) * photoIndex + offsetPageX,
       };
     });
   }
@@ -148,9 +148,10 @@ export default class PhotoSlider extends React.Component<
 
     const offsetPageX = pageX - lastPageX;
     const offsetPageY = pageY - lastPageY;
+    const singlePageWidth = innerWidth + horizontalOffset;
 
     // 当前偏移
-    let currentTranslateX = -innerWidth * photoIndex;
+    let currentTranslateX = -singlePageWidth * photoIndex;
     let currentPhotoIndex = photoIndex;
 
     if (Math.abs(offsetPageY) > innerHeight * 0.14) {
@@ -158,14 +159,14 @@ export default class PhotoSlider extends React.Component<
       // 下一张
     } else if (offsetPageX < -maxMoveOffset && photoIndex < images.length - 1) {
       currentPhotoIndex = photoIndex + 1;
-      currentTranslateX = -innerWidth * currentPhotoIndex;
+      currentTranslateX = -singlePageWidth * currentPhotoIndex;
       if (onIndexChange) {
         onIndexChange(currentPhotoIndex);
       }
       // 上一张
     } else if (offsetPageX > maxMoveOffset && photoIndex > 0) {
       currentPhotoIndex = photoIndex - 1;
-      currentTranslateX = -innerWidth * currentPhotoIndex;
+      currentTranslateX = -singlePageWidth * currentPhotoIndex;
       if (onIndexChange) {
         onIndexChange(currentPhotoIndex);
       }
@@ -243,7 +244,7 @@ export default class PhotoSlider extends React.Component<
                   wrapClassName={viewClassName}
                   className={imageClassName}
                   style={{
-                    left: `${innerWidth * realIndex}px`,
+                    left: `${(innerWidth + horizontalOffset) * realIndex}px`,
                     WebkitTransform: transform,
                     transform,
                     transition: touched
