@@ -7,7 +7,7 @@ import { maxMoveOffset, defaultOpacity } from './variables';
 
 export interface IPhotoSliderProps {
   // 图片列表
-  images: string[];
+  images: (string | dataType)[];
   // 图片当前索引
   index?: number;
   // 可见
@@ -35,7 +35,7 @@ type PhotoSliderState = {
   photoIndex: number;
 
   // 图片处于触摸的状态
-  touched: boolean,
+  touched: boolean;
   // Reach 开始时 x 坐标
   lastPageX: number | undefined;
   // Reach 开始时 y 坐标
@@ -53,7 +53,10 @@ export default class PhotoSlider extends React.Component<
   static displayName = 'PhotoSlider';
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.index !== undefined && nextProps.index !== prevState.photoIndex) {
+    if (
+      nextProps.index !== undefined &&
+      nextProps.index !== prevState.photoIndex
+    ) {
       return {
         photoIndex: nextProps.index,
         translateX: -window.innerWidth * nextProps.index,
@@ -111,13 +114,10 @@ export default class PhotoSlider extends React.Component<
         touched: true,
         lastPageY,
         backdropOpacity: Math.max(
-          Math.min(defaultOpacity, defaultOpacity - (offsetPageY / 100 / 2)),
+          Math.min(defaultOpacity, defaultOpacity - offsetPageY / 100 / 2),
           defaultOpacity / 6,
         ),
-        photoScale: Math.max(
-          Math.min(1, 1 - (offsetPageY / 100 / 10)),
-          0.6,
-        ),
+        photoScale: Math.max(Math.min(1, 1 - offsetPageY / 100 / 10), 0.6),
       };
     });
   }
@@ -157,7 +157,7 @@ export default class PhotoSlider extends React.Component<
     let currentTranslateX = -innerWidth * photoIndex;
     let currentPhotoIndex = photoIndex;
     // 下一张
-    if (offsetPageX < - maxMoveOffset && photoIndex < images.length - 1) {
+    if (offsetPageX < -maxMoveOffset && photoIndex < images.length - 1) {
       currentPhotoIndex = photoIndex + 1;
       currentTranslateX = -innerWidth * currentPhotoIndex;
       if (onIndexChange) {
@@ -209,32 +209,42 @@ export default class PhotoSlider extends React.Component<
             className={maskClassName}
             style={{ background: `rgba(0, 0, 0, ${backdropOpacity})` }}
           />
-          {images.map((src, index) => {
-            return (
-              <PhotoView
-                key={src + index}
-                src={src}
-                onReachTopMove={this.handleReachVerticalMove}
-                onReachBottomMove={this.handleReachVerticalMove}
-                onReachRightMove={index < images.length - 1
-                  ? this.handleReachHorizontalMove
-                  : undefined}
-                onReachLeftMove={index > 0 ? this.handleReachHorizontalMove : undefined}
-                onReachUp={this.handleReachUp}
-                photoScale={photoIndex === index ? photoScale : 1}
-                wrapClassName={viewClassName}
-                className={imageClassName}
-                style={{
-                  left: `${innerWidth * index}px`,
-                  WebkitTransform: transform,
-                  transform,
-                  transition: touched
-                    ? undefined
-                    : 'transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)',
-                }}
-              />
-            );
-          })}
+          {images
+            .map((item: string | dataType, index) => {
+              const isStrItem = typeof item === 'string';
+              return (
+                <PhotoView
+                  key={
+                    isStrItem
+                      ? (item as string) + index
+                      : (item as dataType).dataKey
+                  }
+                  src={isStrItem ? (item as string) : (item as dataType).src}
+                  onReachTopMove={this.handleReachVerticalMove}
+                  onReachBottomMove={this.handleReachVerticalMove}
+                  onReachRightMove={
+                    index < images.length - 1
+                      ? this.handleReachHorizontalMove
+                      : undefined
+                  }
+                  onReachLeftMove={
+                    index > 0 ? this.handleReachHorizontalMove : undefined
+                  }
+                  onReachUp={this.handleReachUp}
+                  photoScale={photoIndex === index ? photoScale : 1}
+                  wrapClassName={viewClassName}
+                  className={imageClassName}
+                  style={{
+                    left: `${innerWidth * index}px`,
+                    WebkitTransform: transform,
+                    transform,
+                    transition: touched
+                      ? undefined
+                      : 'transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                  }}
+                />
+              );
+            })}
           {overlay}
         </SlideWrap>
       );

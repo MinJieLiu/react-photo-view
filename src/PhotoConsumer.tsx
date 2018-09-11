@@ -1,17 +1,20 @@
 import React from 'react';
 import uniqueId from 'lodash.uniqueid';
-import PhotoContext from './photo-context';
+import PhotoContext, {
+  onShowType,
+  addItemType,
+  removeItemType,
+} from './photo-context';
 
 export interface IPhotoViewItem {
   src: string;
-  children: React.ReactElement<any>;
-  onShow: (dataKey) => void;
-  addItem: (dataKey: string, src: string) => void;
-  removeItem: (dataKey) => void;
+  children?: React.ReactElement<any>;
+  onShow: onShowType;
+  addItem: addItemType;
+  removeItem: removeItemType;
 }
 
 class PhotoViewItem extends React.Component<IPhotoViewItem> {
-
   private dataKey: string = uniqueId();
 
   componentDidMount() {
@@ -28,9 +31,11 @@ class PhotoViewItem extends React.Component<IPhotoViewItem> {
     const { onShow, children } = this.props;
     onShow(this.dataKey);
 
-    const { onClick } = children.props;
-    if (onClick) {
-      onClick(e);
+    if (children) {
+      const { onClick } = children.props;
+      if (onClick) {
+        onClick(e);
+      }
     }
   }
 
@@ -47,10 +52,14 @@ class PhotoViewItem extends React.Component<IPhotoViewItem> {
 
 export interface IPhotoConsumer {
   src: string;
-  children: React.ReactElement<any>;
+  children?: React.ReactElement<any>;
 }
 
-const PhotoConsumer: React.SFC<IPhotoConsumer> = ({ src, children, ...restProps }) => (
+const PhotoConsumer: React.SFC<IPhotoConsumer> = ({
+  src,
+  children,
+  ...restProps
+}) => (
   <PhotoContext.Consumer>
     {value => (
       <PhotoViewItem

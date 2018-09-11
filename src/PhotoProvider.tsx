@@ -1,5 +1,9 @@
 import React from 'react';
-import PhotoContext from './photo-context';
+import PhotoContext, {
+  onShowType,
+  addItemType,
+  removeItemType,
+} from './photo-context';
 import PhotoSlider from './PhotoSlider';
 import { dataType } from './types';
 
@@ -19,10 +23,9 @@ type PhotoProviderState = {
   data: dataType[];
   visible: boolean;
   index: number;
-  onShow: (dataKey) => void;
-  onClose: () => void;
-  addItem: (dataKey: string, src: string) => void;
-  removeItem: (dataKey) => void;
+  onShow: onShowType;
+  addItem: addItemType;
+  removeItem: removeItemType;
 };
 
 export default class PhotoProvider extends React.Component<
@@ -39,23 +42,30 @@ export default class PhotoProvider extends React.Component<
       addItem: this.handleAddItem,
       removeItem: this.handleRemoveItem,
       onShow: this.handleShow,
-      onClose: this.handleClose,
     };
   }
 
-  handleAddItem = item => {
+  handleAddItem = (dataKey: string, src: string) => {
     this.setState(prev => ({
-      data: prev.data.concat(item),
+      data: prev.data.concat({
+        dataKey,
+        src,
+      }),
     }));
   }
 
-  handleRemoveItem = dataKey => {
-    this.setState(prev => ({
-      data: prev.data.filter(item => item.dataKey !== dataKey),
-    }));
+  handleRemoveItem = (dataKey: string) => {
+    this.setState(({ data, index }) => {
+      const nextData = data.filter(item => item.dataKey !== dataKey);
+      const nextEndIndex = nextData.length - 1;
+      return {
+        data: nextData,
+        index: Math.min(nextEndIndex, index),
+      };
+    });
   }
 
-  handleShow = (dataKey) => {
+  handleShow = (dataKey: string) => {
     const { data } = this.state;
     this.setState({
       visible: true,
@@ -69,7 +79,7 @@ export default class PhotoProvider extends React.Component<
     });
   }
 
-  handleIndexChange = (index) => {
+  handleIndexChange = (index: number) => {
     this.setState({
       index,
     });
