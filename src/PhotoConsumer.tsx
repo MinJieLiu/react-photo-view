@@ -46,9 +46,7 @@ class PhotoViewItem extends React.Component<IPhotoViewItem> {
         onClick: this.handleShow,
         // 子节点若不传 src 则覆盖
         ...children.props.src === undefined
-          ? {
-            src,
-          }
+          ? { src }
           : undefined,
       });
     }

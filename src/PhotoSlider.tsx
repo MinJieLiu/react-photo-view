@@ -71,10 +71,10 @@ export default class PhotoSlider extends React.Component<
 
   constructor(props) {
     super(props);
-    const { index = 0 } = props;
+
     this.state = {
-      translateX: index * -(window.innerWidth + horizontalOffset),
-      photoIndex: index,
+      translateX: 0,
+      photoIndex: 0,
       touched: false,
 
       lastPageX: undefined,
@@ -85,6 +85,11 @@ export default class PhotoSlider extends React.Component<
   }
 
   componentDidMount() {
+    const { index = 0 } = this.props;
+    this.setState({
+      translateX: index * -(window.innerWidth + horizontalOffset),
+      photoIndex: index,
+    });
     window.addEventListener('resize', this.handleResize);
   }
 
@@ -187,7 +192,6 @@ export default class PhotoSlider extends React.Component<
   }
 
   render() {
-    const { innerWidth } = window;
     const {
       images,
       visible,
@@ -210,6 +214,8 @@ export default class PhotoSlider extends React.Component<
     const transform = `translate3d(${translateX}px, 0px, 0)`;
 
     if (visible) {
+      const { innerWidth } = window;
+
       return (
         <SlideWrap className={className}>
           <Backdrop

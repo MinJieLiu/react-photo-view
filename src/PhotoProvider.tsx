@@ -17,6 +17,10 @@ interface IPhotoProvider {
   viewClassName?: string;
   // 图片 className
   imageClassName?: string;
+  // 自定义 loading
+  loadingElement?: JSX.Element;
+  // 加载失败 Element
+  brokenElement?: JSX.Element;
 }
 
 type PhotoProviderState = {
@@ -91,6 +95,8 @@ export default class PhotoProvider extends React.Component<
       maskClassName,
       viewClassName,
       imageClassName,
+      loadingElement,
+      brokenElement,
       children,
     } = this.props;
     const { data, visible, index } = this.state;
@@ -108,6 +114,8 @@ export default class PhotoProvider extends React.Component<
           maskClassName={maskClassName}
           viewClassName={viewClassName}
           imageClassName={imageClassName}
+          loadingElement={loadingElement}
+          brokenElement={brokenElement}
         />
       </PhotoContext.Provider>
     );
