@@ -1,6 +1,6 @@
 {
   "name": "react-photo-view",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "React photo preview",
   "keywords": [
     "react",
@@ -30,7 +30,7 @@
   "files": [
     "lib"
   ],
-  "main": "./lib",
+  "main": "lib/index.js",
   "module": "./es",
   "author": "LMY",
   "license": "MIT",
