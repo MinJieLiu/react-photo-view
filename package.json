@@ -1,9 +1,9 @@
 {
   "name": "react-photo-view",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "React photo preview.",
-  "main": "./lib",
-  "module": "./es",
+  "main": "./lib/index",
+  "module": "./es/index",
   "keywords": [
     "react",
     "react-component",
