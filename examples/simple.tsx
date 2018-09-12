@@ -10,7 +10,6 @@ const Container = styled.div`
 const Header = styled.header`
   padding: 40px;
   font-size: 32px;
-  height: 1000px;
   border-bottom: 1px solid #ccc;
 `;
 
@@ -54,4 +53,4 @@ class Example extends React.Component {
   }
 }
 
-ReactDOM.render(<Example />, document.getElementById('root'));
+ReactDOM.render(<Example />, document.getElementById('__react-content'));

@@ -1,5 +1,4 @@
-import { animationType } from '../types';
-import { maxTouchTime, slideAnimationConfig } from '../variables';
+import { maxTouchTime } from '../variables';
 
 /**
  * 根据速度滑动至目标位置
@@ -19,7 +18,7 @@ const slideToPosition = ({
 }): {
   endX: number;
   endY: number;
-} & animationType => {
+} => {
   const moveTime = Date.now() - touchedTime;
   const speedX = (x - lastX) / moveTime;
   const speedY = (y - lastY) / moveTime;
@@ -28,7 +27,6 @@ const slideToPosition = ({
   return {
     endX: Math.floor(x + speedX * slideTime),
     endY: Math.floor(y + speedY * slideTime),
-    animation: slideAnimationConfig,
   };
 };
 

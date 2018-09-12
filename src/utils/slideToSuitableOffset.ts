@@ -1,5 +1,3 @@
-import { animationType } from '../types';
-import { defaultAnimationConfig } from '../variables';
 import slideToPosition from './slideToPosition';
 import { getClosedHorizontal, getClosedVertical } from './getCloseEdge';
 
@@ -27,9 +25,9 @@ const slideToSuitableOffset = ({
 }): {
   x: number;
   y: number;
-} & animationType => {
+} => {
   // 滑动到结果的位置
-  const { endX, endY, animation } = slideToPosition({
+  const { endX, endY } = slideToPosition({
     x,
     y,
     lastX,
@@ -65,12 +63,9 @@ const slideToSuitableOffset = ({
     currentY = -outOffsetY;
   }
 
-  const isClosedEdge = horizontalType !== 0 || verticalType !== 0;
-
   return {
     x: currentX,
     y: currentY,
-    animation: isClosedEdge ? defaultAnimationConfig : animation,
   };
 };
 

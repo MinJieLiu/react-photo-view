@@ -22,10 +22,10 @@ type PhotoState = {
 
 const PhotoImage = styled.img`
   will-change: transform;
-  cursor: -webkit-grab;
+  cursor: grab;
 
   &:active {
-    cursor: -webkit-grabbing;
+    cursor: grabbing;
   }
 `;
 

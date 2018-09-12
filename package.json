@@ -1,7 +1,7 @@
 {
   "name": "react-photo-view",
-  "version": "0.1.3",
-  "description": "React photo preview",
+  "version": "0.1.4",
+  "description": "React photo preview.",
   "main": "./lib",
   "module": "./es",
   "keywords": [
@@ -47,7 +47,6 @@
   "dependencies": {
     "lodash.throttle": "^4.1.1",
     "lodash.uniqueid": "^4.0.1",
-    "react-motion": "^0.5.2",
     "styled-components": "^3.0.1"
   }
 }

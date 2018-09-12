@@ -1,5 +1,3 @@
-import { springType } from './types';
-
 /**
  * 最大触摸时间
  */
@@ -31,7 +29,7 @@ export const defaultOpacity: number = 0.8;
 export const minScale: number = 1;
 
 /**
- * 最大缩放度（若图片足够大，则会被忽略）
+ * 最大缩放度（若图片足够大，则会超出）
  */
 export const maxScale: number = 6;
 
@@ -39,19 +37,3 @@ export const maxScale: number = 6;
  * 缩放弹性缓冲
  */
 export const scaleBuffer = 0.2;
-
-/**
- * 默认动画参数
- */
-export const defaultAnimationConfig: springType = {
-  stiffness: 240,
-  damping: 30,
-};
-
-/**
- * 滑动时动画参数
- */
-export const slideAnimationConfig: springType = {
-  stiffness: 170,
-  damping: 32,
-};

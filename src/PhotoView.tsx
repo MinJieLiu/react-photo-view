@@ -1,5 +1,4 @@
 import React from 'react';
-import { Motion, spring } from 'react-motion';
 import throttle from 'lodash.throttle';
 import Photo from './Photo';
 import PhotoWrap from './components/PhotoWrap';
@@ -10,7 +9,6 @@ import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import slideToSuitableOffset from './utils/slideToSuitableOffset';
 import { getClosedHorizontal, getClosedVertical } from './utils/getCloseEdge';
 import {
-  defaultAnimationConfig,
   minReachOffset,
   minScale,
   maxScale,
@@ -75,8 +73,6 @@ const initialState = {
   touchedTime: 0,
   // 多指触控间距
   lastTouchLength: 0,
-  // 动画类型
-  animation: defaultAnimationConfig,
 
   // 当前边缘触发状态，0: 未触发，1: x 轴，2: y 轴
   reachState: 0,
@@ -210,7 +206,6 @@ export default class PhotoView extends React.Component<
           // 若图片足够大，则放大适应的倍数
           toScale: scale !== 1 ? 1 : Math.max(2, naturalWidth / width),
         }),
-        animation: defaultAnimationConfig,
       };
     });
   }
@@ -240,7 +235,6 @@ export default class PhotoView extends React.Component<
           fromScale: scale,
           toScale,
         }),
-        animation: defaultAnimationConfig,
       };
     });
   }
@@ -341,7 +335,6 @@ export default class PhotoView extends React.Component<
             }) : {
               x,
               y,
-              animation: defaultAnimationConfig,
             },
         };
       });
@@ -439,7 +432,9 @@ export default class PhotoView extends React.Component<
       loadingElement,
       brokenElement,
     } = this.props;
-    const { x, y, scale, touched, animation } = this.state;
+    const { x, y, scale, touched } = this.state;
+
+    const transform = `translate3d(${x}px, ${y}px, 0) scale(${scale * photoScale})`;
 
     return (
       <PhotoWrap className={wrapClassName} style={style}>
@@ -447,35 +442,25 @@ export default class PhotoView extends React.Component<
           onMouseDown={isMobile ? undefined : this.handleMaskMouseDown}
           onTouchStart={isMobile ? this.handleMaskTouchStart : undefined}
         />
-        <Motion
+        <Photo
+          className={className}
+          src={src}
+          ref={this.handlePhotoRef}
+          onDoubleClick={this.handleDoubleClick}
+          onMouseDown={isMobile ? undefined : this.handleMouseDown}
+          onTouchStart={isMobile ? this.handleTouchStart : undefined}
+          onWheel={this.handleWheel}
+          onPhotoResize={this.handleResize}
           style={{
-            currX: touched ? x : spring(x, animation),
-            currY: touched ? y : spring(y, animation),
-            currScale: touched ? scale : spring(scale, animation),
+            WebkitTransform: transform,
+            transform,
+            transition: touched
+              ? undefined
+              : 'transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
           }}
-        >
-          {({ currX, currY, currScale }) => {
-            const transform = `translate3d(${currX}px, ${currY}px, 0) scale(${currScale * photoScale})`;
-            return (
-              <Photo
-                className={className}
-                src={src}
-                ref={this.handlePhotoRef}
-                onDoubleClick={this.handleDoubleClick}
-                onMouseDown={isMobile ? undefined : this.handleMouseDown}
-                onTouchStart={isMobile ? this.handleTouchStart : undefined}
-                onWheel={this.handleWheel}
-                onPhotoResize={this.handleResize}
-                style={{
-                  WebkitTransform: transform,
-                  transform,
-                }}
-                loadingElement={loadingElement}
-                brokenElement={brokenElement}
-              />
-            );
-          }}
-        </Motion>
+          loadingElement={loadingElement}
+          brokenElement={brokenElement}
+        />
       </PhotoWrap>
     );
   }
