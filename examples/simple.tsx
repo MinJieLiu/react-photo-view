@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
-import { PhotoProvider, PhotoConsumer } from '../src';
+import { PhotoProvider, PhotoConsumer } from '../src/index';
 
 const Container = styled.div`
   font-size: 32px;
