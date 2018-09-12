@@ -4,7 +4,7 @@ import throttle from 'lodash.throttle';
 import Spinner from './components/Spinner';
 import getSuitableImageSize from './utils/getSuitableImageSize';
 
-export interface IPhotoProps extends React.HTMLAttributes<any> {
+interface IPhotoProps extends React.HTMLAttributes<any> {
   src: string;
   onPhotoResize: () => void;
   loadingElement?: JSX.Element;
@@ -35,50 +35,56 @@ export default class Photo extends React.Component<IPhotoProps, PhotoState> {
   readonly state = {
     loaded: false,
     broken: false,
-    naturalWidth: 0,
-    naturalHeight: 0,
-    width: 0,
-    height: 0,
+    naturalWidth: 1,
+    naturalHeight: 1,
+    width: 1,
+    height: 1,
   };
+
+  private isMount = true;
 
   constructor(props) {
     super(props);
-
-    const currPhoto = new Image();
-    currPhoto.src = props.src;
-    currPhoto.onload = this.handleImageLoaded;
-    currPhoto.onerror = this.handleImageBroken;
-
     this.handleResize = throttle(this.handleResize, 8);
   }
 
   componentDidMount() {
+    const currPhoto = new Image();
+    currPhoto.src = this.props.src;
+    currPhoto.onload = this.handleImageLoaded;
+    currPhoto.onerror = this.handleImageBroken;
+
     window.addEventListener('resize', this.handleResize);
   }
 
   componentWillUnmount() {
+    this.isMount = false;
     window.removeEventListener('resize', this.handleResize);
   }
 
   handleImageLoaded = e => {
     const { naturalWidth, naturalHeight } = e.target;
-    this.setState({
-      loaded: true,
-      naturalWidth,
-      naturalHeight,
-      ...getSuitableImageSize(naturalWidth, naturalHeight),
-    });
+    if (this.isMount) {
+      this.setState({
+        loaded: true,
+        naturalWidth,
+        naturalHeight,
+        ...getSuitableImageSize(naturalWidth, naturalHeight),
+      });
+    }
   }
 
   handleImageBroken = () => {
-    this.setState({
-      broken: true,
-    });
+    if (this.isMount) {
+      this.setState({
+        broken: true,
+      });
+    }
   }
 
   handleResize = () => {
     const { loaded, naturalWidth, naturalHeight } = this.state;
-    if (loaded) {
+    if (loaded && this.isMount) {
       this.setState(
         getSuitableImageSize(naturalWidth, naturalHeight),
         this.props.onPhotoResize,

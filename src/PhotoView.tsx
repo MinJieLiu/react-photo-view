@@ -3,6 +3,7 @@ import { Motion, spring } from 'react-motion';
 import throttle from 'lodash.throttle';
 import Photo from './Photo';
 import PhotoWrap from './components/PhotoWrap';
+import PhotoMask from './components/PhotoMask';
 import isMobile from './utils/isMobile';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
@@ -18,7 +19,7 @@ import {
 
 type ReachFunction = (pageX: number, pageY: number) => void;
 
-export interface IPhotoViewProps {
+interface IPhotoViewProps {
   // 图片地址
   src: string;
   // 容器类名
@@ -29,6 +30,10 @@ export interface IPhotoViewProps {
   style?: object;
   // 缩放，用于下拉关闭变小的效果
   photoScale?: number;
+  // 自定义 loading
+  loadingElement?: JSX.Element;
+  // 加载失败 Element
+  brokenElement?: JSX.Element;
 
   // 到达顶部滑动事件
   onReachTopMove?: ReachFunction;
@@ -53,6 +58,8 @@ const initialState = {
   scale: 1,
   // 图片处于触摸的状态
   touched: false,
+  // 背景处于触摸状态
+  maskTouched: false,
 
   // 触摸开始时 x 原始坐标
   pageX: 0,
@@ -123,7 +130,8 @@ export default class PhotoView extends React.Component<
   }
 
   handleMove = (newPageX: number, newPageY: number, touchLength: number = 0) => {
-    if (this.state.touched) {
+    const { touched, maskTouched } = this.state;
+    if (touched || maskTouched) {
       const { width, naturalWidth } = this.photoRef.state;
       const {
         x,
@@ -153,8 +161,8 @@ export default class PhotoView extends React.Component<
           reachState,
         );
       }
-      // 横向边缘触发禁用当前滑动
-      if (currentReachState === 1) {
+      // 横向边缘触发、背景触发禁用当前滑动
+      if (currentReachState === 1 || maskTouched) {
         this.setState({
           reachState: 1,
         });
@@ -186,6 +194,7 @@ export default class PhotoView extends React.Component<
   }
 
   handleDoubleClick = (e) => {
+    e.preventDefault();
     const { pageX, pageY } = e;
     const { width, naturalWidth } = this.photoRef.state;
     this.setState(({ x, y, scale }) => {
@@ -236,6 +245,26 @@ export default class PhotoView extends React.Component<
     });
   }
 
+  handleMaskStart = (pageX: number, pageY: number) => {
+    this.setState(prevState => ({
+      maskTouched: true,
+      pageX,
+      pageY,
+      lastX: prevState.x,
+      lastY: prevState.y,
+      touchedTime: Date.now(),
+    }));
+  }
+
+  handleMaskMouseDown = (e) => {
+    this.handleMaskStart(e.pageX, e.pageY);
+  }
+
+  handleMaskTouchStart = (e) => {
+    const { pageX, pageY } = e.touches[0];
+    this.handleMaskStart(pageX, pageY);
+  }
+
   handleTouchStart = e => {
     if (e.touches.length >= 2) {
       const { pageX, pageY, touchLength } = getMultipleTouchPosition(e);
@@ -268,7 +297,8 @@ export default class PhotoView extends React.Component<
   }
 
   handleUp = (newPageX: number, newPageY: number) => {
-    if (this.state.touched) {
+    const { touched, maskTouched } = this.state;
+    if (touched || maskTouched) {
       const { onReachUp } = this.props;
       const { width, naturalWidth, height } = this.photoRef.state;
       this.setState(({
@@ -295,6 +325,7 @@ export default class PhotoView extends React.Component<
         );
         return {
           touched: false,
+          maskTouched: false,
           scale: toScale,
           reachState: 0, // 重置触发状态
           ...hasMove
@@ -399,11 +430,23 @@ export default class PhotoView extends React.Component<
   }
 
   render() {
-    const { src, wrapClassName, className, style, photoScale = 1 } = this.props;
+    const {
+      src,
+      wrapClassName,
+      className,
+      style,
+      photoScale = 1,
+      loadingElement,
+      brokenElement,
+    } = this.props;
     const { x, y, scale, touched, animation } = this.state;
 
     return (
       <PhotoWrap className={wrapClassName} style={style}>
+        <PhotoMask
+          onMouseDown={isMobile ? undefined : this.handleMaskMouseDown}
+          onTouchStart={isMobile ? this.handleMaskTouchStart : undefined}
+        />
         <Motion
           style={{
             currX: touched ? x : spring(x, animation),
@@ -427,6 +470,8 @@ export default class PhotoView extends React.Component<
                   WebkitTransform: transform,
                   transform,
                 }}
+                loadingElement={loadingElement}
+                brokenElement={brokenElement}
               />
             );
           }}

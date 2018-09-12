@@ -5,7 +5,7 @@ import Backdrop from './components/Backdrop';
 import { dataType } from './types';
 import { maxMoveOffset, defaultOpacity, horizontalOffset } from './variables';
 
-export interface IPhotoSliderProps {
+interface IPhotoSliderProps {
   // 图片列表
   images: (string | dataType)[];
   // 图片当前索引
@@ -26,6 +26,10 @@ export interface IPhotoSliderProps {
   viewClassName?: string;
   // 图片 className
   imageClassName?: string;
+  // 自定义 loading
+  loadingElement?: JSX.Element;
+  // 加载失败 Element
+  brokenElement?: JSX.Element;
 }
 
 type PhotoSliderState = {
@@ -192,6 +196,8 @@ export default class PhotoSlider extends React.Component<
       maskClassName,
       viewClassName,
       imageClassName,
+      loadingElement,
+      brokenElement,
     } = this.props;
     const {
       translateX,
@@ -251,6 +257,8 @@ export default class PhotoSlider extends React.Component<
                       ? undefined
                       : 'transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)',
                   }}
+                  loadingElement={loadingElement}
+                  brokenElement={brokenElement}
                 />
               );
             })}

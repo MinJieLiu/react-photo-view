@@ -6,7 +6,7 @@ import PhotoContext, {
   removeItemType,
 } from './photo-context';
 
-export interface IPhotoViewItem {
+interface IPhotoViewItem {
   src: string;
   children?: React.ReactElement<any>;
   onShow: onShowType;
