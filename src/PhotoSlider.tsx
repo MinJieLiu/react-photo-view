@@ -41,9 +41,9 @@ type PhotoSliderState = {
   // 图片处于触摸的状态
   touched: boolean;
   // Reach 开始时 x 坐标
-  lastPageX: number | undefined;
+  lastClientX: number | undefined;
   // Reach 开始时 y 坐标
-  lastPageY: number | undefined;
+  lastClientY: number | undefined;
   // 背景透明度
   backdropOpacity: number;
   // 缩放度
@@ -77,8 +77,8 @@ export default class PhotoSlider extends React.Component<
       photoIndex: 0,
       touched: false,
 
-      lastPageX: undefined,
-      lastPageY: undefined,
+      lastClientX: undefined,
+      lastClientY: undefined,
       backdropOpacity: defaultOpacity,
       photoScale: 1,
     };
@@ -102,78 +102,78 @@ export default class PhotoSlider extends React.Component<
     this.setState(({ photoIndex }) => {
       return {
         translateX: -(innerWidth + horizontalOffset) * photoIndex,
-        lastPageX: undefined,
-        lastPageY: undefined,
+        lastClientX: undefined,
+        lastClientY: undefined,
       };
     });
   }
 
-  handleReachVerticalMove = (pageX, pageY) => {
-    this.setState(({ lastPageY, backdropOpacity }) => {
-      if (lastPageY === undefined) {
+  handleReachVerticalMove = (clientX, clientY) => {
+    this.setState(({ lastClientY, backdropOpacity }) => {
+      if (lastClientY === undefined) {
         return {
           touched: true,
-          lastPageY: pageY,
+          lastClientY: clientY,
           backdropOpacity,
           photoScale: 1,
         };
       }
-      const offsetPageY = Math.abs(pageY - lastPageY);
+      const offsetClientY = Math.abs(clientY - lastClientY);
       return {
         touched: true,
-        lastPageY,
+        lastClientY,
         backdropOpacity: Math.max(
-          Math.min(defaultOpacity, defaultOpacity - offsetPageY / 100 / 2),
+          Math.min(defaultOpacity, defaultOpacity - offsetClientY / 100 / 2),
           0,
         ),
-        photoScale: Math.max(Math.min(1, 1 - offsetPageY / 100 / 10), 0.6),
+        photoScale: Math.max(Math.min(1, 1 - offsetClientY / 100 / 10), 0.6),
       };
     });
   }
 
-  handleReachHorizontalMove = (pageX) => {
+  handleReachHorizontalMove = (clientX) => {
     const { innerWidth } = window;
-    this.setState(({ lastPageX, translateX, photoIndex }) => {
-      if (lastPageX === undefined) {
+    this.setState(({ lastClientX, translateX, photoIndex }) => {
+      if (lastClientX === undefined) {
         return {
           touched: true,
-          lastPageX: pageX,
+          lastClientX: clientX,
           translateX,
         };
       }
-      const offsetPageX = pageX - lastPageX;
+      const offsetClientX = clientX - lastClientX;
       return {
         touched: true,
-        lastPageX: lastPageX,
-        translateX: -(innerWidth + horizontalOffset) * photoIndex + offsetPageX,
+        lastClientX: lastClientX,
+        translateX: -(innerWidth + horizontalOffset) * photoIndex + offsetClientX,
       };
     });
   }
 
-  handleReachUp = (pageX, pageY) => {
+  handleReachUp = (clientX, clientY) => {
     const { innerWidth, innerHeight } = window;
     const { images, onIndexChange, onClose } = this.props;
-    const { lastPageX = pageX, lastPageY = pageY, photoIndex } = this.state;
+    const { lastClientX = clientX, lastClientY = clientY, photoIndex } = this.state;
 
-    const offsetPageX = pageX - lastPageX;
-    const offsetPageY = pageY - lastPageY;
+    const offsetClientX = clientX - lastClientX;
+    const offsetClientY = clientY - lastClientY;
     const singlePageWidth = innerWidth + horizontalOffset;
 
     // 当前偏移
     let currentTranslateX = -singlePageWidth * photoIndex;
     let currentPhotoIndex = photoIndex;
 
-    if (Math.abs(offsetPageY) > innerHeight * 0.14) {
+    if (Math.abs(offsetClientY) > innerHeight * 0.14) {
       onClose();
       // 下一张
-    } else if (offsetPageX < -maxMoveOffset && photoIndex < images.length - 1) {
+    } else if (offsetClientX < -maxMoveOffset && photoIndex < images.length - 1) {
       currentPhotoIndex = photoIndex + 1;
       currentTranslateX = -singlePageWidth * currentPhotoIndex;
       if (onIndexChange) {
         onIndexChange(currentPhotoIndex);
       }
       // 上一张
-    } else if (offsetPageX > maxMoveOffset && photoIndex > 0) {
+    } else if (offsetClientX > maxMoveOffset && photoIndex > 0) {
       currentPhotoIndex = photoIndex - 1;
       currentTranslateX = -singlePageWidth * currentPhotoIndex;
       if (onIndexChange) {
@@ -184,8 +184,8 @@ export default class PhotoSlider extends React.Component<
       touched: false,
       translateX: currentTranslateX,
       photoIndex: currentPhotoIndex,
-      lastPageX: undefined,
-      lastPageY: undefined,
+      lastClientX: undefined,
+      lastClientY: undefined,
       backdropOpacity: defaultOpacity,
       photoScale: 1,
     });

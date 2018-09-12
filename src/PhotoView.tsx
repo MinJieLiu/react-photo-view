@@ -17,7 +17,7 @@ import {
   scaleBuffer,
 } from './variables';
 
-type ReachFunction = (pageX: number, pageY: number) => void;
+type ReachFunction = (clientX: number, clientY: number) => void;
 
 interface IPhotoViewProps {
   // 图片地址
@@ -62,9 +62,9 @@ const initialState = {
   maskTouched: false,
 
   // 触摸开始时 x 原始坐标
-  pageX: 0,
+  clientX: 0,
   // 触摸开始时 y 原始坐标
-  pageY: 0,
+  clientY: 0,
 
   // 触摸开始时图片 x 偏移量
   lastX: 0,
@@ -117,11 +117,11 @@ export default class PhotoView extends React.Component<
     }
   }
 
-  handleStart = (pageX: number, pageY: number, touchLength: number = 0) => {
+  handleStart = (clientX: number, clientY: number, touchLength: number = 0) => {
     this.setState(prevState => ({
       touched: true,
-      pageX,
-      pageY,
+      clientX,
+      clientY,
       lastX: prevState.x,
       lastY: prevState.y,
       lastTouchLength: touchLength,
@@ -129,15 +129,15 @@ export default class PhotoView extends React.Component<
     }));
   }
 
-  handleMove = (newPageX: number, newPageY: number, touchLength: number = 0) => {
+  handleMove = (newClientX: number, newClientY: number, touchLength: number = 0) => {
     const { touched, maskTouched } = this.state;
     if (touched || maskTouched) {
       const { width, naturalWidth } = this.photoRef.state;
       const {
         x,
         y,
-        pageX,
-        pageY,
+        clientX,
+        clientY,
         lastX,
         lastY,
         scale,
@@ -149,15 +149,15 @@ export default class PhotoView extends React.Component<
       // 边缘状态
       let currentReachState = 0;
       if (touchLength === 0) {
-        currentX = newPageX - pageX + lastX;
-        currentY = newPageY - pageY + lastY;
+        currentX = newClientX - clientX + lastX;
+        currentY = newClientY - clientY + lastY;
         // 边缘触发检测
         currentReachState = this.handleReachCallback(
           currentX,
           currentY,
           scale,
-          newPageX,
-          newPageY,
+          newClientX,
+          newClientY,
           reachState,
         );
       }
@@ -183,8 +183,8 @@ export default class PhotoView extends React.Component<
           ...getPositionOnMoveOrScale({
             x: currentX,
             y: currentY,
-            pageX: newPageX,
-            pageY: newPageY,
+            clientX: newClientX,
+            clientY: newClientY,
             fromScale: scale,
             toScale,
           }),
@@ -195,17 +195,17 @@ export default class PhotoView extends React.Component<
 
   handleDoubleClick = (e) => {
     e.preventDefault();
-    const { pageX, pageY } = e;
+    const { clientX, clientY } = e;
     const { width, naturalWidth } = this.photoRef.state;
     this.setState(({ x, y, scale }) => {
       return {
-        pageX,
-        pageY,
+        clientX,
+        clientY,
         ...getPositionOnMoveOrScale({
           x,
           y,
-          pageX,
-          pageY,
+          clientX,
+          clientY,
           fromScale: scale,
           // 若图片足够大，则放大适应的倍数
           toScale: scale !== 1 ? 1 : Math.max(2, naturalWidth / width),
@@ -217,7 +217,7 @@ export default class PhotoView extends React.Component<
 
   handleWheel = (e) => {
     e.preventDefault();
-    const { pageX, pageY, deltaY } = e;
+    const { clientX, clientY, deltaY } = e;
     const { width, naturalWidth } = this.photoRef.state;
     this.setState(({ x, y, scale }) => {
       const endScale = scale - deltaY / 100 / 2;
@@ -230,13 +230,13 @@ export default class PhotoView extends React.Component<
         minScale,
       );
       return {
-        pageX,
-        pageY,
+        clientX,
+        clientY,
         ...getPositionOnMoveOrScale({
           x,
           y,
-          pageX,
-          pageY,
+          clientX,
+          clientY,
           fromScale: scale,
           toScale,
         }),
@@ -245,11 +245,11 @@ export default class PhotoView extends React.Component<
     });
   }
 
-  handleMaskStart = (pageX: number, pageY: number) => {
+  handleMaskStart = (clientX: number, clientY: number) => {
     this.setState(prevState => ({
       maskTouched: true,
-      pageX,
-      pageY,
+      clientX,
+      clientY,
       lastX: prevState.x,
       lastY: prevState.y,
       touchedTime: Date.now(),
@@ -257,46 +257,46 @@ export default class PhotoView extends React.Component<
   }
 
   handleMaskMouseDown = (e) => {
-    this.handleMaskStart(e.pageX, e.pageY);
+    this.handleMaskStart(e.clientX, e.clientY);
   }
 
   handleMaskTouchStart = (e) => {
-    const { pageX, pageY } = e.touches[0];
-    this.handleMaskStart(pageX, pageY);
+    const { clientX, clientY } = e.touches[0];
+    this.handleMaskStart(clientX, clientY);
   }
 
   handleTouchStart = e => {
     if (e.touches.length >= 2) {
-      const { pageX, pageY, touchLength } = getMultipleTouchPosition(e);
-      this.handleStart(pageX, pageY, touchLength);
+      const { clientX, clientY, touchLength } = getMultipleTouchPosition(e);
+      this.handleStart(clientX, clientY, touchLength);
     } else {
-      const { pageX, pageY } = e.touches[0];
-      this.handleStart(pageX, pageY);
+      const { clientX, clientY } = e.touches[0];
+      this.handleStart(clientX, clientY);
     }
   }
 
   handleMouseDown = e => {
     e.preventDefault();
-    this.handleStart(e.pageX, e.pageY);
+    this.handleStart(e.clientX, e.clientY);
   }
 
   handleTouchMove = e => {
     e.preventDefault();
     if (e.touches.length >= 2) {
-      const { pageX, pageY, touchLength } = getMultipleTouchPosition(e);
-      this.handleMove(pageX, pageY, touchLength);
+      const { clientX, clientY, touchLength } = getMultipleTouchPosition(e);
+      this.handleMove(clientX, clientY, touchLength);
     } else {
-      const { pageX, pageY } = e.touches[0];
-      this.handleMove(pageX, pageY);
+      const { clientX, clientY } = e.touches[0];
+      this.handleMove(clientX, clientY);
     }
   }
 
   handleMouseMove = e => {
     e.preventDefault();
-    this.handleMove(e.pageX, e.pageY);
+    this.handleMove(e.clientX, e.clientY);
   }
 
-  handleUp = (newPageX: number, newPageY: number) => {
+  handleUp = (newClientX: number, newClientY: number) => {
     const { touched, maskTouched } = this.state;
     if (touched || maskTouched) {
       const { onReachUp } = this.props;
@@ -308,13 +308,13 @@ export default class PhotoView extends React.Component<
         lastY,
         scale,
         touchedTime,
-        pageX,
-        pageY,
+        clientX,
+        clientY,
       }) => {
         if (onReachUp) {
-          onReachUp(newPageX, newPageY);
+          onReachUp(newClientX, newClientY);
         }
-        const hasMove = pageX !== newPageX || pageY !== newPageY;
+        const hasMove = clientX !== newClientX || clientY !== newClientY;
         // 缩放弹性效果
         const toScale = Math.max(
           Math.min(
@@ -349,13 +349,13 @@ export default class PhotoView extends React.Component<
   }
 
   handleTouchEnd = (e) => {
-    const { pageX, pageY } = e.changedTouches[0];
-    this.handleUp(pageX, pageY);
+    const { clientX, clientY } = e.changedTouches[0];
+    this.handleUp(clientX, clientY);
   }
 
   handleMouseUp = (e) => {
-    const { pageX, pageY } = e;
-    this.handleUp(pageX, pageY);
+    const { clientX, clientY } = e;
+    this.handleUp(clientX, clientY);
   }
 
   handleResize = () => {
@@ -370,8 +370,8 @@ export default class PhotoView extends React.Component<
     x: number,
     y: number,
     scale: number,
-    newPageX: number,
-    newPageY: number,
+    newClientX: number,
+    newClientY: number,
     reachState: number,
   ): number => {
     const { width, height } = this.photoRef.state;
@@ -392,7 +392,7 @@ export default class PhotoView extends React.Component<
       && reachState === 0
       || reachState === 1)
     ) {
-      onReachLeftMove(newPageX, newPageY);
+      onReachLeftMove(newClientX, newClientY);
       return 1;
     } else if (
       onReachRightMove
@@ -401,7 +401,7 @@ export default class PhotoView extends React.Component<
       && reachState === 0
       || reachState === 1)
     ) {
-      onReachRightMove(newPageX, newPageY);
+      onReachRightMove(newClientX, newClientY);
       return 1;
     } else if (
       onReachTopMove
@@ -410,7 +410,7 @@ export default class PhotoView extends React.Component<
       && reachState === 0
       || reachState === 2)
     ) {
-      onReachTopMove(newPageX, newPageY);
+      onReachTopMove(newClientX, newClientY);
       return 2;
     } else if (
       onReachBottomMove
@@ -419,7 +419,7 @@ export default class PhotoView extends React.Component<
       && reachState === 0
       || reachState === 2)
     ) {
-      onReachBottomMove(newPageX, newPageY);
+      onReachBottomMove(newClientX, newClientY);
       return 2;
     }
     return 0;

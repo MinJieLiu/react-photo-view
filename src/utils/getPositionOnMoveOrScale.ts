@@ -4,15 +4,15 @@
 const getPositionOnMoveOrScale = ({
   x,
   y,
-  pageX,
-  pageY,
+  clientX,
+  clientY,
   fromScale,
   toScale,
 }: {
   x: number;
   y: number;
-  pageX: number;
-  pageY: number;
+  clientX: number;
+  clientY: number;
   fromScale: number;
   toScale: number;
 }): {
@@ -21,17 +21,17 @@ const getPositionOnMoveOrScale = ({
   scale: number;
 } => {
   const { innerWidth, innerHeight } = window;
-  const centerPageX = innerWidth / 2;
-  const centerPageY = innerHeight / 2;
+  const centerClientX = innerWidth / 2;
+  const centerClientY = innerHeight / 2;
   // 坐标偏移
-  const lastPositionX = centerPageX + x;
-  const lastPositionY = centerPageY + y;
+  const lastPositionX = centerClientX + x;
+  const lastPositionY = centerClientY + y;
 
   // 放大偏移量
   const offsetScale = toScale / fromScale;
   // 偏移位置
-  const originX = pageX - (pageX - lastPositionX) * offsetScale - centerPageX;
-  const originY = pageY - (pageY - lastPositionY) * offsetScale - centerPageY;
+  const originX = clientX - (clientX - lastPositionX) * offsetScale - centerClientX;
+  const originY = clientY - (clientY - lastPositionY) * offsetScale - centerClientY;
   return {
     x: originX,
     y: originY,

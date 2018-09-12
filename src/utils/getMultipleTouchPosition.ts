@@ -6,17 +6,17 @@ import React from 'react';
 const getMultipleTouchPosition = (
   evt: React.TouchEvent,
 ): {
-  pageX: number;
-  pageY: number;
+  clientX: number;
+  clientY: number;
   touchLength: number;
 } => {
-  const { pageX, pageY } = evt.touches[0];
-  const { pageX: nextPageX, pageY: nextPageY } = evt.touches[1];
+  const { clientX, clientY } = evt.touches[0];
+  const { clientX: nextClientX, clientY: nextClientY } = evt.touches[1];
   return {
-    pageX: (pageX + nextPageX) / 2,
-    pageY: (pageY + nextPageY) / 2,
+    clientX: (clientX + nextClientX) / 2,
+    clientY: (clientY + nextClientY) / 2,
     touchLength: Math.sqrt(
-      Math.pow(nextPageX - pageX, 2) + Math.pow(nextPageY - pageY, 2),
+      Math.pow(nextClientX - clientX, 2) + Math.pow(nextClientY - clientY, 2),
     ),
   };
 };
