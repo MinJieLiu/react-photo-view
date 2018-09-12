@@ -1,6 +1,6 @@
 {
   "name": "react-photo-view",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "React photo preview.",
   "main": "./lib/index",
   "module": "./es/index",
@@ -30,8 +30,10 @@
     "port": 8001
   },
   "files": [
-    "lib"
+    "lib",
+    "es"
   ],
+  "typings": "./lib/index.d.ts",
   "author": "LMY",
   "license": "MIT",
   "devDependencies": {
