@@ -56,7 +56,9 @@ export default class SlideWrap extends React.Component<{
     const { className, children } = this.props;
 
     return createPortal(
-      <Container className={className}>{children}</Container>,
+      <Container className={className}>
+        {children}
+      </Container>,
       this.dialogNode,
     );
   }

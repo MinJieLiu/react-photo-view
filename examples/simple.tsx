@@ -30,7 +30,7 @@ const SmallImage = styled.img`
 
 class Example extends React.Component {
   state = {
-    photoImages: ['1.png', '2.jpg', '3.jpg', '4.jpg', '5.jpg', '6.jpg'],
+    photoImages: ['1.png', '2.jpg', '3.jpg', '4.jpg', '5.jpg'],
   };
 
   render() {

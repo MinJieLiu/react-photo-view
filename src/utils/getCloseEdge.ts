@@ -1,3 +1,5 @@
+import { CloseEdgeEnum } from '../types';
+
 /**
  * 接触左边或右边边缘
  * @param x
@@ -9,19 +11,19 @@ export const getClosedHorizontal = (
   x: number,
   scale: number,
   width: number,
-): number => {
+): CloseEdgeEnum => {
   const { innerWidth } = window;
   const currentWidth = width * scale;
   // 图片超出的宽度
   const outOffsetX = (currentWidth - innerWidth) / 2;
   if (currentWidth <= innerWidth) {
-    return 1;
+    return CloseEdgeEnum.Small;
   } else if (x > 0 && outOffsetX - x <= 0) {
-    return 2;
+    return CloseEdgeEnum.Before;
   } else if (x < 0 && outOffsetX + x <= 0) {
-    return 3;
+    return CloseEdgeEnum.After;
   }
-  return 0;
+  return CloseEdgeEnum.Normal;
 };
 
 /**
@@ -35,18 +37,18 @@ export const getClosedVertical = (
   y: number,
   scale: number,
   height: number,
-): number => {
+): CloseEdgeEnum => {
   const { innerHeight } = window;
   const currentHeight = height * scale;
   // 图片超出的高度
   const outOffsetY = (currentHeight - innerHeight) / 2;
 
   if (currentHeight <= innerHeight) {
-    return 1;
+    return CloseEdgeEnum.Small;
   } else if (y > 0 && outOffsetY - y <= 0) {
-    return 2;
+    return CloseEdgeEnum.Before;
   } else if (y < 0 && outOffsetY + y <= 0) {
-    return 3;
+    return CloseEdgeEnum.After;
   }
-  return 0;
+  return CloseEdgeEnum.Normal;
 };

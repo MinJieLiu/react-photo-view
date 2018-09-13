@@ -1,5 +1,6 @@
 import slideToPosition from './slideToPosition';
 import { getClosedHorizontal, getClosedVertical } from './getCloseEdge';
+import { CloseEdgeEnum } from '../types';
 
 /**
  * 适应到合适的图片偏移量
@@ -47,19 +48,19 @@ const slideToSuitableOffset = ({
   const verticalType = getClosedVertical(endY, scale, height);
 
   // x
-  if (horizontalType === 1) {
+  if (horizontalType === CloseEdgeEnum.Small) {
     currentX = 0;
-  } else if (horizontalType === 2) {
+  } else if (horizontalType === CloseEdgeEnum.Before) {
     currentX = outOffsetX;
-  } else if (horizontalType === 3) {
+  } else if (horizontalType === CloseEdgeEnum.After) {
     currentX = -outOffsetX;
   }
   // y
-  if (verticalType === 1) {
+  if (verticalType === CloseEdgeEnum.Small) {
     currentY = 0;
-  } else if (verticalType === 2) {
+  } else if (verticalType === CloseEdgeEnum.Before) {
     currentY = outOffsetY;
-  } else if (verticalType === 3) {
+  } else if (verticalType === CloseEdgeEnum.After) {
     currentY = -outOffsetY;
   }
 

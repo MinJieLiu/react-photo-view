@@ -1,6 +1,6 @@
 {
   "name": "react-photo-view",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "React photo preview.",
   "main": "./lib/index",
   "module": "./es/index",
@@ -10,6 +10,11 @@
     "react-photo-view",
     "photo"
   ],
+  "homepage": "https://github.com/MinJieLiu/react-photo-view",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MinJieLiu/react-photo-view.git"
+  },
   "scripts": {
     "watch-tsc": "rc-tools run watch-tsc",
     "dist": "rc-tools run dist",

@@ -2,8 +2,9 @@ import React from 'react';
 import PhotoView from './PhotoView';
 import SlideWrap from './components/SlideWrap';
 import Backdrop from './components/Backdrop';
-import { dataType } from './types';
-import { maxMoveOffset, defaultOpacity, horizontalOffset } from './variables';
+import { Close, Counter, TopBar } from './components/TopWrap';
+import { dataType, TouchTypeEnum } from './types';
+import { defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
 
 interface IPhotoSliderProps {
   // 图片列表
@@ -13,9 +14,11 @@ interface IPhotoSliderProps {
   // 可见
   visible: boolean;
   // 关闭事件
-  onClose: Function;
+  onClose: (evt?: React.MouseEvent) => void;
   // 索引改变回调
   onIndexChange?: Function;
+  // 背景可点击关闭，默认 true
+  maskClosable?: boolean;
   // 自定义容器
   overlay?: React.ReactNode;
   // className
@@ -150,9 +153,9 @@ export default class PhotoSlider extends React.Component<
     });
   }
 
-  handleReachUp = (clientX, clientY) => {
+  handleReachUp = (clientX: number, clientY: number, touchType: TouchTypeEnum) => {
     const { innerWidth, innerHeight } = window;
-    const { images, onIndexChange, onClose } = this.props;
+    const { images, onIndexChange, onClose, maskClosable = true } = this.props;
     const { lastClientX = clientX, lastClientY = clientY, photoIndex } = this.state;
 
     const offsetClientX = clientX - lastClientX;
@@ -163,7 +166,14 @@ export default class PhotoSlider extends React.Component<
     let currentTranslateX = -singlePageWidth * photoIndex;
     let currentPhotoIndex = photoIndex;
 
-    if (Math.abs(offsetClientY) > innerHeight * 0.14) {
+    // mask 点击事件
+    if (lastClientX === clientX
+      && lastClientY === clientY
+      && maskClosable
+      && touchType === TouchTypeEnum.Mask
+    ) {
+      onClose();
+    } else if (Math.abs(offsetClientY) > innerHeight * 0.14) {
       onClose();
       // 下一张
     } else if (offsetClientX < -maxMoveOffset && photoIndex < images.length - 1) {
@@ -200,6 +210,7 @@ export default class PhotoSlider extends React.Component<
       maskClassName,
       viewClassName,
       imageClassName,
+      onClose,
       loadingElement,
       brokenElement,
     } = this.props;
@@ -222,6 +233,10 @@ export default class PhotoSlider extends React.Component<
             className={maskClassName}
             style={{ background: `rgba(0, 0, 0, ${backdropOpacity})` }}
           />
+          <TopBar>
+            <Counter>{photoIndex + 1} / {imageLength}</Counter>
+            <Close onClick={onClose} />
+          </TopBar>
           {images
             .slice( // 加载相邻三张
               Math.max(photoIndex - 1, 0),

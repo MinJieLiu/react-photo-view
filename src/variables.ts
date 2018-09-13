@@ -21,7 +21,7 @@ export const minReachOffset: number = 20;
 /**
  * 默认背景透明度
  */
-export const defaultOpacity: number = 0.8;
+export const defaultOpacity: number = 1;
 
 /**
  * 最小缩放度

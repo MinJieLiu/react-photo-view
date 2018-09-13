@@ -8,14 +8,8 @@ import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import slideToSuitableOffset from './utils/slideToSuitableOffset';
 import { getClosedHorizontal, getClosedVertical } from './utils/getCloseEdge';
-import {
-  minReachOffset,
-  minScale,
-  maxScale,
-  scaleBuffer,
-} from './variables';
-
-type ReachFunction = (clientX: number, clientY: number) => void;
+import { maxScale, minReachOffset, minScale, scaleBuffer } from './variables';
+import { ReachFunction, ReachTypeEnum, TouchTypeEnum } from './types';
 
 interface IPhotoViewProps {
   // 图片地址
@@ -42,7 +36,7 @@ interface IPhotoViewProps {
   // 到达左部滑动事件
   onReachLeftMove?: ReachFunction;
   // 触摸解除事件
-  onReachUp?: ReachFunction;
+  onReachUp?: (clientX: number, clientY: number, TouchTypeEnum) => void;
 
   onPhotoResize?: () => void;
 }
@@ -74,8 +68,8 @@ const initialState = {
   // 多指触控间距
   lastTouchLength: 0,
 
-  // 当前边缘触发状态，0: 未触发，1: x 轴，2: y 轴
-  reachState: 0,
+  // 当前边缘触发状态
+  reachState: ReachTypeEnum.Normal,
 };
 
 export default class PhotoView extends React.Component<
@@ -143,7 +137,7 @@ export default class PhotoView extends React.Component<
       let currentX = x;
       let currentY = y;
       // 边缘状态
-      let currentReachState = 0;
+      let currentReachState = ReachTypeEnum.Normal;
       if (touchLength === 0) {
         currentX = newClientX - clientX + lastX;
         currentY = newClientY - clientY + lastY;
@@ -158,9 +152,9 @@ export default class PhotoView extends React.Component<
         );
       }
       // 横向边缘触发、背景触发禁用当前滑动
-      if (currentReachState === 1 || maskTouched) {
+      if (currentReachState === ReachTypeEnum.XReach || maskTouched) {
         this.setState({
-          reachState: 1,
+          reachState: ReachTypeEnum.XReach,
         });
       } else {
         // 目标倍数
@@ -306,7 +300,13 @@ export default class PhotoView extends React.Component<
         clientY,
       }) => {
         if (onReachUp) {
-          onReachUp(newClientX, newClientY);
+          onReachUp(
+            newClientX,
+            newClientY,
+            maskTouched
+              ? TouchTypeEnum.Mask
+              : TouchTypeEnum.Image,
+          );
         }
         const hasMove = clientX !== newClientX || clientY !== newClientY;
         // 缩放弹性效果
@@ -321,7 +321,7 @@ export default class PhotoView extends React.Component<
           touched: false,
           maskTouched: false,
           scale: toScale,
-          reachState: 0, // 重置触发状态
+          reachState: ReachTypeEnum.Normal, // 重置触发状态
           ...hasMove
             ? slideToSuitableOffset({
               x,
@@ -365,7 +365,7 @@ export default class PhotoView extends React.Component<
     scale: number,
     newClientX: number,
     newClientY: number,
-    reachState: number,
+    reachState: ReachTypeEnum,
   ): number => {
     const { width, height } = this.photoRef.state;
 
@@ -382,40 +382,40 @@ export default class PhotoView extends React.Component<
       onReachLeftMove
       && (horizontalType
       && x > minReachOffset
-      && reachState === 0
-      || reachState === 1)
+      && reachState === ReachTypeEnum.Normal
+      || reachState === ReachTypeEnum.XReach)
     ) {
       onReachLeftMove(newClientX, newClientY);
-      return 1;
+      return ReachTypeEnum.XReach;
     } else if (
       onReachRightMove
       && (horizontalType
       && x < -minReachOffset
-      && reachState === 0
-      || reachState === 1)
+      && reachState === ReachTypeEnum.Normal
+      || reachState === ReachTypeEnum.XReach)
     ) {
       onReachRightMove(newClientX, newClientY);
-      return 1;
+      return ReachTypeEnum.XReach;
     } else if (
       onReachTopMove
       && (verticalType
       && y > minReachOffset
-      && reachState === 0
-      || reachState === 2)
+      && reachState === ReachTypeEnum.Normal
+      || reachState === ReachTypeEnum.YReach)
     ) {
       onReachTopMove(newClientX, newClientY);
-      return 2;
+      return ReachTypeEnum.YReach;
     } else if (
       onReachBottomMove
       && (verticalType
       && y < -minReachOffset
-      && reachState === 0
-      || reachState === 2)
+      && reachState === ReachTypeEnum.Normal
+      || reachState === ReachTypeEnum.YReach)
     ) {
       onReachBottomMove(newClientX, newClientY);
-      return 2;
+      return ReachTypeEnum.YReach;
     }
-    return 0;
+    return ReachTypeEnum.Normal;
   }
 
   handlePhotoRef = (ref) => {
