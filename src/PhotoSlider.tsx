@@ -51,6 +51,8 @@ type PhotoSliderState = {
   backdropOpacity: number;
   // 缩放度
   photoScale: number;
+  // 覆盖物可见度
+  overlayVisible: boolean;
 };
 
 export default class PhotoSlider extends React.Component<
@@ -84,6 +86,7 @@ export default class PhotoSlider extends React.Component<
       lastClientY: undefined,
       backdropOpacity: defaultOpacity,
       photoScale: 1,
+      overlayVisible: true,
     };
   }
 
@@ -98,6 +101,12 @@ export default class PhotoSlider extends React.Component<
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleResize);
+  }
+
+  handlePhotoClick = () => {
+    this.setState(prevState => ({
+      overlayVisible: !prevState.overlayVisible,
+    }));
   }
 
   handleResize = () => {
@@ -156,7 +165,12 @@ export default class PhotoSlider extends React.Component<
   handleReachUp = (clientX: number, clientY: number, touchType: TouchTypeEnum) => {
     const { innerWidth, innerHeight } = window;
     const { images, onIndexChange, onClose, maskClosable = true } = this.props;
-    const { lastClientX = clientX, lastClientY = clientY, photoIndex } = this.state;
+    const {
+      lastClientX = clientX,
+      lastClientY = clientY,
+      photoIndex,
+      overlayVisible,
+    } = this.state;
 
     const offsetClientX = clientX - lastClientX;
     const offsetClientY = clientY - lastClientY;
@@ -165,6 +179,7 @@ export default class PhotoSlider extends React.Component<
     // 当前偏移
     let currentTranslateX = -singlePageWidth * photoIndex;
     let currentPhotoIndex = photoIndex;
+    let isChangeVisible = false;
 
     // mask 点击事件
     if (lastClientX === clientX
@@ -172,8 +187,10 @@ export default class PhotoSlider extends React.Component<
       && maskClosable
       && touchType === TouchTypeEnum.Mask
     ) {
+      isChangeVisible = true;
       onClose();
     } else if (Math.abs(offsetClientY) > innerHeight * 0.14) {
+      isChangeVisible = true;
       onClose();
       // 下一张
     } else if (offsetClientX < -maxMoveOffset && photoIndex < images.length - 1) {
@@ -198,6 +215,7 @@ export default class PhotoSlider extends React.Component<
       lastClientY: undefined,
       backdropOpacity: defaultOpacity,
       photoScale: 1,
+      overlayVisible: isChangeVisible ? true : overlayVisible,
     });
   }
 
@@ -220,6 +238,7 @@ export default class PhotoSlider extends React.Component<
       photoIndex,
       backdropOpacity,
       photoScale,
+      overlayVisible,
     } = this.state;
     const imageLength = images.length;
     const transform = `translate3d(${translateX}px, 0px, 0)`;
@@ -233,7 +252,7 @@ export default class PhotoSlider extends React.Component<
             className={maskClassName}
             style={{ background: `rgba(0, 0, 0, ${backdropOpacity})` }}
           />
-          <TopBar>
+          <TopBar style={{ opacity: +overlayVisible }}>
             <Counter>{photoIndex + 1} / {imageLength}</Counter>
             <Close onClick={onClose} />
           </TopBar>
@@ -267,6 +286,7 @@ export default class PhotoSlider extends React.Component<
                     realIndex > 0 ? this.handleReachHorizontalMove : undefined
                   }
                   onReachUp={this.handleReachUp}
+                  onPhotoClick={this.handlePhotoClick}
                   photoScale={photoIndex === realIndex ? photoScale : 1}
                   wrapClassName={viewClassName}
                   className={imageClassName}

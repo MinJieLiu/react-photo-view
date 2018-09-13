@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import throttle from 'lodash.throttle';
+import throttle from './utils/throttle';
 import Spinner from './components/Spinner';
 import getSuitableImageSize from './utils/getSuitableImageSize';
 

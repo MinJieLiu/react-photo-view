@@ -12,7 +12,7 @@ export const TopBar = styled.div`
   height: 44px;
   color: white;
   background-color: rgba(0, 0, 0, 0.5);
-  transition: opacity 0.4s linear;
+  transition: opacity 0.2s ease-out;
   will-change: opacity;
   z-index: 20;
 `;
@@ -42,6 +42,7 @@ function CloseSVG(props) {
 }
 
 export const Close = styled(CloseSVG)<React.HTMLAttributes<any>>`
+  box-sizing: border-box;
   padding: 10px;
   opacity: 0.75;
   cursor: pointer;

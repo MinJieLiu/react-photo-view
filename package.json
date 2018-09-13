@@ -1,6 +1,6 @@
 {
   "name": "react-photo-view",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "React photo preview.",
   "main": "./lib/index",
   "module": "./es/index",
@@ -52,7 +52,7 @@
     "react-dom": "^16.4.1"
   },
   "dependencies": {
-    "lodash.throttle": "^4.1.1",
+    "lodash.debounce": "^4.0.8",
     "lodash.uniqueid": "^4.0.1",
     "styled-components": "^3.0.1"
   }

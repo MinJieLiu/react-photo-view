@@ -1,8 +1,9 @@
 import React from 'react';
-import throttle from 'lodash.throttle';
+import debounce from 'lodash.debounce';
 import Photo from './Photo';
 import PhotoWrap from './components/PhotoWrap';
 import PhotoMask from './components/PhotoMask';
+import throttle from './utils/throttle';
 import isMobile from './utils/isMobile';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
@@ -27,6 +28,8 @@ interface IPhotoViewProps {
   // 加载失败 Element
   brokenElement?: JSX.Element;
 
+  // Photo 点击事件
+  onPhotoClick?: (clientX: number, clientY: number) => void;
   // 到达顶部滑动事件
   onReachTopMove?: ReachFunction;
   // 到达右部滑动事件
@@ -81,9 +84,11 @@ export default class PhotoView extends React.Component<
   readonly state = initialState;
 
   private photoRef;
+  private readonly onPhotoClick;
 
   constructor(props) {
     super(props);
+    this.onPhotoClick = debounce(this.debouncePhotoClick, 400);
     this.handleMove = throttle(this.handleMove, 8);
   }
 
@@ -183,8 +188,22 @@ export default class PhotoView extends React.Component<
     }
   }
 
+  debouncePhotoClick = (newClientX: number, newClientY: number) => {
+    const { onPhotoClick } = this.props;
+    const { clientX, clientY } = this.state;
+    if (onPhotoClick && clientX === newClientX && clientY === newClientY) {
+      onPhotoClick(newClientX, newClientY);
+    }
+  }
+
+  handlePhotoClick = (e) => {
+    this.onPhotoClick(e.clientX, e.clientY);
+  }
+
   handleDoubleClick = (e) => {
     e.preventDefault();
+    // 取消 click 事件
+    this.onPhotoClick.cancel();
     const { clientX, clientY } = e;
     const { width, naturalWidth } = this.photoRef.state;
     this.setState(({ x, y, scale }) => {
@@ -446,6 +465,7 @@ export default class PhotoView extends React.Component<
           className={className}
           src={src}
           ref={this.handlePhotoRef}
+          onClick={this.handlePhotoClick}
           onDoubleClick={this.handleDoubleClick}
           onMouseDown={isMobile ? undefined : this.handleMouseDown}
           onTouchStart={isMobile ? this.handleTouchStart : undefined}
