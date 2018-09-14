@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 const FooterWrap = styled.div`
+  box-sizing: border-box;
   position: absolute;
   left: 0;
   bottom: 0;
