@@ -8,6 +8,8 @@ export type dataType = {
 
 export type ReachFunction = (clientX: number, clientY: number) => void;
 
+export type PhotoClickFunction = (clientX: number, clientY: number) => void;
+
 /**
  * 边缘超出状态
  */
@@ -25,12 +27,4 @@ export enum ReachTypeEnum {
   Normal, // 未触发
   XReach, // x 轴
   YReach, // y 轴
-}
-
-/**
- * 触摸类型
- */
-export enum TouchTypeEnum {
-  Image = 1, // 图片
-  Mask, // 背景
 }

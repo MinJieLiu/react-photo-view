@@ -5,12 +5,17 @@ import PhotoWrap from './components/PhotoWrap';
 import PhotoMask from './components/PhotoMask';
 import throttle from './utils/throttle';
 import isMobile from './utils/isMobile';
+import getCurrentFromEvent from './utils/getCurrentFromEvent';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import slideToSuitableOffset from './utils/slideToSuitableOffset';
 import { getClosedHorizontal, getClosedVertical } from './utils/getCloseEdge';
 import { maxScale, minReachOffset, minScale, scaleBuffer } from './variables';
-import { ReachFunction, ReachTypeEnum, TouchTypeEnum } from './types';
+import {
+  ReachFunction,
+  PhotoClickFunction,
+  ReachTypeEnum,
+} from './types';
 
 interface IPhotoViewProps {
   // 图片地址
@@ -29,7 +34,9 @@ interface IPhotoViewProps {
   brokenElement?: JSX.Element;
 
   // Photo 点击事件
-  onPhotoClick?: (clientX: number, clientY: number) => void;
+  onPhotoClick?: PhotoClickFunction;
+  // Mask 点击事件
+  onMaskClick?: PhotoClickFunction;
   // 到达顶部滑动事件
   onReachTopMove?: ReachFunction;
   // 到达右部滑动事件
@@ -39,7 +46,7 @@ interface IPhotoViewProps {
   // 到达左部滑动事件
   onReachLeftMove?: ReachFunction;
   // 触摸解除事件
-  onReachUp?: (clientX: number, clientY: number, TouchTypeEnum) => void;
+  onReachUp?: (clientX: number, clientY: number) => void;
 
   onPhotoResize?: () => void;
 }
@@ -84,11 +91,10 @@ export default class PhotoView extends React.Component<
   readonly state = initialState;
 
   private photoRef;
-  private readonly onPhotoClick;
 
   constructor(props) {
     super(props);
-    this.onPhotoClick = debounce(this.debouncePhotoClick, 400);
+    this.photoClick = debounce(this.photoClick, 300);
     this.handleMove = throttle(this.handleMove, 8);
   }
 
@@ -188,22 +194,26 @@ export default class PhotoView extends React.Component<
     }
   }
 
-  debouncePhotoClick = (newClientX: number, newClientY: number) => {
+  photoClick = (newClientX: number, newClientY: number) => {
     const { onPhotoClick } = this.props;
     const { clientX, clientY } = this.state;
-    if (onPhotoClick && clientX === newClientX && clientY === newClientY) {
+    if (onPhotoClick
+      && Math.abs(clientX - newClientX) < 5
+      && Math.abs(clientY - newClientY) < 5
+    ) {
       onPhotoClick(newClientX, newClientY);
     }
   }
 
   handlePhotoClick = (e) => {
-    this.onPhotoClick(e.clientX, e.clientY);
+    const { clientX, clientY } = getCurrentFromEvent(e);
+    this.photoClick(clientX, clientY);
   }
 
   handleDoubleClick = (e) => {
     e.preventDefault();
-    // 取消 click 事件
-    this.onPhotoClick.cancel();
+    // @ts-ignore 取消 click 事件
+    this.photoClick.cancel();
     const { clientX, clientY } = e;
     const { width, naturalWidth } = this.photoRef.state;
     this.setState(({ x, y, scale }) => {
@@ -259,7 +269,6 @@ export default class PhotoView extends React.Component<
       clientY,
       lastX: prevState.x,
       lastY: prevState.y,
-      touchedTime: Date.now(),
     }));
   }
 
@@ -270,6 +279,19 @@ export default class PhotoView extends React.Component<
   handleMaskTouchStart = (e) => {
     const { clientX, clientY } = e.touches[0];
     this.handleMaskStart(clientX, clientY);
+  }
+
+  handleMaskClick = (e) => {
+    const evt = getCurrentFromEvent(e);
+    const { onMaskClick } = this.props;
+    const { clientX, clientY } = this.state;
+    if (
+      onMaskClick
+      && Math.abs(clientX - evt.clientX) < 5
+      && Math.abs(clientY - evt.clientY) < 5
+    ) {
+      onMaskClick(clientX, clientY);
+    }
   }
 
   handleTouchStart = e => {
@@ -319,21 +341,12 @@ export default class PhotoView extends React.Component<
         clientY,
       }) => {
         if (onReachUp) {
-          onReachUp(
-            newClientX,
-            newClientY,
-            maskTouched
-              ? TouchTypeEnum.Mask
-              : TouchTypeEnum.Image,
-          );
+          onReachUp(newClientX, newClientY);
         }
         const hasMove = clientX !== newClientX || clientY !== newClientY;
         // 缩放弹性效果
         const toScale = Math.max(
-          Math.min(
-            scale,
-            Math.max(maxScale, naturalWidth / width),
-          ),
+          Math.min(scale, Math.max(maxScale, naturalWidth / width)),
           minScale,
         );
         return {
@@ -460,6 +473,7 @@ export default class PhotoView extends React.Component<
         <PhotoMask
           onMouseDown={isMobile ? undefined : this.handleMaskMouseDown}
           onTouchStart={isMobile ? this.handleMaskTouchStart : undefined}
+          onClick={this.handleMaskClick}
         />
         <Photo
           className={className}

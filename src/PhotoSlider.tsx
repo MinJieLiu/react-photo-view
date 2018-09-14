@@ -3,7 +3,7 @@ import PhotoView from './PhotoView';
 import SlideWrap from './components/SlideWrap';
 import Backdrop from './components/Backdrop';
 import { Close, Counter, TopBar } from './components/TopWrap';
-import { dataType, TouchTypeEnum } from './types';
+import { dataType } from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
 
 interface IPhotoSliderProps {
@@ -61,6 +61,10 @@ export default class PhotoSlider extends React.Component<
 > {
   static displayName = 'PhotoSlider';
 
+  static defaultProps = {
+    maskClosable: true,
+  };
+
   static getDerivedStateFromProps(nextProps, prevState) {
     if (
       nextProps.index !== undefined &&
@@ -107,6 +111,16 @@ export default class PhotoSlider extends React.Component<
     this.setState(prevState => ({
       overlayVisible: !prevState.overlayVisible,
     }));
+  }
+
+  handlePhotoMaskClick = () => {
+    const { maskClosable, onClose } = this.props;
+    if (maskClosable) {
+      onClose();
+      this.setState({
+        overlayVisible: true,
+      });
+    }
   }
 
   handleResize = () => {
@@ -162,9 +176,9 @@ export default class PhotoSlider extends React.Component<
     });
   }
 
-  handleReachUp = (clientX: number, clientY: number, touchType: TouchTypeEnum) => {
+  handleReachUp = (clientX: number, clientY: number) => {
     const { innerWidth, innerHeight } = window;
-    const { images, onIndexChange, onClose, maskClosable = true } = this.props;
+    const { images, onIndexChange, onClose } = this.props;
     const {
       lastClientX = clientX,
       lastClientY = clientY,
@@ -181,15 +195,7 @@ export default class PhotoSlider extends React.Component<
     let currentPhotoIndex = photoIndex;
     let isChangeVisible = false;
 
-    // mask 点击事件
-    if (lastClientX === clientX
-      && lastClientY === clientY
-      && maskClosable
-      && touchType === TouchTypeEnum.Mask
-    ) {
-      isChangeVisible = true;
-      onClose();
-    } else if (Math.abs(offsetClientY) > innerHeight * 0.14) {
+    if (Math.abs(offsetClientY) > innerHeight * 0.14) {
       isChangeVisible = true;
       onClose();
       // 下一张
@@ -287,6 +293,7 @@ export default class PhotoSlider extends React.Component<
                   }
                   onReachUp={this.handleReachUp}
                   onPhotoClick={this.handlePhotoClick}
+                  onMaskClick={this.handlePhotoMaskClick}
                   photoScale={photoIndex === realIndex ? photoScale : 1}
                   wrapClassName={viewClassName}
                   className={imageClassName}
