@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-export const TopBar = styled.div`
+export const BannerWrap = styled.div`
   position: absolute;
   left: 0;
   top: 0;
@@ -13,7 +13,6 @@ export const TopBar = styled.div`
   color: white;
   background-color: rgba(0, 0, 0, 0.5);
   transition: opacity 0.2s ease-out;
-  will-change: opacity;
   z-index: 20;
 `;
 
@@ -21,6 +20,10 @@ export const Counter = styled.div`
   padding: 0 10px;
   font-size: 14px;
   opacity: 0.75;
+`;
+
+export const BannerRight = styled.div`
+  height: 100%;
 `;
 
 function CloseSVG(props) {

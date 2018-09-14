@@ -42,7 +42,7 @@ class Example extends React.Component {
         <PhotoProvider>
           <ImageList>
             {photoImages.map((item, index) => (
-              <PhotoConsumer key={index} src={item}>
+              <PhotoConsumer key={index} src={item} intro={item}>
                 {index < 2 ? <SmallImage /> : undefined}
               </PhotoConsumer>
             ))}

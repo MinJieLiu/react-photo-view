@@ -2,13 +2,14 @@ import React from 'react';
 import PhotoView from './PhotoView';
 import SlideWrap from './components/SlideWrap';
 import Backdrop from './components/Backdrop';
-import { Close, Counter, TopBar } from './components/TopWrap';
-import { dataType } from './types';
+import { Close, Counter, BannerWrap, BannerRight } from './components/BannerWrap';
+import FooterWrap from './components/FooterWrap';
+import { dataType, IPhotoProviderBase } from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
 
-interface IPhotoSliderProps {
+interface IPhotoSliderProps extends IPhotoProviderBase {
   // 图片列表
-  images: (string | dataType)[];
+  images: dataType[];
   // 图片当前索引
   index?: number;
   // 可见
@@ -17,22 +18,6 @@ interface IPhotoSliderProps {
   onClose: (evt?: React.MouseEvent) => void;
   // 索引改变回调
   onIndexChange?: Function;
-  // 背景可点击关闭，默认 true
-  maskClosable?: boolean;
-  // 自定义容器
-  overlay?: React.ReactNode;
-  // className
-  className?: string;
-  // 遮罩 className
-  maskClassName?: string;
-  // 图片容器 className
-  viewClassName?: string;
-  // 图片 className
-  imageClassName?: string;
-  // 自定义 loading
-  loadingElement?: JSX.Element;
-  // 加载失败 Element
-  brokenElement?: JSX.Element;
 }
 
 type PhotoSliderState = {
@@ -63,6 +48,8 @@ export default class PhotoSlider extends React.Component<
 
   static defaultProps = {
     maskClosable: true,
+    bannerVisible: true,
+    introVisible: true,
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -235,6 +222,8 @@ export default class PhotoSlider extends React.Component<
       viewClassName,
       imageClassName,
       onClose,
+      bannerVisible,
+      introVisible,
       loadingElement,
       brokenElement,
     } = this.props;
@@ -248,6 +237,9 @@ export default class PhotoSlider extends React.Component<
     } = this.state;
     const imageLength = images.length;
     const transform = `translate3d(${translateX}px, 0px, 0)`;
+    // Overlay
+    const overlayIntro = imageLength ? images[photoIndex].intro : undefined;
+    const overlayStyle = { opacity: +overlayVisible };
 
     if (visible) {
       const { innerWidth } = window;
@@ -258,29 +250,28 @@ export default class PhotoSlider extends React.Component<
             className={maskClassName}
             style={{ background: `rgba(0, 0, 0, ${backdropOpacity})` }}
           />
-          <TopBar style={{ opacity: +overlayVisible }}>
-            <Counter>{photoIndex + 1} / {imageLength}</Counter>
-            <Close onClick={onClose} />
-          </TopBar>
+          {bannerVisible ? (
+            <BannerWrap style={overlayStyle}>
+              <Counter>{photoIndex + 1} / {imageLength}</Counter>
+              <BannerRight>
+                <Close onClick={onClose} />
+              </BannerRight>
+            </BannerWrap>
+          ) : undefined}
           {images
             .slice( // 加载相邻三张
               Math.max(photoIndex - 1, 0),
               Math.min(photoIndex + 2, imageLength + 1)
             )
-            .map((item: string | dataType, index) => {
-              const isStrItem = typeof item === 'string';
+            .map((item: dataType, index) => {
               // 截取之前的索引位置
               const realIndex = photoIndex === 0
                 ? photoIndex + index
                 : photoIndex - 1 + index;
               return (
                 <PhotoView
-                  key={
-                    isStrItem
-                      ? (item as string) + realIndex
-                      : (item as dataType).dataKey
-                  }
-                  src={isStrItem ? (item as string) : (item as dataType).src}
+                  key={item.key || realIndex}
+                  src={item.src}
                   onReachTopMove={this.handleReachVerticalMove}
                   onReachBottomMove={this.handleReachVerticalMove}
                   onReachRightMove={
@@ -310,6 +301,9 @@ export default class PhotoSlider extends React.Component<
                 />
               );
             })}
+          {introVisible && overlayIntro ? (
+            <FooterWrap style={overlayStyle}>{overlayIntro}</FooterWrap>
+          ) : undefined}
           {overlay}
         </SlideWrap>
       );

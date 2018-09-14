@@ -8,6 +8,7 @@ import PhotoContext, {
 
 interface IPhotoViewItem {
   src: string;
+  intro?: React.ReactNode;
   children?: React.ReactElement<any>;
   onShow: onShowType;
   addItem: addItemType;
@@ -15,21 +16,21 @@ interface IPhotoViewItem {
 }
 
 class PhotoViewItem extends React.Component<IPhotoViewItem> {
-  private dataKey: string = uniqueId();
+  private key: string = uniqueId();
 
   componentDidMount() {
-    const { src, addItem } = this.props;
-    addItem(this.dataKey, src);
+    const { addItem, src, intro } = this.props;
+    addItem(this.key, src, intro);
   }
 
   componentWillUnmount() {
     const { removeItem } = this.props;
-    removeItem(this.dataKey);
+    removeItem(this.key);
   }
 
   handleShow = (e) => {
     const { onShow, children } = this.props;
-    onShow(this.dataKey);
+    onShow(this.key);
 
     if (children) {
       const { onClick } = children.props;
@@ -56,11 +57,13 @@ class PhotoViewItem extends React.Component<IPhotoViewItem> {
 
 export interface IPhotoConsumer {
   src: string;
+  intro?: React.ReactNode;
   children?: React.ReactElement<any>;
 }
 
 const PhotoConsumer: React.SFC<IPhotoConsumer> = ({
   src,
+  intro,
   children,
   ...restProps
 }) => (
@@ -70,6 +73,7 @@ const PhotoConsumer: React.SFC<IPhotoConsumer> = ({
         {...value}
         {...restProps}
         src={src}
+        intro={intro}
       >
         {children}
       </PhotoViewItem>

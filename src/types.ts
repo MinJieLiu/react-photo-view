@@ -1,10 +1,39 @@
 /**
  * 图片 item 类型
  */
+import React from 'react';
+
 export type dataType = {
-  dataKey: string;
+  // 唯一标识
+  key?: string;
+  // 图片地址
   src: string;
+  // 图片介绍
+  intro?: React.ReactNode;
 };
+
+export interface IPhotoProviderBase {
+  // 背景可点击关闭，默认 true
+  maskClosable?: boolean;
+  // 导航条 visible，默认 true
+  bannerVisible?: boolean;
+  // 简介 visible，默认 true
+  introVisible?: boolean;
+  // 自定义容器
+  overlay?: React.ReactNode;
+  // className
+  className?: string;
+  // 遮罩 className
+  maskClassName?: string;
+  // 图片容器 className
+  viewClassName?: string;
+  // 图片 className
+  imageClassName?: string;
+  // 自定义 loading
+  loadingElement?: JSX.Element;
+  // 加载失败 Element
+  brokenElement?: JSX.Element;
+}
 
 export type ReachFunction = (clientX: number, clientY: number) => void;
 

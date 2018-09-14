@@ -94,6 +94,7 @@ export default class PhotoView extends React.Component<
 
   constructor(props) {
     super(props);
+    // 加入延迟触发，避免与双击混淆
     this.photoClick = debounce(this.photoClick, 300);
     this.handleMove = throttle(this.handleMove, 8);
   }

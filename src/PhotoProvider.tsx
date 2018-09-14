@@ -5,26 +5,14 @@ import PhotoContext, {
   removeItemType,
 } from './photo-context';
 import PhotoSlider from './PhotoSlider';
-import { dataType } from './types';
+import { dataType, IPhotoProviderBase } from './types';
 
-interface IPhotoProvider {
+interface IPhotoProvider extends IPhotoProviderBase {
   children: React.ReactNode;
-  // className
-  className?: string;
-  // 遮罩 className
-  maskClassName?: string;
-  // 图片容器 className
-  viewClassName?: string;
-  // 图片 className
-  imageClassName?: string;
-  // 自定义 loading
-  loadingElement?: JSX.Element;
-  // 加载失败 Element
-  brokenElement?: JSX.Element;
 }
 
 type PhotoProviderState = {
-  data: dataType[];
+  images: dataType[];
   visible: boolean;
   index: number;
   onShow: onShowType;
@@ -40,7 +28,7 @@ export default class PhotoProvider extends React.Component<
     super(props);
 
     this.state = {
-      data: [],
+      images: [],
       visible: false,
       index: 0,
       addItem: this.handleAddItem,
@@ -49,31 +37,32 @@ export default class PhotoProvider extends React.Component<
     };
   }
 
-  handleAddItem = (dataKey: string, src: string) => {
+  handleAddItem = (key: string, src: string, intro: React.ReactNode) => {
     this.setState(prev => ({
-      data: prev.data.concat({
-        dataKey,
+      images: prev.images.concat({
+        key,
         src,
+        intro,
       }),
     }));
   }
 
-  handleRemoveItem = (dataKey: string) => {
-    this.setState(({ data, index }) => {
-      const nextData = data.filter(item => item.dataKey !== dataKey);
-      const nextEndIndex = nextData.length - 1;
+  handleRemoveItem = (key: string) => {
+    this.setState(({ images, index }) => {
+      const nextImages = images.filter(item => item.key !== key);
+      const nextEndIndex = nextImages.length - 1;
       return {
-        data: nextData,
+        images: nextImages,
         index: Math.min(nextEndIndex, index),
       };
     });
   }
 
-  handleShow = (dataKey: string) => {
-    const { data } = this.state;
+  handleShow = (key: string) => {
+    const { images } = this.state;
     this.setState({
       visible: true,
-      index: data.findIndex(item => item.dataKey === dataKey),
+      index: images.findIndex(item => item.key === key),
     });
   }
 
@@ -91,31 +80,21 @@ export default class PhotoProvider extends React.Component<
 
   render() {
     const {
-      className,
-      maskClassName,
-      viewClassName,
-      imageClassName,
-      loadingElement,
-      brokenElement,
       children,
+      ...restProps
     } = this.props;
-    const { data, visible, index } = this.state;
+    const { images, visible, index } = this.state;
 
     return (
       <PhotoContext.Provider value={this.state}>
         {children}
         <PhotoSlider
-          images={data}
+          images={images}
           visible={visible}
           index={index}
           onIndexChange={this.handleIndexChange}
           onClose={this.handleClose}
-          className={className}
-          maskClassName={maskClassName}
-          viewClassName={viewClassName}
-          imageClassName={imageClassName}
-          loadingElement={loadingElement}
-          brokenElement={brokenElement}
+          {...restProps}
         />
       </PhotoContext.Provider>
     );
