@@ -37,7 +37,7 @@ export interface IPhotoProviderBase {
 
 export type ReachFunction = (clientX: number, clientY: number) => void;
 
-export type PhotoClickFunction = (clientX: number, clientY: number) => void;
+export type PhotoTapFunction = (clientX: number, clientY: number) => void;
 
 /**
  * 边缘超出状态

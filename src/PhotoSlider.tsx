@@ -4,6 +4,7 @@ import SlideWrap from './components/SlideWrap';
 import Backdrop from './components/Backdrop';
 import { Close, Counter, BannerWrap, BannerRight } from './components/BannerWrap';
 import FooterWrap from './components/FooterWrap';
+import isMobile from './utils/isMobile';
 import { dataType, IPhotoProviderBase } from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
 
@@ -15,7 +16,7 @@ interface IPhotoSliderProps extends IPhotoProviderBase {
   // 可见
   visible: boolean;
   // 关闭事件
-  onClose: (evt?: React.MouseEvent) => void;
+  onClose: (evt?: React.MouseEvent | React.TouchEvent) => void;
   // 索引改变回调
   onIndexChange?: Function;
 }
@@ -94,13 +95,13 @@ export default class PhotoSlider extends React.Component<
     window.removeEventListener('resize', this.handleResize);
   }
 
-  handlePhotoClick = () => {
+  handlePhotoTap = () => {
     this.setState(prevState => ({
       overlayVisible: !prevState.overlayVisible,
     }));
   }
 
-  handlePhotoMaskClick = () => {
+  handlePhotoMaskTap = () => {
     const { maskClosable, onClose } = this.props;
     if (maskClosable) {
       onClose();
@@ -254,7 +255,10 @@ export default class PhotoSlider extends React.Component<
             <BannerWrap style={overlayStyle}>
               <Counter>{photoIndex + 1} / {imageLength}</Counter>
               <BannerRight>
-                <Close onClick={onClose} />
+                <Close
+                  onTouchEnd={isMobile ? onClose : undefined}
+                  onClick={isMobile ? undefined : onClose}
+                />
               </BannerRight>
             </BannerWrap>
           ) : undefined}
@@ -283,8 +287,8 @@ export default class PhotoSlider extends React.Component<
                     realIndex > 0 ? this.handleReachHorizontalMove : undefined
                   }
                   onReachUp={this.handleReachUp}
-                  onPhotoClick={this.handlePhotoClick}
-                  onMaskClick={this.handlePhotoMaskClick}
+                  onPhotoTap={this.handlePhotoTap}
+                  onMaskTap={this.handlePhotoMaskTap}
                   photoScale={photoIndex === realIndex ? photoScale : 1}
                   wrapClassName={viewClassName}
                   className={imageClassName}
