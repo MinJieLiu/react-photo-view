@@ -1,16 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
-import { PhotoProvider, PhotoConsumer } from '../src/index';
+import { PhotoProvider, PhotoConsumer } from '../src';
 
 const Container = styled.div`
   font-size: 32px;
-`;
-
-const Header = styled.header`
-  padding: 40px;
-  font-size: 32px;
-  border-bottom: 1px solid #ccc;
 `;
 
 const ImageList = styled.div`
@@ -38,12 +32,11 @@ class Example extends React.Component {
 
     return (
       <Container>
-        <Header>React 图片预览组件</Header>
         <PhotoProvider>
           <ImageList>
             {photoImages.map((item, index) => (
               <PhotoConsumer key={index} src={item} intro={item}>
-                {index < 2 ? <SmallImage /> : undefined}
+                {index < 2 ? <SmallImage src={item} /> : undefined}
               </PhotoConsumer>
             ))}
           </ImageList>

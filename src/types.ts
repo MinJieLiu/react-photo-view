@@ -1,8 +1,8 @@
+import React from 'react';
+
 /**
  * 图片 item 类型
  */
-import React from 'react';
-
 export type dataType = {
   // 唯一标识
   key?: string;

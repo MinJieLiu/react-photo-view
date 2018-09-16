@@ -1,5 +1,6 @@
 import React from 'react';
 import uniqueId from 'lodash.uniqueid';
+import isMobile from './utils/isMobile';
 import PhotoContext, {
   onShowType,
   addItemType,
@@ -15,7 +16,17 @@ interface IPhotoViewItem {
   removeItem: removeItemType;
 }
 
-class PhotoViewItem extends React.Component<IPhotoViewItem> {
+type PhotoViewState = {
+  clientX: number | undefined;
+  clientY: number | undefined;
+};
+
+class PhotoViewItem extends React.Component<IPhotoViewItem, PhotoViewState> {
+  readonly state = {
+    clientX: undefined,
+    clientY: undefined,
+  };
+
   private key: string = uniqueId();
 
   componentDidMount() {
@@ -28,10 +39,39 @@ class PhotoViewItem extends React.Component<IPhotoViewItem> {
     removeItem(this.key);
   }
 
-  handleShow = (e) => {
+  handleTouchStart = (e) => {
+    const { clientX, clientY } = e.touches[0];
+    this.setState({
+      clientX,
+      clientY,
+    });
+    const { children } = this.props;
+    if (children) {
+      const { onTouchStart } = children.props;
+      if (onTouchStart) {
+        onTouchStart(e);
+      }
+    }
+  }
+
+  handleTouchEnd = (e) => {
+    const { onShow, children } = this.props;
+    const { clientX: newClientX, clientY: newClientY } = e.changedTouches[0];
+    const { clientX, clientY } = this.state;
+    if (clientX === newClientX && clientY === newClientY) {
+      onShow(this.key);
+    }
+    if (children) {
+      const { onTouchEnd } = children.props;
+      if (onTouchEnd) {
+        onTouchEnd(e);
+      }
+    }
+  }
+
+  handleClick = (e) => {
     const { onShow, children } = this.props;
     onShow(this.key);
-
     if (children) {
       const { onClick } = children.props;
       if (onClick) {
@@ -41,15 +81,17 @@ class PhotoViewItem extends React.Component<IPhotoViewItem> {
   }
 
   render() {
-    const { src, children } = this.props;
+    const { children } = this.props;
     if (children) {
-      return React.cloneElement(children, {
-        onClick: this.handleShow,
-        // 子节点若不传 src 则覆盖
-        ...children.props.src === undefined
-          ? { src }
-          : undefined,
-      });
+      return React.Children.only(React.cloneElement(
+        children,
+        isMobile
+          ? {
+            onTouchStart: this.handleTouchStart,
+            onTouchEnd: this.handleTouchEnd,
+          }
+          : { onClick: this.handleClick },
+      ));
     }
     return null;
   }
