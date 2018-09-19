@@ -1,5 +1,4 @@
 import React from 'react';
-import debounce from 'lodash.debounce';
 import Photo from './Photo';
 import PhotoWrap from './components/PhotoWrap';
 import PhotoMask from './components/PhotoMask';
@@ -9,6 +8,7 @@ import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import slideToSuitableOffset from './utils/slideToSuitableOffset';
 import { getClosedHorizontal, getClosedVertical } from './utils/getCloseEdge';
+import withContinuousTap from './utils/withContinuousTap';
 import { maxScale, minReachOffset, minScale, scaleBuffer } from './variables';
 import {
   ReachFunction,
@@ -88,20 +88,23 @@ export default class PhotoView extends React.Component<
   static displayName = 'PhotoView';
 
   readonly state = initialState;
-
-  private photoRef;
+  private readonly photoRef = React.createRef<Photo>();
+  private readonly handlePhotoTap;
 
   constructor(props) {
     super(props);
-    this.handleMove = throttle(this.handleMove, 8);
-    // 延迟触发，与双击事件区分
-    this.handlePhotoTap = debounce(this.handlePhotoTap, 300);
+    this.onMove = throttle(this.onMove, 8);
+    // 单击与双击事件处理
+    this.handlePhotoTap = withContinuousTap(
+      this.onPhotoTap,
+      this.onDoubleTap,
+    );
   }
 
   componentDidMount() {
     if (isMobile) {
       window.addEventListener('touchmove', this.handleTouchMove, { passive: false });
-      window.addEventListener('touchend', this.handleTouchEnd);
+      window.addEventListener('touchend', this.handleTouchEnd, { passive: false });
     } else {
       window.addEventListener('mousemove', this.handleMouseMove);
       window.addEventListener('mouseup', this.handleMouseUp);
@@ -130,10 +133,11 @@ export default class PhotoView extends React.Component<
     }));
   }
 
-  handleMove = (newClientX: number, newClientY: number, touchLength: number = 0) => {
+  onMove = (newClientX: number, newClientY: number, touchLength: number = 0) => {
     const { touched, maskTouched } = this.state;
-    if (touched || maskTouched) {
-      const { width, naturalWidth } = this.photoRef.state;
+    const { current } = this.photoRef;
+    if ((touched || maskTouched) && current) {
+      const { width, height, naturalWidth } = current.state;
       const {
         x,
         y,
@@ -153,14 +157,16 @@ export default class PhotoView extends React.Component<
         currentX = newClientX - clientX + lastX;
         currentY = newClientY - clientY + lastY;
         // 边缘触发检测
-        currentReachState = this.handleReachCallback(
-          currentX,
-          currentY,
+        currentReachState = this.handleReachCallback({
+          x: currentX,
+          y: currentY,
+          width,
+          height,
           scale,
-          newClientX,
-          newClientY,
+          clientX: newClientX,
+          clientY: newClientY,
           reachState,
-        );
+        });
       }
       // 横向边缘触发、背景触发禁用当前滑动
       if (currentReachState === ReachTypeEnum.XReach || maskTouched) {
@@ -194,21 +200,19 @@ export default class PhotoView extends React.Component<
     }
   }
 
-  handlePhotoTap = (clientX: number, clientY: number) => {
+  onPhotoTap = (clientX: number, clientY: number) => {
     const { onPhotoTap } = this.props;
     if (onPhotoTap) {
       onPhotoTap(clientX, clientY);
     }
   }
 
-  handleDoubleClick = (e) => {
-    e.preventDefault();
-    // @ts-ignore 取消 Tap 事件
-    this.handlePhotoTap.cancel();
-    const { clientX, clientY } = e;
-    const { width, naturalWidth } = this.photoRef.state;
-    this.setState(({ x, y, scale }) => {
-      return {
+  onDoubleTap = (clientX, clientY) => {
+    const { current } = this.photoRef;
+    if (current) {
+      const { width, naturalWidth } = current.state;
+      const { x, y, scale } = this.state;
+      this.setState({
         clientX,
         clientY,
         ...getPositionOnMoveOrScale({
@@ -220,37 +224,40 @@ export default class PhotoView extends React.Component<
           // 若图片足够大，则放大适应的倍数
           toScale: scale !== 1 ? 1 : Math.max(2, naturalWidth / width),
         }),
-      };
-    });
+      });
+    }
   }
 
   handleWheel = (e) => {
     e.preventDefault();
-    const { clientX, clientY, deltaY } = e;
-    const { width, naturalWidth } = this.photoRef.state;
-    this.setState(({ x, y, scale }) => {
-      const endScale = scale - deltaY / 100 / 2;
-      // 限制最大倍数和最小倍数
-      const toScale = Math.max(
-        Math.min(
-          endScale,
-          Math.max(maxScale, naturalWidth / width)
-        ),
-        minScale,
-      );
-      return {
-        clientX,
-        clientY,
-        ...getPositionOnMoveOrScale({
-          x,
-          y,
+    const { current } = this.photoRef;
+    if (current) {
+      const { clientX, clientY, deltaY } = e;
+      const { width, naturalWidth } = current.state;
+      this.setState(({ x, y, scale }) => {
+        const endScale = scale - deltaY / 100 / 2;
+        // 限制最大倍数和最小倍数
+        const toScale = Math.max(
+          Math.min(
+            endScale,
+            Math.max(maxScale, naturalWidth / width)
+          ),
+          minScale,
+        );
+        return {
           clientX,
           clientY,
-          fromScale: scale,
-          toScale,
-        }),
-      };
-    });
+          ...getPositionOnMoveOrScale({
+            x,
+            y,
+            clientX,
+            clientY,
+            fromScale: scale,
+            toScale,
+          }),
+        };
+      });
+    }
   }
 
   handleMaskStart = (clientX: number, clientY: number) => {
@@ -272,7 +279,7 @@ export default class PhotoView extends React.Component<
     this.handleMaskStart(clientX, clientY);
   }
 
-  handleTouchStart = e => {
+  handleTouchStart = (e) => {
     if (e.touches.length >= 2) {
       const { clientX, clientY, touchLength } = getMultipleTouchPosition(e);
       this.handleStart(clientX, clientY, touchLength);
@@ -282,33 +289,34 @@ export default class PhotoView extends React.Component<
     }
   }
 
-  handleMouseDown = e => {
+  handleMouseDown = (e) => {
     e.preventDefault();
     this.handleStart(e.clientX, e.clientY);
   }
 
-  handleTouchMove = e => {
+  handleTouchMove = (e) => {
     e.preventDefault();
     if (e.touches.length >= 2) {
       const { clientX, clientY, touchLength } = getMultipleTouchPosition(e);
-      this.handleMove(clientX, clientY, touchLength);
+      this.onMove(clientX, clientY, touchLength);
     } else {
       const { clientX, clientY } = e.touches[0];
-      this.handleMove(clientX, clientY);
+      this.onMove(clientX, clientY);
     }
   }
 
-  handleMouseMove = e => {
+  handleMouseMove = (e) => {
     e.preventDefault();
-    this.handleMove(e.clientX, e.clientY);
+    this.onMove(e.clientX, e.clientY);
   }
 
   handleUp = (newClientX: number, newClientY: number) => {
     const { touched, maskTouched } = this.state;
-    if (touched || maskTouched) {
+    const { current } = this.photoRef;
+    if ((touched || maskTouched) && current) {
       const { onReachUp, onPhotoTap, onMaskTap } = this.props;
-      const { width, naturalWidth, height } = this.photoRef.state;
-      this.setState(({
+      const { width, naturalWidth, height } = current.state;
+      const {
         x,
         y,
         lastX,
@@ -317,12 +325,36 @@ export default class PhotoView extends React.Component<
         touchedTime,
         clientX,
         clientY,
-      }) => {
-        const hasMove = clientX !== newClientX || clientY !== newClientY;
+      } = this.state;
+      const hasMove = clientX !== newClientX || clientY !== newClientY;
+      this.setState({
+        touched: false,
+        maskTouched: false,
+        // 限制缩放
+        scale: Math.max(
+          Math.min(scale, Math.max(maxScale, naturalWidth / width)),
+          minScale,
+        ),
+        reachState: ReachTypeEnum.Normal, // 重置触发状态
+        ...hasMove
+          ? slideToSuitableOffset({
+            x,
+            y,
+            lastX,
+            lastY,
+            width,
+            height,
+            scale,
+            touchedTime,
+          }) : {
+            x,
+            y,
+          },
+      }, () => {
         if (onReachUp) {
           onReachUp(newClientX, newClientY);
         }
-        // 没有移动触发 Tap 事件
+        // 触发 Tap 事件
         if (!hasMove) {
           if (touched && onPhotoTap) {
             this.handlePhotoTap(newClientX, newClientY);
@@ -330,30 +362,6 @@ export default class PhotoView extends React.Component<
             onMaskTap(newClientX, newClientY);
           }
         }
-        return {
-          touched: false,
-          maskTouched: false,
-          // 限制缩放
-          scale: Math.max(
-            Math.min(scale, Math.max(maxScale, naturalWidth / width)),
-            minScale,
-          ),
-          reachState: ReachTypeEnum.Normal, // 重置触发状态
-          ...hasMove
-            ? slideToSuitableOffset({
-              x,
-              y,
-              lastX,
-              lastY,
-              width,
-              height,
-              scale,
-              touchedTime,
-            }) : {
-              x,
-              y,
-            },
-        };
       });
     }
   }
@@ -376,16 +384,25 @@ export default class PhotoView extends React.Component<
     }
   }
 
-  handleReachCallback = (
+  handleReachCallback = ({
+    x,
+    y,
+    width,
+    height,
+    scale,
+    clientX,
+    clientY,
+    reachState,
+  }: {
     x: number,
     y: number,
+    width: number,
+    height: number,
     scale: number,
-    newClientX: number,
-    newClientY: number,
+    clientX: number,
+    clientY: number,
     reachState: ReachTypeEnum,
-  ): number => {
-    const { width, height } = this.photoRef.state;
-
+  }): number => {
     const horizontalType = getClosedHorizontal(x, scale, width);
     const verticalType = getClosedVertical(y, scale, height);
     const {
@@ -402,7 +419,7 @@ export default class PhotoView extends React.Component<
       && reachState === ReachTypeEnum.Normal
       || reachState === ReachTypeEnum.XReach)
     ) {
-      onReachLeftMove(newClientX, newClientY);
+      onReachLeftMove(clientX, clientY);
       return ReachTypeEnum.XReach;
     } else if (
       onReachRightMove
@@ -411,7 +428,7 @@ export default class PhotoView extends React.Component<
       && reachState === ReachTypeEnum.Normal
       || reachState === ReachTypeEnum.XReach)
     ) {
-      onReachRightMove(newClientX, newClientY);
+      onReachRightMove(clientX, clientY);
       return ReachTypeEnum.XReach;
     } else if (
       onReachTopMove
@@ -420,7 +437,7 @@ export default class PhotoView extends React.Component<
       && reachState === ReachTypeEnum.Normal
       || reachState === ReachTypeEnum.YReach)
     ) {
-      onReachTopMove(newClientX, newClientY);
+      onReachTopMove(clientX, clientY);
       return ReachTypeEnum.YReach;
     } else if (
       onReachBottomMove
@@ -429,14 +446,10 @@ export default class PhotoView extends React.Component<
       && reachState === ReachTypeEnum.Normal
       || reachState === ReachTypeEnum.YReach)
     ) {
-      onReachBottomMove(newClientX, newClientY);
+      onReachBottomMove(clientX, clientY);
       return ReachTypeEnum.YReach;
     }
     return ReachTypeEnum.Normal;
-  }
-
-  handlePhotoRef = (ref) => {
-    this.photoRef = ref;
   }
 
   render() {
@@ -462,8 +475,7 @@ export default class PhotoView extends React.Component<
         <Photo
           className={className}
           src={src}
-          ref={this.handlePhotoRef}
-          onDoubleClick={this.handleDoubleClick}
+          ref={this.photoRef}
           onMouseDown={isMobile ? undefined : this.handleMouseDown}
           onTouchStart={isMobile ? this.handleTouchStart : undefined}
           onWheel={this.handleWheel}
