@@ -12,18 +12,20 @@ export type dataType = {
   intro?: React.ReactNode;
 };
 
-export interface IPhotoSliderProps {
+type overlayRenderProps = {
   // 图片列表
   images: dataType[];
   // 图片当前索引
-  index?: number;
+  index: number;
   // 可见
   visible: boolean;
   // 关闭事件
   onClose: (evt?: React.MouseEvent | React.TouchEvent) => void;
   // 索引改变回调
-  onIndexChange?: Function;
-}
+  onIndexChange: (photoIndex: number) => void;
+  // 覆盖物可见度
+  overlayVisible: boolean;
+};
 
 export interface IPhotoProviderBase {
   // 背景可点击关闭，默认 true
@@ -35,9 +37,7 @@ export interface IPhotoProviderBase {
   // 简介 visible，默认 true
   introVisible?: boolean;
   // 自定义渲染
-  overlayRender?: (
-    overlayProps: IPhotoSliderProps & { overlayVisible: boolean },
-  ) => React.ReactNode;
+  overlayRender?: (overlayProps: overlayRenderProps) => React.ReactNode;
   // className
   className?: string;
   // 遮罩 className

@@ -8,9 +8,21 @@ import isMobile from './utils/isMobile';
 import {
   dataType,
   IPhotoProviderBase,
-  IPhotoSliderProps,
 } from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
+
+interface IPhotoSliderProps extends IPhotoProviderBase {
+  // 图片列表
+  images: dataType[];
+  // 图片当前索引
+  index?: number;
+  // 可见
+  visible: boolean;
+  // 关闭事件
+  onClose: (evt?: React.MouseEvent | React.TouchEvent) => void;
+  // 索引改变回调
+  onIndexChange?: Function;
+}
 
 type PhotoSliderState =  {
   // 偏移量
@@ -33,7 +45,7 @@ type PhotoSliderState =  {
 };
 
 export default class PhotoSlider extends React.Component<
-  IPhotoProviderBase & IPhotoSliderProps,
+  IPhotoSliderProps,
   PhotoSliderState
 > {
   static displayName = 'PhotoSlider';
@@ -163,6 +175,19 @@ export default class PhotoSlider extends React.Component<
     });
   }
 
+  handleIndexChange = (photoIndex: number) => {
+    const singlePageWidth = window.innerWidth + horizontalOffset;
+    const translateX = -singlePageWidth * photoIndex;
+    this.setState({
+      translateX,
+      photoIndex,
+    });
+    const { onIndexChange } = this.props;
+    if (onIndexChange) {
+      onIndexChange(photoIndex);
+    }
+  }
+
   handleReachUp = (clientX: number, clientY: number) => {
     const { innerWidth, innerHeight } = window;
     const { images, onIndexChange, onClose } = this.props;
@@ -216,8 +241,6 @@ export default class PhotoSlider extends React.Component<
     const {
       images,
       visible,
-      index,
-      onIndexChange,
       className,
       maskClassName,
       viewClassName,
@@ -311,10 +334,10 @@ export default class PhotoSlider extends React.Component<
           ) : undefined}
           {overlayRender && overlayRender({
             images,
-            index,
+            index: photoIndex,
             visible,
             onClose,
-            onIndexChange,
+            onIndexChange: this.handleIndexChange,
             overlayVisible,
           })}
         </SlideWrap>
