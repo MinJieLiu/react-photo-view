@@ -11,7 +11,7 @@ import {
 } from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
 
-interface IPhotoSliderProps extends IPhotoProviderBase {
+export interface IPhotoSliderProps extends IPhotoProviderBase {
   // 图片列表
   images: dataType[];
   // 图片当前索引

@@ -7,7 +7,7 @@ import PhotoContext, {
 import PhotoSlider from './PhotoSlider';
 import { dataType, IPhotoProviderBase } from './types';
 
-interface IPhotoProvider extends IPhotoProviderBase {
+export interface IPhotoProvider extends IPhotoProviderBase {
   children: React.ReactNode;
 }
 

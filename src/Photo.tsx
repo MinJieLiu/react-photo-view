@@ -4,7 +4,7 @@ import throttle from './utils/throttle';
 import Spinner from './components/Spinner';
 import getSuitableImageSize from './utils/getSuitableImageSize';
 
-interface IPhotoProps extends React.HTMLAttributes<any> {
+export interface IPhotoProps extends React.HTMLAttributes<any> {
   src: string;
   onPhotoResize: () => void;
   loadingElement?: JSX.Element;

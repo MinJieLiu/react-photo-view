@@ -16,7 +16,7 @@ import {
   ReachTypeEnum,
 } from './types';
 
-interface IPhotoViewProps {
+export interface IPhotoViewProps {
   // 图片地址
   src: string;
   // 容器类名
