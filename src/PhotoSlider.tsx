@@ -5,23 +5,14 @@ import Backdrop from './components/Backdrop';
 import { Close, Counter, BannerWrap, BannerRight } from './components/BannerWrap';
 import FooterWrap from './components/FooterWrap';
 import isMobile from './utils/isMobile';
-import { dataType, IPhotoProviderBase } from './types';
+import {
+  dataType,
+  IPhotoProviderBase,
+  IPhotoSliderProps,
+} from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
 
-interface IPhotoSliderProps extends IPhotoProviderBase {
-  // 图片列表
-  images: dataType[];
-  // 图片当前索引
-  index?: number;
-  // 可见
-  visible: boolean;
-  // 关闭事件
-  onClose: (evt?: React.MouseEvent | React.TouchEvent) => void;
-  // 索引改变回调
-  onIndexChange?: Function;
-}
-
-type PhotoSliderState = {
+type PhotoSliderState =  {
   // 偏移量
   translateX: number;
   // 图片当前的 index
@@ -42,13 +33,14 @@ type PhotoSliderState = {
 };
 
 export default class PhotoSlider extends React.Component<
-  IPhotoSliderProps,
+  IPhotoProviderBase & IPhotoSliderProps,
   PhotoSliderState
 > {
   static displayName = 'PhotoSlider';
 
   static defaultProps = {
     maskClosable: true,
+    photoClosable: false,
     bannerVisible: true,
     introVisible: true,
   };
@@ -95,19 +87,26 @@ export default class PhotoSlider extends React.Component<
     window.removeEventListener('resize', this.handleResize);
   }
 
+  handleClose = () => {
+    this.props.onClose();
+    this.setState({
+      overlayVisible: true,
+    });
+  }
+
   handlePhotoTap = () => {
-    this.setState(prevState => ({
-      overlayVisible: !prevState.overlayVisible,
-    }));
+    if (this.props.photoClosable) {
+      this.handleClose();
+    } else {
+      this.setState(prevState => ({
+        overlayVisible: !prevState.overlayVisible,
+      }));
+    }
   }
 
   handlePhotoMaskTap = () => {
-    const { maskClosable, onClose } = this.props;
-    if (maskClosable) {
-      onClose();
-      this.setState({
-        overlayVisible: true,
-      });
+    if (this.props.maskClosable) {
+      this.handleClose();
     }
   }
 
@@ -217,7 +216,8 @@ export default class PhotoSlider extends React.Component<
     const {
       images,
       visible,
-      overlay,
+      index,
+      onIndexChange,
       className,
       maskClassName,
       viewClassName,
@@ -225,6 +225,7 @@ export default class PhotoSlider extends React.Component<
       onClose,
       bannerVisible,
       introVisible,
+      overlayRender,
       loadingElement,
       brokenElement,
     } = this.props;
@@ -308,7 +309,14 @@ export default class PhotoSlider extends React.Component<
           {introVisible && overlayIntro ? (
             <FooterWrap style={overlayStyle}>{overlayIntro}</FooterWrap>
           ) : undefined}
-          {overlay}
+          {overlayRender && overlayRender({
+            images,
+            index,
+            visible,
+            onClose,
+            onIndexChange,
+            overlayVisible,
+          })}
         </SlideWrap>
       );
     }

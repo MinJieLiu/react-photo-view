@@ -12,15 +12,32 @@ export type dataType = {
   intro?: React.ReactNode;
 };
 
+export interface IPhotoSliderProps {
+  // 图片列表
+  images: dataType[];
+  // 图片当前索引
+  index?: number;
+  // 可见
+  visible: boolean;
+  // 关闭事件
+  onClose: (evt?: React.MouseEvent | React.TouchEvent) => void;
+  // 索引改变回调
+  onIndexChange?: Function;
+}
+
 export interface IPhotoProviderBase {
   // 背景可点击关闭，默认 true
   maskClosable?: boolean;
+  // 图片点击可关闭，默认 false
+  photoClosable?: boolean;
   // 导航条 visible，默认 true
   bannerVisible?: boolean;
   // 简介 visible，默认 true
   introVisible?: boolean;
-  // 自定义容器
-  overlay?: React.ReactNode;
+  // 自定义渲染
+  overlayRender?: (
+    overlayProps: IPhotoSliderProps & { overlayVisible: boolean },
+  ) => React.ReactNode;
   // className
   className?: string;
   // 遮罩 className
