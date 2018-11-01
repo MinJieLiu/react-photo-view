@@ -24,7 +24,7 @@ export interface IPhotoSliderProps extends IPhotoProviderBase {
   onIndexChange?: Function;
 }
 
-type PhotoSliderState =  {
+type PhotoSliderState = {
   // 偏移量
   translateX: number;
   // 图片当前的 index
@@ -275,7 +275,7 @@ export default class PhotoSlider extends React.Component<
             className={maskClassName}
             style={{ background: `rgba(0, 0, 0, ${backdropOpacity})` }}
           />
-          {bannerVisible ? (
+          {bannerVisible && (
             <BannerWrap style={overlayStyle}>
               <Counter>{photoIndex + 1} / {imageLength}</Counter>
               <BannerRight>
@@ -285,7 +285,7 @@ export default class PhotoSlider extends React.Component<
                 />
               </BannerRight>
             </BannerWrap>
-          ) : undefined}
+          )}
           {images
             .slice( // 加载相邻三张
               Math.max(photoIndex - 1, 0),

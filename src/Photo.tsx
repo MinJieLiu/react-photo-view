@@ -29,7 +29,7 @@ const PhotoImage = styled.img`
   }
 `;
 
-export default class Photo extends React.Component<IPhotoProps, PhotoState> {
+export default class Photo extends React.PureComponent<IPhotoProps, PhotoState> {
   static displayName = 'Photo';
 
   readonly state = {

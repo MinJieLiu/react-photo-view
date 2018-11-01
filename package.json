@@ -1,6 +1,6 @@
 {
   "name": "react-photo-view",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "description": "React photo preview.",
   "main": "./lib/index",
   "module": "./es/index",
@@ -42,18 +42,21 @@
   "author": "LMY",
   "license": "MIT",
   "devDependencies": {
-    "@types/react": "^16.4.6",
-    "@types/react-dom": "^16.0.6",
-    "babel-polyfill": "^6.23.0",
-    "prettier": "^1.13.7",
+    "@types/react": "^16.4.18",
+    "@types/react-dom": "^16.0.9",
+    "babel-polyfill": "^6.26.0",
+    "prettier": "^1.14.3",
     "rc-test": "^6.0.9",
-    "rc-tools": "^8.1.1",
-    "react": "^16.4.1",
-    "react-dom": "^16.4.1"
+    "rc-tools": "^8.2.2",
+    "react": "^16.6.0",
+    "react-dom": "^16.6.0",
+    "styled-components": "^4.0.3"
   },
   "dependencies": {
     "lodash.debounce": "^4.0.8",
-    "lodash.uniqueid": "^4.0.1",
-    "styled-components": "^3.0.1"
+    "lodash.uniqueid": "^4.0.1"
+  },
+  "peerDependencies": {
+    "styled-components": "^4.0.0"
   }
 }

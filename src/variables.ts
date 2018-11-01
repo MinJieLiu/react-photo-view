@@ -36,4 +36,4 @@ export const maxScale: number = 6;
 /**
  * 缩放弹性缓冲
  */
-export const scaleBuffer = 0.2;
+export const scaleBuffer: number = 0.2;
