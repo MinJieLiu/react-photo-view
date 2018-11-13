@@ -6,7 +6,7 @@ import throttle from './utils/throttle';
 import isMobile from './utils/isMobile';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
-import slideToSuitableOffset from './utils/slideToSuitableOffset';
+import slideToPosition from './utils/slideToPosition';
 import { getClosedHorizontal, getClosedVertical } from './utils/getCloseEdge';
 import withContinuousTap from './utils/withContinuousTap';
 import { maxScale, minReachOffset, minScale, scaleBuffer } from './variables';
@@ -337,7 +337,7 @@ export default class PhotoView extends React.Component<
         ),
         reachState: ReachTypeEnum.Normal, // 重置触发状态
         ...hasMove
-          ? slideToSuitableOffset({
+          ? slideToPosition({
             x,
             y,
             lastX,

@@ -1,32 +1,57 @@
-import { maxTouchTime } from '../variables';
+import {
+  maxTouchTime,
+  slideAcceleration,
+} from '../variables';
 
 /**
- * 根据速度滑动至目标位置
+ * 适应到合适的图片偏移量
  */
 const slideToPosition = ({
   x,
   y,
   lastX,
   lastY,
+  width,
+  height,
+  scale,
   touchedTime,
 }: {
   x: number;
   y: number;
   lastX: number;
   lastY: number;
+  width: number;
+  height: number;
+  scale: number;
   touchedTime: number;
 }): {
-  endX: number;
-  endY: number;
+  x: number;
+  y: number;
+
 } => {
   const moveTime = Date.now() - touchedTime;
+  // 时间过长
+  if (moveTime >= maxTouchTime) {
+    return {
+      x,
+      y,
+    };
+  }
+  // 初始速度
   const speedX = (x - lastX) / moveTime;
   const speedY = (y - lastY) / moveTime;
-  const maxSpeed = Math.max(speedX, speedY);
-  const slideTime = moveTime < maxTouchTime ? Math.abs(maxSpeed) * 20 + maxTouchTime : 0;
+
+  // 停下所消耗时间
+  const slideTimeX = speedX / slideAcceleration;
+  const slideTimeY = speedY / slideAcceleration;
+
+  // 计划滑动位置
+  const planX = Math.floor(x + speedX * slideTimeX);
+  const planY = Math.floor(y + speedY * slideTimeY);
+
   return {
-    endX: Math.floor(x + speedX * slideTime),
-    endY: Math.floor(y + speedY * slideTime),
+    x: planX,
+    y: planY,
   };
 };
 
