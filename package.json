@@ -2,61 +2,68 @@
   "name": "react-photo-view",
   "version": "0.3.0",
   "description": "React photo preview.",
-  "main": "./lib/index",
-  "module": "./es/index",
+  "author": "MinJieLiu",
+  "license": "MIT",
+  "repository": "https://github.com/MinJieLiu/react-photo-view.git",
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "jsnext:main": "dist/index.es.js",
   "keywords": [
     "react",
     "react-component",
     "react-photo-view",
     "photo"
   ],
-  "homepage": "https://github.com/MinJieLiu/react-photo-view",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/MinJieLiu/react-photo-view.git"
+  "engines": {
+    "node": ">=8",
+    "npm": ">=5"
   },
   "scripts": {
-    "watch-tsc": "rc-tools run watch-tsc",
-    "dist": "rc-tools run dist",
-    "build": "rc-tools run build",
-    "gh-pages": "rc-tools run gh-pages",
-    "start": "rc-tools run server",
-    "compile": "rc-tools run compile --babel-runtime",
-    "pub": "rc-tools run pub --babel-runtime",
-    "lint": "rc-tools run lint",
-    "karma": "rc-test run karma",
-    "saucelabs": "rc-test run saucelabs",
-    "test": "rc-test run test",
-    "prepublish": "rc-tools run guard",
-    "chrome-test": "rc-test run chrome-test",
-    "coverage": "rc-test run coverage"
-  },
-  "config": {
-    "port": 8001
-  },
-  "files": [
-    "lib",
-    "es"
-  ],
-  "typings": "./lib/index.d.ts",
-  "author": "LMY",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/react": "^16.4.18",
-    "@types/react-dom": "^16.0.9",
-    "babel-polyfill": "^6.26.0",
-    "prettier": "^1.14.3",
-    "rc-test": "^6.0.9",
-    "rc-tools": "^8.2.2",
-    "react": "^16.6.0",
-    "react-dom": "^16.6.0",
-    "styled-components": "^4.0.3"
+    "test": "cross-env CI=1 react-scripts-ts test --env=jsdom",
+    "test:watch": "react-scripts-ts test --env=jsdom",
+    "build": "rollup -c",
+    "start": "rollup -c -w",
+    "prepare": "npm run build",
+    "predeploy": "cd example && npm install && npm run build",
+    "deploy": "gh-pages -d example/build"
   },
   "dependencies": {
     "lodash.debounce": "^4.0.8",
     "lodash.uniqueid": "^4.0.1"
   },
   "peerDependencies": {
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0",
     "styled-components": "^4.0.0"
-  }
+  },
+  "devDependencies": {
+    "@svgr/rollup": "^4.1.0",
+    "@types/jest": "^24.0.11",
+    "@types/lodash.debounce": "^4.0.6",
+    "@types/lodash.uniqueid": "^4.0.6",
+    "@types/react": "^16.8.12",
+    "@types/react-dom": "^16.8.3",
+    "@types/styled-components": "^4.1.13",
+    "babel-core": "^6.26.3",
+    "babel-runtime": "^6.26.0",
+    "cross-env": "^5.2.0",
+    "gh-pages": "^2.0.1",
+    "prettier": "^1.16.4",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-scripts-ts": "^3.1.0",
+    "rollup": "^1.9.0",
+    "rollup-plugin-babel": "^3.0.7",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-node-resolve": "^4.2.0",
+    "rollup-plugin-peer-deps-external": "^2.2.0",
+    "rollup-plugin-postcss": "^2.0.3",
+    "rollup-plugin-typescript2": "^0.20.1",
+    "rollup-plugin-url": "^2.2.0",
+    "styled-components": "^4.2.0",
+    "typescript": "^3.4.2"
+  },
+  "files": [
+    "dist"
+  ]
 }

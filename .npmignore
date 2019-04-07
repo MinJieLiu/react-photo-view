@@ -1,9 +1,5 @@
 .DS_STORE
 *.log
-node_modules
-/build
-/examples
-coverage
-.nyc_output
+/example
 yarn.lock
 .idea/

@@ -1,15 +1,17 @@
 import debounce from 'lodash.debounce';
 
+export type TapFuncType<T> = (...args: T[]) => void;
+
 /**
  * 单击和双击事件处理
- * @param singleTap
- * @param doubleTap
+ * @param singleTap - 单击事件
+ * @param doubleTap - 双击事件
  * @return invokeTap
  */
-export default function withContinuousTap(
-  singleTap: Function,
-  doubleTap: Function,
-) {
+export default function withContinuousTap<T>(
+  singleTap: TapFuncType<T>,
+  doubleTap: TapFuncType<T>,
+): TapFuncType<T> {
   // 当前连续点击次数
   let continuousClick = 0;
 

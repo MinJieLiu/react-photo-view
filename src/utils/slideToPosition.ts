@@ -11,18 +11,12 @@ const slideToPosition = ({
   y,
   lastX,
   lastY,
-  width,
-  height,
-  scale,
   touchedTime,
 }: {
   x: number;
   y: number;
   lastX: number;
   lastY: number;
-  width: number;
-  height: number;
-  scale: number;
   touchedTime: number;
 }): {
   x: number;

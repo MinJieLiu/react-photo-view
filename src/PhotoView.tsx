@@ -8,7 +8,7 @@ import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import slideToPosition from './utils/slideToPosition';
 import { getClosedHorizontal, getClosedVertical } from './utils/getCloseEdge';
-import withContinuousTap from './utils/withContinuousTap';
+import withContinuousTap, { TapFuncType } from './utils/withContinuousTap';
 import { maxScale, minReachOffset, minScale, scaleBuffer } from './variables';
 import {
   ReachFunction,
@@ -89,9 +89,9 @@ export default class PhotoView extends React.Component<
 
   readonly state = initialState;
   private readonly photoRef = React.createRef<Photo>();
-  private readonly handlePhotoTap;
+  private readonly handlePhotoTap: TapFuncType<number>;
 
-  constructor(props) {
+  constructor(props: IPhotoViewProps) {
     super(props);
     this.onMove = throttle(this.onMove, 8);
     // 单击与双击事件处理
@@ -207,7 +207,7 @@ export default class PhotoView extends React.Component<
     }
   }
 
-  onDoubleTap = (clientX, clientY) => {
+  onDoubleTap: TapFuncType<number> = (clientX, clientY) => {
     const { current } = this.photoRef;
     if (current) {
       const { width, naturalWidth } = current.state;
@@ -315,7 +315,7 @@ export default class PhotoView extends React.Component<
     const { current } = this.photoRef;
     if ((touched || maskTouched) && current) {
       const { onReachUp, onPhotoTap, onMaskTap } = this.props;
-      const { width, naturalWidth, height } = current.state;
+      const { width, naturalWidth } = current.state;
       const {
         x,
         y,
@@ -342,9 +342,6 @@ export default class PhotoView extends React.Component<
             y,
             lastX,
             lastY,
-            width,
-            height,
-            scale,
             touchedTime,
           }) : {
             x,

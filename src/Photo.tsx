@@ -43,7 +43,7 @@ export default class Photo extends React.PureComponent<IPhotoProps, PhotoState> 
 
   private isMount = true;
 
-  constructor(props) {
+  constructor(props: IPhotoProps) {
     super(props);
     this.handleResize = throttle(this.handleResize, 8);
   }
@@ -62,7 +62,7 @@ export default class Photo extends React.PureComponent<IPhotoProps, PhotoState> 
     window.removeEventListener('resize', this.handleResize);
   }
 
-  handleImageLoaded = e => {
+  handleImageLoaded = (e) => {
     const { naturalWidth, naturalHeight } = e.target;
     if (this.isMount) {
       this.setState({

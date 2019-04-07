@@ -133,7 +133,7 @@ export default class PhotoSlider extends React.Component<
     });
   }
 
-  handleReachVerticalMove = (clientX, clientY) => {
+  handleReachVerticalMove = (_, clientY) => {
     this.setState(({ lastClientY, backdropOpacity }) => {
       if (lastClientY === undefined) {
         return {
