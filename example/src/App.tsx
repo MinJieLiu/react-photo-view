@@ -1,7 +1,7 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import styled from 'styled-components';
-import { PhotoProvider, PhotoConsumer } from '../src';
+import { PhotoProvider, PhotoConsumer } from 'react-photo-view';
+import './App.css';
 
 const Container = styled.div`
   font-size: 32px;
@@ -22,9 +22,15 @@ const SmallImage = styled.img`
   cursor: pointer;
 `;
 
-class Example extends React.Component {
+class App extends React.Component {
   state = {
-    photoImages: ['1.png', '2.jpg', '3.jpg', '4.jpg', '5.jpg'],
+    photoImages: [
+      'images/1.png',
+      'images/2.jpg',
+      'images/3.jpg',
+      'images/4.jpg',
+      'images/5.jpg',
+    ],
   };
 
   render() {
@@ -46,4 +52,4 @@ class Example extends React.Component {
   }
 }
 
-ReactDOM.render(<Example />, document.getElementById('__react-content'));
+export default App;
