@@ -1,6 +1,6 @@
 {
   "name": "react-photo-view",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "React photo preview.",
   "author": "MinJieLiu",
   "license": "MIT",
@@ -11,8 +11,10 @@
   "keywords": [
     "react",
     "react-component",
+    "react-photo",
     "react-photo-view",
-    "photo"
+    "photo",
+    "photo-view"
   ],
   "engines": {
     "node": ">=8",
@@ -37,31 +39,31 @@
     "styled-components": "^4.0.0"
   },
   "devDependencies": {
-    "@svgr/rollup": "^4.1.0",
-    "@types/jest": "^24.0.11",
+    "@svgr/rollup": "^4.3.3",
+    "@types/jest": "^24.0.22",
     "@types/lodash.debounce": "^4.0.6",
     "@types/lodash.uniqueid": "^4.0.6",
-    "@types/react": "^16.8.12",
-    "@types/react-dom": "^16.8.3",
-    "@types/styled-components": "^4.1.13",
+    "@types/react": "^16.9.11",
+    "@types/react-dom": "^16.9.3",
+    "@types/styled-components": "^4.1.21",
     "babel-core": "^6.26.3",
     "babel-runtime": "^6.26.0",
-    "cross-env": "^5.2.0",
-    "gh-pages": "^2.0.1",
-    "prettier": "^1.16.4",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
+    "cross-env": "^6.0.3",
+    "gh-pages": "^2.1.1",
+    "prettier": "^1.18.2",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
     "react-scripts-ts": "^3.1.0",
-    "rollup": "^1.9.0",
+    "rollup": "^1.26.3",
     "rollup-plugin-babel": "^3.0.7",
-    "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-node-resolve": "^4.2.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-peer-deps-external": "^2.2.0",
     "rollup-plugin-postcss": "^2.0.3",
-    "rollup-plugin-typescript2": "^0.20.1",
-    "rollup-plugin-url": "^2.2.0",
-    "styled-components": "^4.2.0",
-    "typescript": "^3.4.2"
+    "rollup-plugin-typescript2": "^0.25.2",
+    "rollup-plugin-url": "^3.0.0",
+    "styled-components": "^4.4.1",
+    "typescript": "^3.7.2"
   },
   "files": [
     "dist"
