@@ -4,6 +4,7 @@ import PhotoView from './PhotoView';
 import SlideWrap from './components/SlideWrap';
 import CloseSVG from './components/CloseSVG';
 import isMobile from './utils/isMobile';
+import './PhotoSlider.less';
 import { dataType, IPhotoProviderBase } from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
 
@@ -273,7 +274,7 @@ export default class PhotoSlider extends React.Component<
         <SlideWrap className={className}>
           <div
             className={classNames(
-              'PhotoView_PhotoSlide__Backdrop',
+              'PhotoView-PhotoSlider__Backdrop',
               maskClassName,
             )}
             style={{ background: `rgba(0, 0, 0, ${backdropOpacity})` }}

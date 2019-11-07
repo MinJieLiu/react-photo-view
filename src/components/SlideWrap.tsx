@@ -3,42 +3,54 @@ import { createPortal } from 'react-dom';
 import classNames from 'classnames';
 import './SlideWrap.less';
 
-const SlideWrap: React.FC<{ className?: string }> = ({
-  className,
-  children,
-}) => {
-  const [dialogNode] = React.useState(() => {
+export default class SlideWrap extends React.Component<{
+  className?: string;
+  children: any;
+}> {
+  static displayName = 'SlideWrap';
+
+  private dialogNode;
+  private originalOverflow;
+
+  constructor(props) {
+    super(props);
+
     // 创建容器
-    const dialogNode = document.createElement('section');
-    document.body.appendChild(dialogNode);
-    return dialogNode;
-  });
-  const originalOverflowCallback = React.useRef('');
+    this.dialogNode = document.createElement('section');
+    document.body.appendChild(this.dialogNode);
+  }
 
-  React.useEffect(
-    () => {
-      const { style } = document.body;
-      originalOverflowCallback.current = style.overflow;
-      style.overflow = 'hidden';
+  componentDidMount() {
+    this.preventScroll();
+  }
 
-      return () => {
-        const { style } = document.body;
-        style.overflow = originalOverflowCallback.current;
-        // 清除容器
-        document.body.removeChild(dialogNode);
-      };
-    },
-    [] as readonly [],
-  );
+  componentWillUnmount() {
+    this.allowScroll();
+    // 清除容器
+    document.body.removeChild(this.dialogNode);
+    this.dialogNode = undefined;
+  }
 
-  return createPortal(
-    <div className={classNames('PhotoView__SlideWrap', className)}>
-      {children}
-    </div>,
-    dialogNode,
-  );
-};
+  preventScroll = () => {
+    const { style } = document.body;
+    this.originalOverflow = style.overflow;
+    style.overflow = 'hidden';
+  };
 
-SlideWrap.displayName = 'SlideWrap';
+  allowScroll = () => {
+    const { style } = document.body;
+    style.overflow = this.originalOverflow;
+    this.originalOverflow = undefined;
+  };
 
-export default SlideWrap;
+  render() {
+    const { className, children } = this.props;
+
+    return createPortal(
+      <div className={classNames('PhotoView__SlideWrap', className)}>
+        {children}
+      </div>,
+      this.dialogNode,
+    );
+  }
+}

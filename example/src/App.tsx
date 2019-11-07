@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { PhotoProvider, PhotoConsumer } from 'react-photo-view';
 import './App.css';
+import 'react-photo-view/dist/index.css';
 
 const Container = styled.div`
   font-size: 32px;
