@@ -45,7 +45,7 @@ export default class PhotoProvider extends React.Component<
         intro,
       }),
     }));
-  }
+  };
 
   handleRemoveItem = (key: string) => {
     this.setState(({ images, index }) => {
@@ -56,7 +56,7 @@ export default class PhotoProvider extends React.Component<
         index: Math.min(nextEndIndex, index),
       };
     });
-  }
+  };
 
   handleShow = (key: string) => {
     const { images } = this.state;
@@ -64,25 +64,22 @@ export default class PhotoProvider extends React.Component<
       visible: true,
       index: images.findIndex(item => item.key === key),
     });
-  }
+  };
 
   handleClose = () => {
     this.setState({
       visible: false,
     });
-  }
+  };
 
   handleIndexChange = (index: number) => {
     this.setState({
       index,
     });
-  }
+  };
 
   render() {
-    const {
-      children,
-      ...restProps
-    } = this.props;
+    const { children, ...restProps } = this.props;
     const { images, visible, index } = this.state;
 
     return (

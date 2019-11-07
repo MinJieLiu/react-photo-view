@@ -1,14 +1,10 @@
 import React from 'react';
+import classNames from 'classnames';
 import PhotoView from './PhotoView';
 import SlideWrap from './components/SlideWrap';
-import Backdrop from './components/Backdrop';
-import { Close, Counter, BannerWrap, BannerRight } from './components/BannerWrap';
-import FooterWrap from './components/FooterWrap';
+import CloseSVG from './components/CloseSVG';
 import isMobile from './utils/isMobile';
-import {
-  dataType,
-  IPhotoProviderBase,
-} from './types';
+import { dataType, IPhotoProviderBase } from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
 
 export interface IPhotoSliderProps extends IPhotoProviderBase {
@@ -104,7 +100,7 @@ export default class PhotoSlider extends React.Component<
     this.setState({
       overlayVisible: true,
     });
-  }
+  };
 
   handlePhotoTap = () => {
     if (this.props.photoClosable) {
@@ -114,13 +110,13 @@ export default class PhotoSlider extends React.Component<
         overlayVisible: !prevState.overlayVisible,
       }));
     }
-  }
+  };
 
   handlePhotoMaskTap = () => {
     if (this.props.maskClosable) {
       this.handleClose();
     }
-  }
+  };
 
   handleResize = () => {
     const { innerWidth } = window;
@@ -131,7 +127,7 @@ export default class PhotoSlider extends React.Component<
         lastClientY: undefined,
       };
     });
-  }
+  };
 
   handleReachVerticalMove = (_, clientY) => {
     this.setState(({ lastClientY, backdropOpacity }) => {
@@ -154,9 +150,9 @@ export default class PhotoSlider extends React.Component<
         photoScale: Math.max(Math.min(1, 1 - offsetClientY / 100 / 10), 0.6),
       };
     });
-  }
+  };
 
-  handleReachHorizontalMove = (clientX) => {
+  handleReachHorizontalMove = clientX => {
     const { innerWidth } = window;
     this.setState(({ lastClientX, translateX, photoIndex }) => {
       if (lastClientX === undefined) {
@@ -170,10 +166,11 @@ export default class PhotoSlider extends React.Component<
       return {
         touched: true,
         lastClientX: lastClientX,
-        translateX: -(innerWidth + horizontalOffset) * photoIndex + offsetClientX,
+        translateX:
+          -(innerWidth + horizontalOffset) * photoIndex + offsetClientX,
       };
     });
-  }
+  };
 
   handleIndexChange = (photoIndex: number) => {
     const singlePageWidth = window.innerWidth + horizontalOffset;
@@ -186,7 +183,7 @@ export default class PhotoSlider extends React.Component<
     if (onIndexChange) {
       onIndexChange(photoIndex);
     }
-  }
+  };
 
   handleReachUp = (clientX: number, clientY: number) => {
     const { innerWidth, innerHeight } = window;
@@ -211,7 +208,10 @@ export default class PhotoSlider extends React.Component<
       isChangeVisible = true;
       onClose();
       // 下一张
-    } else if (offsetClientX < -maxMoveOffset && photoIndex < images.length - 1) {
+    } else if (
+      offsetClientX < -maxMoveOffset &&
+      photoIndex < images.length - 1
+    ) {
       currentPhotoIndex = photoIndex + 1;
       currentTranslateX = -singlePageWidth * currentPhotoIndex;
       if (onIndexChange) {
@@ -235,7 +235,7 @@ export default class PhotoSlider extends React.Component<
       photoScale: 1,
       overlayVisible: isChangeVisible ? true : overlayVisible,
     });
-  }
+  };
 
   render() {
     const {
@@ -271,31 +271,40 @@ export default class PhotoSlider extends React.Component<
 
       return (
         <SlideWrap className={className}>
-          <Backdrop
-            className={maskClassName}
+          <div
+            className={classNames(
+              'PhotoView_PhotoSlide__Backdrop',
+              maskClassName,
+            )}
             style={{ background: `rgba(0, 0, 0, ${backdropOpacity})` }}
           />
           {bannerVisible && (
-            <BannerWrap style={overlayStyle}>
-              <Counter>{photoIndex + 1} / {imageLength}</Counter>
-              <BannerRight>
-                <Close
+            <div
+              className="PhotoView-PhotoSlider__BannerWrap"
+              style={overlayStyle}
+            >
+              <div className="PhotoView-PhotoSlider__Counter">
+                {photoIndex + 1} / {imageLength}
+              </div>
+              <div className="PhotoView-PhotoSlider__BannerRight">
+                <CloseSVG
+                  className="PhotoView-PhotoSlider__Close"
                   onTouchEnd={isMobile ? onClose : undefined}
                   onClick={isMobile ? undefined : onClose}
                 />
-              </BannerRight>
-            </BannerWrap>
+              </div>
+            </div>
           )}
           {images
-            .slice( // 加载相邻三张
+            .slice(
+              // 加载相邻三张
               Math.max(photoIndex - 1, 0),
-              Math.min(photoIndex + 2, imageLength + 1)
+              Math.min(photoIndex + 2, imageLength + 1),
             )
             .map((item: dataType, index) => {
               // 截取之前的索引位置
-              const realIndex = photoIndex === 0
-                ? photoIndex + index
-                : photoIndex - 1 + index;
+              const realIndex =
+                photoIndex === 0 ? photoIndex + index : photoIndex - 1 + index;
               return (
                 <PhotoView
                   key={item.key || realIndex}
@@ -330,16 +339,24 @@ export default class PhotoSlider extends React.Component<
               );
             })}
           {introVisible && overlayIntro ? (
-            <FooterWrap style={overlayStyle}>{overlayIntro}</FooterWrap>
-          ) : undefined}
-          {overlayRender && overlayRender({
-            images,
-            index: photoIndex,
-            visible,
-            onClose,
-            onIndexChange: this.handleIndexChange,
-            overlayVisible,
-          })}
+            <div
+              className="PhotoView-PhotoSlider__FooterWrap"
+              style={overlayStyle}
+            >
+              {overlayIntro}
+            </div>
+          ) : (
+            undefined
+          )}
+          {overlayRender &&
+            overlayRender({
+              images,
+              index: photoIndex,
+              visible,
+              onClose,
+              onIndexChange: this.handleIndexChange,
+              overlayVisible,
+            })}
         </SlideWrap>
       );
     }

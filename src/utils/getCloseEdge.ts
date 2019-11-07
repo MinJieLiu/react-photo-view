@@ -5,7 +5,7 @@ import { CloseEdgeEnum } from '../types';
  * @param x
  * @param scale
  * @param width
- * @return 0. 未超出 1. 小于屏幕宽度 2. 接触左边 3. 接触右边
+ * @return CloseEdgeEnum
  */
 export const getClosedHorizontal = (
   x: number,
@@ -31,7 +31,7 @@ export const getClosedHorizontal = (
  * @param y
  * @param scale
  * @param height
- * @return 0. 未超出 1. 小于屏幕高度 2. 接触上边 3. 接触下边
+ * @return CloseEdgeEnum
  */
 export const getClosedVertical = (
   y: number,

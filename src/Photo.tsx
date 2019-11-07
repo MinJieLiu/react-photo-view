@@ -1,11 +1,13 @@
 import React from 'react';
-import styled from 'styled-components';
+import classNames from 'classnames';
 import throttle from './utils/throttle';
 import Spinner from './components/Spinner';
 import getSuitableImageSize from './utils/getSuitableImageSize';
+import './Photo.less';
 
 export interface IPhotoProps extends React.HTMLAttributes<any> {
   src: string;
+  className?: string;
   onPhotoResize: () => void;
   loadingElement?: JSX.Element;
   brokenElement?: JSX.Element;
@@ -20,16 +22,10 @@ type PhotoState = {
   height: number;
 };
 
-const PhotoImage = styled.img`
-  will-change: transform;
-  cursor: grab;
-
-  &:active {
-    cursor: grabbing;
-  }
-`;
-
-export default class Photo extends React.PureComponent<IPhotoProps, PhotoState> {
+export default class Photo extends React.PureComponent<
+  IPhotoProps,
+  PhotoState
+> {
   static displayName = 'Photo';
 
   readonly state = {
@@ -62,7 +58,7 @@ export default class Photo extends React.PureComponent<IPhotoProps, PhotoState> 
     window.removeEventListener('resize', this.handleResize);
   }
 
-  handleImageLoaded = (e) => {
+  handleImageLoaded = e => {
     const { naturalWidth, naturalHeight } = e.target;
     if (this.isMount) {
       this.setState({
@@ -72,7 +68,7 @@ export default class Photo extends React.PureComponent<IPhotoProps, PhotoState> 
         ...getSuitableImageSize(naturalWidth, naturalHeight),
       });
     }
-  }
+  };
 
   handleImageBroken = () => {
     if (this.isMount) {
@@ -80,7 +76,7 @@ export default class Photo extends React.PureComponent<IPhotoProps, PhotoState> 
         broken: true,
       });
     }
-  }
+  };
 
   handleResize = () => {
     const { loaded, naturalWidth, naturalHeight } = this.state;
@@ -90,11 +86,12 @@ export default class Photo extends React.PureComponent<IPhotoProps, PhotoState> 
         this.props.onPhotoResize,
       );
     }
-  }
+  };
 
   render() {
     const {
       src,
+      className,
       loadingElement,
       brokenElement,
       ...restProps
@@ -104,10 +101,12 @@ export default class Photo extends React.PureComponent<IPhotoProps, PhotoState> 
     if (src && !broken) {
       if (loaded) {
         return (
-          <PhotoImage
+          <img
+            className={classNames('PhotoView__Photo', className)}
             src={src}
             width={width}
             height={height}
+            alt=""
             {...restProps}
           />
         );

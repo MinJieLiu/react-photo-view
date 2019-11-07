@@ -1,12 +1,10 @@
 import React from 'react';
-import styled, { keyframes } from 'styled-components';
+import './Spinner.less';
 
-function Spinner(props: {
-  className?: string;
-}) {
+function Spinner() {
   return (
     <svg
-      className={props.className}
+      className="PhotoView__Spinner"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 32 32"
       width="36"
@@ -22,16 +20,4 @@ function Spinner(props: {
   );
 }
 
-const rotate = keyframes`
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-`;
-
-export default styled(Spinner)`
-  animation: ${rotate} 0.6s linear infinite;
-`;
+export default Spinner;

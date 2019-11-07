@@ -1,7 +1,6 @@
 import React from 'react';
+import classNames from 'classnames';
 import Photo from './Photo';
-import PhotoWrap from './components/PhotoWrap';
-import PhotoMask from './components/PhotoMask';
 import throttle from './utils/throttle';
 import isMobile from './utils/isMobile';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
@@ -15,6 +14,7 @@ import {
   PhotoTapFunction,
   ReachTypeEnum,
 } from './types';
+import './PhotoView.less';
 
 export interface IPhotoViewProps {
   // 图片地址
@@ -131,7 +131,7 @@ export default class PhotoView extends React.Component<
       lastTouchLength: touchLength,
       touchedTime: Date.now(),
     }));
-  }
+  };
 
   onMove = (newClientX: number, newClientY: number, touchLength: number = 0) => {
     const { touched, maskTouched } = this.state;
@@ -198,14 +198,14 @@ export default class PhotoView extends React.Component<
         });
       }
     }
-  }
+  };
 
   onPhotoTap = (clientX: number, clientY: number) => {
     const { onPhotoTap } = this.props;
     if (onPhotoTap) {
       onPhotoTap(clientX, clientY);
     }
-  }
+  };
 
   onDoubleTap: TapFuncType<number> = (clientX, clientY) => {
     const { current } = this.photoRef;
@@ -226,7 +226,7 @@ export default class PhotoView extends React.Component<
         }),
       });
     }
-  }
+  };
 
   handleWheel = (e) => {
     e.preventDefault();
@@ -258,7 +258,7 @@ export default class PhotoView extends React.Component<
         };
       });
     }
-  }
+  };
 
   handleMaskStart = (clientX: number, clientY: number) => {
     this.setState(prevState => ({
@@ -268,16 +268,16 @@ export default class PhotoView extends React.Component<
       lastX: prevState.x,
       lastY: prevState.y,
     }));
-  }
+  };
 
   handleMaskMouseDown = (e) => {
     this.handleMaskStart(e.clientX, e.clientY);
-  }
+  };
 
   handleMaskTouchStart = (e) => {
     const { clientX, clientY } = e.touches[0];
     this.handleMaskStart(clientX, clientY);
-  }
+  };
 
   handleTouchStart = (e) => {
     if (e.touches.length >= 2) {
@@ -287,12 +287,12 @@ export default class PhotoView extends React.Component<
       const { clientX, clientY } = e.touches[0];
       this.handleStart(clientX, clientY);
     }
-  }
+  };
 
   handleMouseDown = (e) => {
     e.preventDefault();
     this.handleStart(e.clientX, e.clientY);
-  }
+  };
 
   handleTouchMove = (e) => {
     e.preventDefault();
@@ -303,12 +303,12 @@ export default class PhotoView extends React.Component<
       const { clientX, clientY } = e.touches[0];
       this.onMove(clientX, clientY);
     }
-  }
+  };
 
   handleMouseMove = (e) => {
     e.preventDefault();
     this.onMove(e.clientX, e.clientY);
-  }
+  };
 
   handleUp = (newClientX: number, newClientY: number) => {
     const { touched, maskTouched } = this.state;
@@ -361,17 +361,17 @@ export default class PhotoView extends React.Component<
         }
       });
     }
-  }
+  };
 
   handleTouchEnd = (e) => {
     const { clientX, clientY } = e.changedTouches[0];
     this.handleUp(clientX, clientY);
-  }
+  };
 
   handleMouseUp = (e) => {
     const { clientX, clientY } = e;
     this.handleUp(clientX, clientY);
-  }
+  };
 
   handleResize = () => {
     this.setState(initialState);
@@ -379,7 +379,7 @@ export default class PhotoView extends React.Component<
     if (onPhotoResize) {
       onPhotoResize();
     }
-  }
+  };
 
   handleReachCallback = ({
     x,
@@ -447,7 +447,7 @@ export default class PhotoView extends React.Component<
       return ReachTypeEnum.YReach;
     }
     return ReachTypeEnum.Normal;
-  }
+  };
 
   render() {
     const {
@@ -464,8 +464,9 @@ export default class PhotoView extends React.Component<
     const transform = `translate3d(${x}px, ${y}px, 0) scale(${scale * photoScale})`;
 
     return (
-      <PhotoWrap className={wrapClassName} style={style}>
-        <PhotoMask
+      <div className={classNames('PhotoView__PhotoWrap', wrapClassName)} style={style}>
+        <div
+          className="PhotoView__PhotoMask"
           onMouseDown={isMobile ? undefined : this.handleMaskMouseDown}
           onTouchStart={isMobile ? this.handleMaskTouchStart : undefined}
         />
@@ -487,7 +488,7 @@ export default class PhotoView extends React.Component<
           loadingElement={loadingElement}
           brokenElement={brokenElement}
         />
-      </PhotoWrap>
+      </div>
     );
   }
 }

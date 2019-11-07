@@ -35,12 +35,13 @@
     "lodash.uniqueid": "^4.0.1"
   },
   "peerDependencies": {
-    "react": "^16.0.0",
-    "react-dom": "^16.0.0",
-    "styled-components": "^4.0.0"
+    "classnames": "^2.2.0",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
   },
   "devDependencies": {
     "@svgr/rollup": "^4.3.3",
+    "@types/classnames": "^2.2.9",
     "@types/jest": "^24.0.22",
     "@types/lodash.debounce": "^4.0.6",
     "@types/lodash.uniqueid": "^4.0.6",
@@ -49,8 +50,10 @@
     "@types/styled-components": "^4.1.21",
     "babel-core": "^6.26.3",
     "babel-runtime": "^6.26.0",
+    "classnames": "^2.2.6",
     "cross-env": "^6.0.3",
     "gh-pages": "^2.1.1",
+    "less": "^3.10.3",
     "prettier": "^1.18.2",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
@@ -63,7 +66,6 @@
     "rollup-plugin-postcss": "^2.0.3",
     "rollup-plugin-typescript2": "^0.25.2",
     "rollup-plugin-url": "^3.0.0",
-    "styled-components": "^4.4.1",
     "typescript": "^3.7.2"
   },
   "files": [

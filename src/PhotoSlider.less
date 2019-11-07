@@ -1,0 +1,65 @@
+.PhotoView {
+  &-PhotoSlider__Backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: -1;
+  }
+
+  &-PhotoSlider__BannerWrap {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 44px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    transition: opacity 0.2s ease-out;
+    z-index: 20;
+  }
+
+  &-PhotoSlider__Counter {
+    padding: 0 10px;
+    font-size: 14px;
+    opacity: 0.75;
+  }
+
+  &-PhotoSlider__BannerRight {
+    height: 100%;
+  }
+
+  &-PhotoSlider__Close {
+    box-sizing: border-box;
+    padding: 10px;
+    opacity: 0.75;
+    cursor: pointer;
+    transition: opacity 0.2s linear;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  &-PhotoSlider__FooterWrap {
+    box-sizing: border-box;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    padding: 10px;
+    width: 100%;
+    min-height: 44px;
+    line-height: 1.5;
+    font-size: 14px;
+    color: #ccc;
+    background-color: rgba(0, 0, 0, 0.5);
+    text-align: justify;
+    transition: opacity 0.2s ease-out;
+    z-index: 20;
+  }
+}

@@ -39,7 +39,7 @@ class PhotoViewItem extends React.Component<IPhotoViewItem, PhotoViewState> {
     removeItem(this.key);
   }
 
-  handleTouchStart = (e) => {
+  handleTouchStart = e => {
     const { clientX, clientY } = e.touches[0];
     this.setState({
       clientX,
@@ -52,9 +52,9 @@ class PhotoViewItem extends React.Component<IPhotoViewItem, PhotoViewState> {
         onTouchStart(e);
       }
     }
-  }
+  };
 
-  handleTouchEnd = (e) => {
+  handleTouchEnd = e => {
     const { onShow, children } = this.props;
     const { clientX: newClientX, clientY: newClientY } = e.changedTouches[0];
     const { clientX, clientY } = this.state;
@@ -67,9 +67,9 @@ class PhotoViewItem extends React.Component<IPhotoViewItem, PhotoViewState> {
         onTouchEnd(e);
       }
     }
-  }
+  };
 
-  handleClick = (e) => {
+  handleClick = e => {
     const { onShow, children } = this.props;
     onShow(this.key);
     if (children) {
@@ -78,20 +78,22 @@ class PhotoViewItem extends React.Component<IPhotoViewItem, PhotoViewState> {
         onClick(e);
       }
     }
-  }
+  };
 
   render() {
     const { children } = this.props;
     if (children) {
-      return React.Children.only(React.cloneElement(
-        children,
-        isMobile
-          ? {
-            onTouchStart: this.handleTouchStart,
-            onTouchEnd: this.handleTouchEnd,
-          }
-          : { onClick: this.handleClick },
-      ));
+      return React.Children.only(
+        React.cloneElement(
+          children,
+          isMobile
+            ? {
+                onTouchStart: this.handleTouchStart,
+                onTouchEnd: this.handleTouchEnd,
+              }
+            : { onClick: this.handleClick },
+        ),
+      );
     }
     return null;
   }
@@ -111,12 +113,7 @@ const PhotoConsumer: React.SFC<IPhotoConsumer> = ({
 }) => (
   <PhotoContext.Consumer>
     {value => (
-      <PhotoViewItem
-        {...value}
-        {...restProps}
-        src={src}
-        intro={intro}
-      >
+      <PhotoViewItem {...value} {...restProps} src={src} intro={intro}>
         {children}
       </PhotoViewItem>
     )}
