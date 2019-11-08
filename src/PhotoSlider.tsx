@@ -1,5 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
+import debounce from 'lodash.debounce';
 import PhotoView from './PhotoView';
 import SlideWrap from './components/SlideWrap';
 import CloseSVG from './components/CloseSVG';
@@ -81,6 +82,7 @@ export default class PhotoSlider extends React.Component<
       photoScale: 1,
       overlayVisible: true,
     };
+    this.handleResize = debounce(this.handleResize, 32);
   }
 
   componentDidMount() {
@@ -89,11 +91,6 @@ export default class PhotoSlider extends React.Component<
       translateX: index * -(window.innerWidth + horizontalOffset),
       photoIndex: index,
     });
-    window.addEventListener('resize', this.handleResize);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.handleResize);
   }
 
   handleClose = () => {
@@ -336,6 +333,7 @@ export default class PhotoSlider extends React.Component<
                   }}
                   loadingElement={loadingElement}
                   brokenElement={brokenElement}
+                  onPhotoResize={this.handleResize}
                 />
               );
             })}

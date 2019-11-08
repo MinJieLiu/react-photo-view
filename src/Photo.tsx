@@ -94,6 +94,7 @@ export default class Photo extends React.PureComponent<
       className,
       loadingElement,
       brokenElement,
+      onPhotoResize,
       ...restProps
     } = this.props;
     const { loaded, broken, width, height } = this.state;

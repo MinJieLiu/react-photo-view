@@ -3,54 +3,42 @@ import { createPortal } from 'react-dom';
 import classNames from 'classnames';
 import './SlideWrap.less';
 
-export default class SlideWrap extends React.Component<{
-  className?: string;
-  children: any;
-}> {
-  static displayName = 'SlideWrap';
-
-  private dialogNode;
-  private originalOverflow;
-
-  constructor(props) {
-    super(props);
-
+const SlideWrap: React.FC<{ className?: string }> = ({
+  className,
+  children,
+}) => {
+  const [dialogNode] = React.useState(() => {
     // 创建容器
-    this.dialogNode = document.createElement('section');
-    document.body.appendChild(this.dialogNode);
-  }
+    const dialogNode = document.createElement('section');
+    document.body.appendChild(dialogNode);
+    return dialogNode;
+  });
+  const originalOverflowCallback = React.useRef('');
 
-  componentDidMount() {
-    this.preventScroll();
-  }
+  React.useEffect(
+    () => {
+      const { style } = document.body;
+      originalOverflowCallback.current = style.overflow;
+      style.overflow = 'hidden';
 
-  componentWillUnmount() {
-    this.allowScroll();
-    // 清除容器
-    document.body.removeChild(this.dialogNode);
-    this.dialogNode = undefined;
-  }
+      return () => {
+        const { style } = document.body;
+        style.overflow = originalOverflowCallback.current;
+        // 清除容器
+        document.body.removeChild(dialogNode);
+      };
+    },
+    [] as readonly [],
+  );
 
-  preventScroll = () => {
-    const { style } = document.body;
-    this.originalOverflow = style.overflow;
-    style.overflow = 'hidden';
-  };
+  return createPortal(
+    <div className={classNames('PhotoView__SlideWrap', className)}>
+      {children}
+    </div>,
+    dialogNode,
+  );
+};
 
-  allowScroll = () => {
-    const { style } = document.body;
-    style.overflow = this.originalOverflow;
-    this.originalOverflow = undefined;
-  };
+SlideWrap.displayName = 'SlideWrap';
 
-  render() {
-    const { className, children } = this.props;
-
-    return createPortal(
-      <div className={classNames('PhotoView__SlideWrap', className)}>
-        {children}
-      </div>,
-      this.dialogNode,
-    );
-  }
-}
+export default SlideWrap;

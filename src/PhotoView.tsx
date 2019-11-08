@@ -12,7 +12,7 @@ import { maxScale, minReachOffset, minScale, scaleBuffer } from './variables';
 import {
   ReachFunction,
   PhotoTapFunction,
-  ReachTypeEnum,
+  ReachTypeEnum, CloseEdgeEnum,
 } from './types';
 import './PhotoView.less';
 
@@ -151,18 +151,21 @@ export default class PhotoView extends React.Component<
       } = this.state;
       let currentX = x;
       let currentY = y;
-      // 边缘状态
+      // 边缘超出状态
+      const horizontalCloseEdge = getClosedHorizontal(x, scale, width);
+      const verticalCloseEdge = getClosedVertical(y, scale, height);
+      // 边缘触发状态
       let currentReachState = ReachTypeEnum.Normal;
       if (touchLength === 0) {
-        currentX = newClientX - clientX + lastX;
-        currentY = newClientY - clientY + lastY;
+        // 非正常滑动则响应距离减半
+        currentX = (newClientX - clientX) / (horizontalCloseEdge !== CloseEdgeEnum.Normal ? 2 : 1)  + lastX;
+        currentY = (newClientY - clientY) / (verticalCloseEdge !== CloseEdgeEnum.Normal ? 2 : 1) + lastY;
         // 边缘触发检测
         currentReachState = this.handleReachCallback({
           x: currentX,
           y: currentY,
-          width,
-          height,
-          scale,
+          horizontalCloseEdge,
+          verticalCloseEdge,
           clientX: newClientX,
           clientY: newClientY,
           reachState,
@@ -387,24 +390,20 @@ export default class PhotoView extends React.Component<
   handleReachCallback = ({
     x,
     y,
-    width,
-    height,
-    scale,
     clientX,
     clientY,
+    horizontalCloseEdge,
+    verticalCloseEdge,
     reachState,
   }: {
     x: number,
     y: number,
-    width: number,
-    height: number,
-    scale: number,
     clientX: number,
     clientY: number,
+    horizontalCloseEdge: CloseEdgeEnum,
+    verticalCloseEdge: CloseEdgeEnum,
     reachState: ReachTypeEnum,
-  }): number => {
-    const horizontalType = getClosedHorizontal(x, scale, width);
-    const verticalType = getClosedVertical(y, scale, height);
+  }): ReachTypeEnum => {
     const {
       onReachTopMove,
       onReachRightMove,
@@ -414,7 +413,7 @@ export default class PhotoView extends React.Component<
     //  触碰到边缘
     if (
       onReachLeftMove
-      && (horizontalType
+      && (horizontalCloseEdge
       && x > minReachOffset
       && reachState === ReachTypeEnum.Normal
       || reachState === ReachTypeEnum.XReach)
@@ -423,7 +422,7 @@ export default class PhotoView extends React.Component<
       return ReachTypeEnum.XReach;
     } else if (
       onReachRightMove
-      && (horizontalType
+      && (horizontalCloseEdge
       && x < -minReachOffset
       && reachState === ReachTypeEnum.Normal
       || reachState === ReachTypeEnum.XReach)
@@ -432,7 +431,7 @@ export default class PhotoView extends React.Component<
       return ReachTypeEnum.XReach;
     } else if (
       onReachTopMove
-      && (verticalType
+      && (verticalCloseEdge
       && y > minReachOffset
       && reachState === ReachTypeEnum.Normal
       || reachState === ReachTypeEnum.YReach)
@@ -441,7 +440,7 @@ export default class PhotoView extends React.Component<
       return ReachTypeEnum.YReach;
     } else if (
       onReachBottomMove
-      && (verticalType
+      && (verticalCloseEdge
       && y < -minReachOffset
       && reachState === ReachTypeEnum.Normal
       || reachState === ReachTypeEnum.YReach)
