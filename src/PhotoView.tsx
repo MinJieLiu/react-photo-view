@@ -149,19 +149,21 @@ export default class PhotoView extends React.Component<
       } = this.state;
       let currentX = x;
       let currentY = y;
-      // 边缘超出状态
-      const horizontalCloseEdge = getClosedHorizontal(x, scale, width);
-      const verticalCloseEdge = getClosedVertical(y, scale, height);
       // 边缘触发状态
       let currentReachState = ReachTypeEnum.Normal;
       if (touchLength === 0) {
-        // 非正常滑动则响应距离减半
+        const planX = newClientX - clientX + lastX;
+        const planY = newClientY - clientY + lastY;
+        // 边缘超出状态
+        const horizontalCloseEdge = getClosedHorizontal(planX, scale, width);
+        const verticalCloseEdge = getClosedVertical(planY, scale, height);
+        // 非正常滑动则响应距离减少
         currentX = (newClientX - clientX) / (horizontalCloseEdge !== CloseEdgeEnum.Normal ? 2 : 1)  + lastX;
         currentY = (newClientY - clientY) / (verticalCloseEdge !== CloseEdgeEnum.Normal ? 2 : 1) + lastY;
         // 边缘触发检测
         currentReachState = this.handleReachCallback({
-          x: currentX,
-          y: currentY,
+          x: planX,
+          y: planY,
           horizontalCloseEdge,
           verticalCloseEdge,
           clientX: newClientX,
