@@ -315,7 +315,7 @@ export default class PhotoView extends React.Component<
     const { current } = this.photoRef;
     if ((touched || maskTouched) && current) {
       const { onReachUp, onPhotoTap, onMaskTap } = this.props;
-      const { width, naturalWidth } = current.state;
+      const { width, height, naturalWidth } = current.state;
       const {
         x,
         y,
@@ -342,6 +342,9 @@ export default class PhotoView extends React.Component<
             y,
             lastX,
             lastY,
+            width,
+            height,
+            scale,
             touchedTime,
           }) : {
             x,

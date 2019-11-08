@@ -36,7 +36,7 @@ export const maxScale: number = 6;
 /**
  * 滑动加速度
  */
-export const slideAcceleration: number = 0.8;
+export const slideAcceleration: number = 0.01;
 
 /**
  * 缩放弹性缓冲
