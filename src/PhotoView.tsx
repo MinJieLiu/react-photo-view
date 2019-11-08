@@ -25,8 +25,6 @@ export interface IPhotoViewProps {
   className?: string;
   // style
   style?: object;
-  // 缩放，用于下拉关闭变小的效果
-  photoScale?: number;
   // 自定义 loading
   loadingElement?: JSX.Element;
   // 加载失败 Element
@@ -168,6 +166,7 @@ export default class PhotoView extends React.Component<
           verticalCloseEdge,
           clientX: newClientX,
           clientY: newClientY,
+          scale,
           reachState,
         });
       }
@@ -394,6 +393,7 @@ export default class PhotoView extends React.Component<
     clientY,
     horizontalCloseEdge,
     verticalCloseEdge,
+    scale,
     reachState,
   }: {
     x: number,
@@ -402,6 +402,7 @@ export default class PhotoView extends React.Component<
     clientY: number,
     horizontalCloseEdge: CloseEdgeEnum,
     verticalCloseEdge: CloseEdgeEnum,
+    scale: number,
     reachState: ReachTypeEnum,
   }): ReachTypeEnum => {
     const {
@@ -436,7 +437,7 @@ export default class PhotoView extends React.Component<
       && reachState === ReachTypeEnum.Normal
       || reachState === ReachTypeEnum.YReach)
     ) {
-      onReachTopMove(clientX, clientY);
+      onReachTopMove(clientX, clientY, scale);
       return ReachTypeEnum.YReach;
     } else if (
       onReachBottomMove
@@ -445,7 +446,7 @@ export default class PhotoView extends React.Component<
       && reachState === ReachTypeEnum.Normal
       || reachState === ReachTypeEnum.YReach)
     ) {
-      onReachBottomMove(clientX, clientY);
+      onReachBottomMove(clientX, clientY, scale);
       return ReachTypeEnum.YReach;
     }
     return ReachTypeEnum.Normal;
@@ -457,13 +458,12 @@ export default class PhotoView extends React.Component<
       wrapClassName,
       className,
       style,
-      photoScale = 1,
       loadingElement,
       brokenElement,
     } = this.props;
     const { x, y, scale, touched } = this.state;
 
-    const transform = `translate3d(${x}px, ${y}px, 0) scale(${scale * photoScale})`;
+    const transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
 
     return (
       <div className={classNames('PhotoView__PhotoWrap', wrapClassName)} style={style}>

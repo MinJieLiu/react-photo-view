@@ -1,7 +1,4 @@
-import {
-  maxTouchTime,
-  slideAcceleration,
-} from '../variables';
+import { maxTouchTime, slideAcceleration } from '../variables';
 import { CloseEdgeEnum } from '../types';
 import { getClosedHorizontal, getClosedVertical } from './getCloseEdge';
 
@@ -52,28 +49,32 @@ const slideToPosition = ({
   const outOffsetX = (width * scale - innerWidth) / 2;
   const outOffsetY = (height * scale - innerHeight) / 2;
 
-  const horizontalType = getClosedHorizontal(planX, scale, width);
-  const verticalType = getClosedVertical(planY, scale, height);
+  const horizontalCloseEdge = getClosedHorizontal(planX, scale, width);
+  const verticalCloseEdge = getClosedVertical(planY, scale, height);
 
   // x
-  if (horizontalType === CloseEdgeEnum.Small) {
+  if (horizontalCloseEdge === CloseEdgeEnum.Small) {
     currentX = 0;
-  } else if (horizontalType === CloseEdgeEnum.Before) {
+  } else if (horizontalCloseEdge === CloseEdgeEnum.Before) {
     currentX = outOffsetX;
-  } else if (horizontalType === CloseEdgeEnum.After) {
+  } else if (horizontalCloseEdge === CloseEdgeEnum.After) {
     currentX = -outOffsetX;
   }
   // y
-  if (verticalType === CloseEdgeEnum.Small) {
+  if (verticalCloseEdge === CloseEdgeEnum.Small) {
     currentY = 0;
-  } else if (verticalType === CloseEdgeEnum.Before) {
+  } else if (verticalCloseEdge === CloseEdgeEnum.Before) {
     currentY = outOffsetY;
-  } else if (verticalType === CloseEdgeEnum.After) {
+  } else if (verticalCloseEdge === CloseEdgeEnum.After) {
     currentY = -outOffsetY;
   }
 
   // 时间过长
-  if (moveTime >= maxTouchTime && (currentX !== 0 || currentY !== 0)) {
+  if (
+    moveTime >= maxTouchTime &&
+    (horizontalCloseEdge === CloseEdgeEnum.Normal &&
+      verticalCloseEdge === CloseEdgeEnum.Normal)
+  ) {
     return {
       x,
       y,

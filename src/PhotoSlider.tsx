@@ -36,10 +36,10 @@ type PhotoSliderState = {
   lastClientY: number | undefined;
   // 背景透明度
   backdropOpacity: number;
-  // 缩放度
-  photoScale: number;
   // 覆盖物可见度
   overlayVisible: boolean;
+  // 可下拉关闭
+  canPullClose: boolean;
 };
 
 export default class PhotoSlider extends React.Component<
@@ -79,8 +79,8 @@ export default class PhotoSlider extends React.Component<
       lastClientX: undefined,
       lastClientY: undefined,
       backdropOpacity: defaultOpacity,
-      photoScale: 1,
       overlayVisible: true,
+      canPullClose: true,
     };
     this.handleResize = debounce(this.handleResize, 32);
   }
@@ -127,25 +127,26 @@ export default class PhotoSlider extends React.Component<
     });
   };
 
-  handleReachVerticalMove = (_, clientY) => {
+  handleReachVerticalMove = (_, clientY, scale) => {
     this.setState(({ lastClientY, backdropOpacity }) => {
       if (lastClientY === undefined) {
         return {
           touched: true,
           lastClientY: clientY,
           backdropOpacity,
-          photoScale: 1,
+          canPullClose: true,
         };
       }
       const offsetClientY = Math.abs(clientY - lastClientY);
+      const opacity = Math.max(
+        Math.min(defaultOpacity, defaultOpacity - offsetClientY / 100 / 2),
+        0,
+      );
       return {
         touched: true,
         lastClientY,
-        backdropOpacity: Math.max(
-          Math.min(defaultOpacity, defaultOpacity - offsetClientY / 100 / 2),
-          0,
-        ),
-        photoScale: Math.max(Math.min(1, 1 - offsetClientY / 100 / 10), 0.6),
+        backdropOpacity: scale === 1 ? opacity : defaultOpacity,
+        canPullClose: scale === 1,
       };
     });
   };
@@ -191,6 +192,7 @@ export default class PhotoSlider extends React.Component<
       lastClientY = clientY,
       photoIndex,
       overlayVisible,
+      canPullClose,
     } = this.state;
 
     const offsetClientX = clientX - lastClientX;
@@ -202,7 +204,7 @@ export default class PhotoSlider extends React.Component<
     let currentPhotoIndex = photoIndex;
     let isChangeVisible = false;
 
-    if (Math.abs(offsetClientY) > innerHeight * 0.14) {
+    if (Math.abs(offsetClientY) > innerHeight * 0.14 && canPullClose) {
       isChangeVisible = true;
       onClose();
       // 下一张
@@ -230,7 +232,6 @@ export default class PhotoSlider extends React.Component<
       lastClientX: undefined,
       lastClientY: undefined,
       backdropOpacity: defaultOpacity,
-      photoScale: 1,
       overlayVisible: isChangeVisible ? true : overlayVisible,
     });
   };
@@ -255,7 +256,6 @@ export default class PhotoSlider extends React.Component<
       touched,
       photoIndex,
       backdropOpacity,
-      photoScale,
       overlayVisible,
     } = this.state;
     const imageLength = images.length;
@@ -320,7 +320,6 @@ export default class PhotoSlider extends React.Component<
                   onReachUp={this.handleReachUp}
                   onPhotoTap={this.handlePhotoTap}
                   onMaskTap={this.handlePhotoMaskTap}
-                  photoScale={photoIndex === realIndex ? photoScale : 1}
                   wrapClassName={viewClassName}
                   className={imageClassName}
                   style={{

@@ -52,7 +52,7 @@ export interface IPhotoProviderBase {
   brokenElement?: JSX.Element;
 }
 
-export type ReachFunction = (clientX: number, clientY: number) => void;
+export type ReachFunction = (clientX: number, clientY: number, scale?: number) => void;
 
 export type PhotoTapFunction = (clientX: number, clientY: number) => void;
 
