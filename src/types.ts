@@ -74,3 +74,12 @@ export enum ReachTypeEnum {
   XReach, // x 轴
   YReach, // y 轴
 }
+
+/**
+ * 初始响应状态
+ */
+export enum TouchStartEnum {
+  Normal, // 未触发
+  X, // X 轴优先
+  Y, // Y 轴优先
+}

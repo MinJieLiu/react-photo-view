@@ -8,11 +8,19 @@ import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import slideToPosition from './utils/slideToPosition';
 import { getClosedHorizontal, getClosedVertical } from './utils/getCloseEdge';
 import withContinuousTap, { TapFuncType } from './utils/withContinuousTap';
-import { maxScale, minReachOffset, minScale, scaleBuffer } from './variables';
+import {
+  maxScale,
+  minReachOffset,
+  minStartTouchOffset,
+  minScale,
+  scaleBuffer,
+} from './variables';
 import {
   ReachFunction,
   PhotoTapFunction,
-  ReachTypeEnum, CloseEdgeEnum,
+  ReachTypeEnum,
+  CloseEdgeEnum,
+  TouchStartEnum,
 } from './types';
 import './PhotoView.less';
 
@@ -77,6 +85,8 @@ const initialState = {
 
   // 当前边缘触发状态
   reachState: ReachTypeEnum.Normal,
+  // 初始响应状态
+  initialTouchState: TouchStartEnum.Normal,
 };
 
 export default class PhotoView extends React.Component<
@@ -132,42 +142,70 @@ export default class PhotoView extends React.Component<
   };
 
   onMove = (newClientX: number, newClientY: number, touchLength: number = 0) => {
-    const { touched, maskTouched } = this.state;
+    // minInitialTouchOffset
+    const {
+      x,
+      y,
+      clientX,
+      clientY,
+      lastX,
+      lastY,
+      scale,
+      lastTouchLength,
+      reachState,
+      touched,
+      maskTouched,
+      initialTouchState,
+    } = this.state;
     const { current } = this.photoRef;
+    let handleClientX = newClientX;
+    let handleClientY = newClientY;
     if ((touched || maskTouched) && current) {
+      // 最小缩放下，以初始移动距离来判断意图
+      if (scale === minScale && initialTouchState === TouchStartEnum.Normal) {
+        const isBeyondX = Math.abs(newClientX - clientX) > minStartTouchOffset;
+        const isBeyondY = Math.abs(newClientY - clientY) > minStartTouchOffset;
+
+        // 初始移动距离不足则不做操作
+        if (!(isBeyondX || isBeyondY)) {
+          return;
+        }
+
+        this.setState({
+          initialTouchState: isBeyondX ? TouchStartEnum.X : TouchStartEnum.Y,
+        });
+      }
+      if (initialTouchState === TouchStartEnum.X) {
+        handleClientX = newClientX - clientX > 0
+          ? newClientX + minStartTouchOffset
+          : newClientX - minStartTouchOffset;
+      } else {
+        handleClientY = newClientY - clientY > 0
+          ? newClientY - minStartTouchOffset
+          : newClientY + minStartTouchOffset;
+      }
+
       const { width, height, naturalWidth } = current.state;
-      const {
-        x,
-        y,
-        clientX,
-        clientY,
-        lastX,
-        lastY,
-        scale,
-        lastTouchLength,
-        reachState,
-      } = this.state;
       let currentX = x;
       let currentY = y;
       // 边缘触发状态
       let currentReachState = ReachTypeEnum.Normal;
       if (touchLength === 0) {
-        const planX = newClientX - clientX + lastX;
-        const planY = newClientY - clientY + lastY;
+        const planX = handleClientX - clientX + lastX;
+        currentY = handleClientY - clientY + lastY;
         // 边缘超出状态
         const horizontalCloseEdge = getClosedHorizontal(planX, scale, width);
-        const verticalCloseEdge = getClosedVertical(planY, scale, height);
-        // 非正常滑动则响应距离减少
-        currentX = (newClientX - clientX) / (horizontalCloseEdge !== CloseEdgeEnum.Normal ? 2 : 1)  + lastX;
-        currentY = (newClientY - clientY) / (verticalCloseEdge !== CloseEdgeEnum.Normal ? 2 : 1) + lastY;
+        const verticalCloseEdge = getClosedVertical(currentY, scale, height);
+        // X 方向响应距离减小
+        currentX = (handleClientX - clientX) / (horizontalCloseEdge !== CloseEdgeEnum.Normal ? 2 : 1)  + lastX;
         // 边缘触发检测
         currentReachState = this.handleReachCallback({
           x: planX,
-          y: planY,
+          y: currentY,
           horizontalCloseEdge,
           verticalCloseEdge,
-          clientX: newClientX,
-          clientY: newClientY,
+          clientX: handleClientX,
+          clientY: handleClientY,
           scale,
           reachState,
         });
@@ -194,8 +232,8 @@ export default class PhotoView extends React.Component<
           ...getPositionOnMoveOrScale({
             x: currentX,
             y: currentY,
-            clientX: newClientX,
-            clientY: newClientY,
+            clientX: handleClientX,
+            clientY: handleClientY,
             fromScale: scale,
             toScale,
           }),
@@ -233,7 +271,6 @@ export default class PhotoView extends React.Component<
   };
 
   handleWheel = (e) => {
-    e.preventDefault();
     const { current } = this.photoRef;
     if (current) {
       const { clientX, clientY, deltaY } = e;
@@ -330,6 +367,7 @@ export default class PhotoView extends React.Component<
           minScale,
         ),
         reachState: ReachTypeEnum.Normal, // 重置触发状态
+        initialTouchState: TouchStartEnum.Normal,
         ...hasMove
           ? slideToPosition({
             x,
