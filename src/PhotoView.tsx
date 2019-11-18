@@ -284,29 +284,19 @@ export default class PhotoView extends React.Component<
   };
 
   handleTouchStart = (e) => {
-    if (e.touches.length >= 2) {
-      const { clientX, clientY, touchLength } = getMultipleTouchPosition(e);
-      this.handleStart(clientX, clientY, touchLength);
-    } else {
-      const { clientX, clientY } = e.touches[0];
-      this.handleStart(clientX, clientY);
-    }
+    const { clientX, clientY, touchLength } = getMultipleTouchPosition(e);
+    this.handleStart(clientX, clientY, touchLength);
   };
 
   handleMouseDown = (e) => {
     e.preventDefault();
-    this.handleStart(e.clientX, e.clientY);
+    this.handleStart(e.clientX, e.clientY, 0);
   };
 
   handleTouchMove = (e) => {
     e.preventDefault();
-    if (e.touches.length >= 2) {
-      const { clientX, clientY, touchLength } = getMultipleTouchPosition(e);
-      this.onMove(clientX, clientY, touchLength);
-    } else {
-      const { clientX, clientY } = e.touches[0];
-      this.onMove(clientX, clientY);
-    }
+    const { clientX, clientY, touchLength } = getMultipleTouchPosition(e);
+    this.onMove(clientX, clientY, touchLength);
   };
 
   handleMouseMove = (e) => {

@@ -45,10 +45,11 @@ export default class Photo extends React.PureComponent<
   }
 
   componentDidMount() {
+    const { src } = this.props;
     const currPhoto = new Image();
-    currPhoto.src = this.props.src;
     currPhoto.onload = this.handleImageLoaded;
     currPhoto.onerror = this.handleImageBroken;
+    currPhoto.src = src;
 
     window.addEventListener('resize', this.handleResize);
   }
@@ -81,9 +82,10 @@ export default class Photo extends React.PureComponent<
   handleResize = () => {
     const { loaded, naturalWidth, naturalHeight } = this.state;
     if (loaded && this.isMount) {
+      const { onPhotoResize } = this.props;
       this.setState(
         getSuitableImageSize(naturalWidth, naturalHeight),
-        this.props.onPhotoResize,
+        onPhotoResize,
       );
     }
   };
