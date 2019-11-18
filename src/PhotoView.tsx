@@ -176,8 +176,12 @@ export default class PhotoView extends React.Component<
         const planX = newClientX - clientX + lastX;
         currentY = newClientY - clientY + lastY;
         // 边缘超出状态
-        const horizontalCloseEdge = getClosedHorizontal(planX, scale, width);
-        const verticalCloseEdge = getClosedVertical(currentY, scale, height);
+        const horizontalCloseEdge = this.initialTouchState === TouchStartEnum.X
+          ? CloseEdgeEnum.Small
+          : getClosedHorizontal(planX, scale, width);
+        const verticalCloseEdge = this.initialTouchState === TouchStartEnum.Y
+          ? CloseEdgeEnum.Small
+          : getClosedVertical(currentY, scale, height);
         // X 方向响应距离减小
         currentX = (newClientX - clientX) / (horizontalCloseEdge !== CloseEdgeEnum.Normal ? 2 : 1)  + lastX;
         // 边缘触发检测
@@ -185,7 +189,7 @@ export default class PhotoView extends React.Component<
 
         // 接触边缘
         if (currentReachState != ReachTypeEnum.Normal) {
-          onReachMove(currentReachState, clientX, clientY, scale);
+          onReachMove(currentReachState, newClientX, newClientY, scale);
         }
       }
       // 横向边缘触发、背景触发禁用当前滑动
