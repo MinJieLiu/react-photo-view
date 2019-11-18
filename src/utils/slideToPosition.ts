@@ -5,7 +5,7 @@ import { getClosedHorizontal, getClosedVertical } from './getCloseEdge';
 /**
  * 适应到合适的图片偏移量
  */
-const slideToPosition = ({
+export default function slideToPosition({
   x,
   y,
   lastX,
@@ -26,7 +26,7 @@ const slideToPosition = ({
 }): {
   x: number;
   y: number;
-} => {
+} {
   const moveTime = Date.now() - touchedTime;
 
   // 初始速度
@@ -84,6 +84,4 @@ const slideToPosition = ({
     x: currentX,
     y: currentY,
   };
-};
-
-export default slideToPosition;
+}

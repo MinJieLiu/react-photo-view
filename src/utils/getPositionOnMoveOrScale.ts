@@ -1,7 +1,7 @@
 /**
  * 获取移动或缩放之后的中心点
  */
-const getPositionOnMoveOrScale = ({
+export default function getPositionOnMoveOrScale({
   x,
   y,
   clientX,
@@ -19,7 +19,7 @@ const getPositionOnMoveOrScale = ({
   x: number;
   y: number;
   scale: number;
-} => {
+} {
   const { innerWidth, innerHeight } = window;
   const centerClientX = innerWidth / 2;
   const centerClientY = innerHeight / 2;
@@ -30,13 +30,13 @@ const getPositionOnMoveOrScale = ({
   // 放大偏移量
   const offsetScale = toScale / fromScale;
   // 偏移位置
-  const originX = clientX - (clientX - lastPositionX) * offsetScale - centerClientX;
-  const originY = clientY - (clientY - lastPositionY) * offsetScale - centerClientY;
+  const originX =
+    clientX - (clientX - lastPositionX) * offsetScale - centerClientX;
+  const originY =
+    clientY - (clientY - lastPositionY) * offsetScale - centerClientY;
   return {
     x: originX,
     y: originY,
     scale: toScale,
   };
-};
-
-export default getPositionOnMoveOrScale;
+}

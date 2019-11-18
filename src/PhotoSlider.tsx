@@ -6,7 +6,7 @@ import SlideWrap from './components/SlideWrap';
 import CloseSVG from './components/CloseSVG';
 import isMobile from './utils/isMobile';
 import './PhotoSlider.less';
-import { dataType, IPhotoProviderBase } from './types';
+import { dataType, IPhotoProviderBase, ReachTypeEnum } from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
 
 export interface IPhotoSliderProps extends IPhotoProviderBase {
@@ -127,7 +127,7 @@ export default class PhotoSlider extends React.Component<
     });
   };
 
-  handleReachVerticalMove = (_, clientY, scale) => {
+  handleReachVerticalMove = (clientY, scale) => {
     this.setState(({ lastClientY, backdropOpacity }) => {
       if (lastClientY === undefined) {
         return {
@@ -181,6 +181,19 @@ export default class PhotoSlider extends React.Component<
     const { onIndexChange } = this.props;
     if (onIndexChange) {
       onIndexChange(photoIndex);
+    }
+  };
+
+  handleReachMove = (
+    reachState: ReachTypeEnum,
+    clientX: number,
+    clientY: number,
+    scale?: number,
+  ) => {
+    if (reachState === ReachTypeEnum.XReach) {
+      this.handleReachHorizontalMove(clientX);
+    } else if (reachState === ReachTypeEnum.YReach) {
+      this.handleReachVerticalMove(clientY, scale);
     }
   };
 
@@ -307,20 +320,11 @@ export default class PhotoSlider extends React.Component<
                 <PhotoView
                   key={item.key || realIndex}
                   src={item.src}
-                  onReachTopMove={this.handleReachVerticalMove}
-                  onReachBottomMove={this.handleReachVerticalMove}
-                  onReachRightMove={
-                    realIndex < imageLength - 1
-                      ? this.handleReachHorizontalMove
-                      : undefined
-                  }
-                  onReachLeftMove={
-                    realIndex > 0 ? this.handleReachHorizontalMove : undefined
-                  }
+                  onReachMove={this.handleReachMove}
                   onReachUp={this.handleReachUp}
                   onPhotoTap={this.handlePhotoTap}
                   onMaskTap={this.handlePhotoMaskTap}
-                  wrapClassName={viewClassName}
+                  viewClassName={viewClassName}
                   className={imageClassName}
                   style={{
                     left: `${(innerWidth + horizontalOffset) * realIndex}px`,

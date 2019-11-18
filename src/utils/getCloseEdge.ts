@@ -1,4 +1,4 @@
-import { CloseEdgeEnum } from '../types';
+import { CloseEdgeEnum, ReachTypeEnum } from '../types';
 
 /**
  * 接触左边或右边边缘
@@ -7,11 +7,11 @@ import { CloseEdgeEnum } from '../types';
  * @param width
  * @return CloseEdgeEnum
  */
-export const getClosedHorizontal = (
+export function getClosedHorizontal(
   x: number,
   scale: number,
   width: number,
-): CloseEdgeEnum => {
+): CloseEdgeEnum {
   const { innerWidth } = window;
   const currentWidth = width * scale;
   // 图片超出的宽度
@@ -24,7 +24,7 @@ export const getClosedHorizontal = (
     return CloseEdgeEnum.After;
   }
   return CloseEdgeEnum.Normal;
-};
+}
 
 /**
  * 接触上边或下边边缘
@@ -33,11 +33,11 @@ export const getClosedHorizontal = (
  * @param height
  * @return CloseEdgeEnum
  */
-export const getClosedVertical = (
+export function getClosedVertical(
   y: number,
   scale: number,
   height: number,
-): CloseEdgeEnum => {
+): CloseEdgeEnum {
   const { innerHeight } = window;
   const currentHeight = height * scale;
   // 图片超出的高度
@@ -51,4 +51,33 @@ export const getClosedVertical = (
     return CloseEdgeEnum.After;
   }
   return CloseEdgeEnum.Normal;
-};
+}
+
+/**
+ * 获取接触边缘类型
+ * @param horizontalCloseEdge
+ * @param verticalCloseEdge
+ * @param reachState
+ */
+export function getReachType({
+  horizontalCloseEdge,
+  verticalCloseEdge,
+  reachState,
+}: {
+  horizontalCloseEdge: CloseEdgeEnum;
+  verticalCloseEdge: CloseEdgeEnum;
+  reachState: ReachTypeEnum;
+}): ReachTypeEnum {
+  if (
+    (horizontalCloseEdge && reachState === ReachTypeEnum.Normal) ||
+    reachState === ReachTypeEnum.XReach
+  ) {
+    return ReachTypeEnum.XReach;
+  } else if (
+    (verticalCloseEdge && reachState === ReachTypeEnum.Normal) ||
+    reachState === ReachTypeEnum.YReach
+  ) {
+    return ReachTypeEnum.YReach;
+  }
+  return ReachTypeEnum.Normal;
+}

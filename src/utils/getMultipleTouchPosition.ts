@@ -3,13 +3,13 @@ import React from 'react';
 /**
  * 从 Touch 事件中获取两个触控中心位置
  */
-const getMultipleTouchPosition = (
+export default function getMultipleTouchPosition(
   evt: React.TouchEvent,
 ): {
   clientX: number;
   clientY: number;
   touchLength: number;
-} => {
+} {
   const { clientX, clientY } = evt.touches[0];
   if (evt.touches.length >= 2) {
     const { clientX: nextClientX, clientY: nextClientY } = evt.touches[1];
@@ -22,6 +22,4 @@ const getMultipleTouchPosition = (
     };
   }
   return { clientX, clientY, touchLength: 0 };
-};
-
-export default getMultipleTouchPosition;
+}

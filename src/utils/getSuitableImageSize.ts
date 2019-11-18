@@ -1,13 +1,13 @@
 /**
  * 获取图片合适的大小
  */
-const getSuitableImageSize = (
+export default function getSuitableImageSize(
   naturalWidth: number,
   naturalHeight: number,
 ): {
   width: number;
   height: number;
-} => {
+} {
   let width = 0;
   let height = 0;
   const { innerWidth, innerHeight } = window;
@@ -35,6 +35,4 @@ const getSuitableImageSize = (
     width: Math.floor(width),
     height: Math.floor(height),
   };
-};
-
-export default getSuitableImageSize;
+}

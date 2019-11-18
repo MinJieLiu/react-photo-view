@@ -6,16 +6,16 @@ import isMobile from './utils/isMobile';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import slideToPosition from './utils/slideToPosition';
-import { getClosedHorizontal, getClosedVertical } from './utils/getCloseEdge';
+import { getClosedHorizontal, getClosedVertical, getReachType } from './utils/getCloseEdge';
 import withContinuousTap, { TapFuncType } from './utils/withContinuousTap';
 import {
   maxScale,
-  minReachOffset,
   minStartTouchOffset,
   minScale,
   scaleBuffer,
 } from './variables';
 import {
+  ReachMoveFunction,
   ReachFunction,
   PhotoTapFunction,
   ReachTypeEnum,
@@ -28,7 +28,7 @@ export interface IPhotoViewProps {
   // 图片地址
   src: string;
   // 容器类名
-  wrapClassName?: string;
+  viewClassName?: string;
   // 图片类名
   className?: string;
   // style
@@ -39,19 +39,13 @@ export interface IPhotoViewProps {
   brokenElement?: JSX.Element;
 
   // Photo 点击事件
-  onPhotoTap?: PhotoTapFunction;
+  onPhotoTap: PhotoTapFunction;
   // Mask 点击事件
-  onMaskTap?: PhotoTapFunction;
-  // 到达顶部滑动事件
-  onReachTopMove?: ReachFunction;
-  // 到达右部滑动事件
-  onReachRightMove?: ReachFunction;
-  // 到达底部滑动事件
-  onReachBottomMove?: ReachFunction;
-  // 到达左部滑动事件
-  onReachLeftMove?: ReachFunction;
+  onMaskTap: PhotoTapFunction;
+  // 到达边缘滑动事件
+  onReachMove: ReachMoveFunction;
   // 触摸解除事件
-  onReachUp?: ReachFunction;
+  onReachUp: ReachFunction;
 
   onPhotoResize?: () => void;
 }
@@ -85,8 +79,6 @@ const initialState = {
 
   // 当前边缘触发状态
   reachState: ReachTypeEnum.Normal,
-  // 初始响应状态
-  initialTouchState: TouchStartEnum.Normal,
 };
 
 export default class PhotoView extends React.Component<
@@ -96,6 +88,9 @@ export default class PhotoView extends React.Component<
   static displayName = 'PhotoView';
 
   readonly state = initialState;
+  // 初始响应状态
+  private initialTouchState = TouchStartEnum.Normal;
+
   private readonly photoRef = React.createRef<Photo>();
   private readonly handlePhotoTap: TapFuncType<number>;
 
@@ -142,7 +137,6 @@ export default class PhotoView extends React.Component<
   };
 
   onMove = (newClientX: number, newClientY: number, touchLength: number = 0) => {
-    // minInitialTouchOffset
     const {
       x,
       y,
@@ -155,34 +149,19 @@ export default class PhotoView extends React.Component<
       reachState,
       touched,
       maskTouched,
-      initialTouchState,
     } = this.state;
     const { current } = this.photoRef;
-    let handleClientX = newClientX;
-    let handleClientY = newClientY;
     if ((touched || maskTouched) && current) {
-      // 最小缩放下，以初始移动距离来判断意图
-      if (scale === minScale && initialTouchState === TouchStartEnum.Normal) {
+      // 单指最小缩放下，以初始移动距离来判断意图
+      if (touchLength === 0 && scale === minScale && this.initialTouchState === TouchStartEnum.Normal) {
         const isBeyondX = Math.abs(newClientX - clientX) > minStartTouchOffset;
         const isBeyondY = Math.abs(newClientY - clientY) > minStartTouchOffset;
-
-        // 初始移动距离不足则不做操作
+        // 初始移动距离不足则不处理
         if (!(isBeyondX || isBeyondY)) {
           return;
         }
-
-        this.setState({
-          initialTouchState: isBeyondX ? TouchStartEnum.X : TouchStartEnum.Y,
-        });
-      }
-      if (initialTouchState === TouchStartEnum.X) {
-        handleClientX = newClientX - clientX > 0
-          ? newClientX + minStartTouchOffset
-          : newClientX - minStartTouchOffset;
-      } else {
-        handleClientY = newClientY - clientY > 0
-          ? newClientY - minStartTouchOffset
-          : newClientY + minStartTouchOffset;
+        // 设置响应状态
+        this.initialTouchState = isBeyondX ? TouchStartEnum.X : TouchStartEnum.Y;
       }
 
       const { width, height, naturalWidth } = current.state;
@@ -191,24 +170,23 @@ export default class PhotoView extends React.Component<
       // 边缘触发状态
       let currentReachState = ReachTypeEnum.Normal;
       if (touchLength === 0) {
-        const planX = handleClientX - clientX + lastX;
-        currentY = handleClientY - clientY + lastY;
+        const {
+          onReachMove,
+        } = this.props;
+        const planX = newClientX - clientX + lastX;
+        currentY = newClientY - clientY + lastY;
         // 边缘超出状态
         const horizontalCloseEdge = getClosedHorizontal(planX, scale, width);
         const verticalCloseEdge = getClosedVertical(currentY, scale, height);
         // X 方向响应距离减小
-        currentX = (handleClientX - clientX) / (horizontalCloseEdge !== CloseEdgeEnum.Normal ? 2 : 1)  + lastX;
+        currentX = (newClientX - clientX) / (horizontalCloseEdge !== CloseEdgeEnum.Normal ? 2 : 1)  + lastX;
         // 边缘触发检测
-        currentReachState = this.handleReachCallback({
-          x: planX,
-          y: currentY,
-          horizontalCloseEdge,
-          verticalCloseEdge,
-          clientX: handleClientX,
-          clientY: handleClientY,
-          scale,
-          reachState,
-        });
+        currentReachState = getReachType({ horizontalCloseEdge, verticalCloseEdge, reachState });
+
+        // 接触边缘
+        if (currentReachState != ReachTypeEnum.Normal) {
+          onReachMove(currentReachState, clientX, clientY, scale);
+        }
       }
       // 横向边缘触发、背景触发禁用当前滑动
       if (currentReachState === ReachTypeEnum.XReach || maskTouched) {
@@ -232,8 +210,8 @@ export default class PhotoView extends React.Component<
           ...getPositionOnMoveOrScale({
             x: currentX,
             y: currentY,
-            clientX: handleClientX,
-            clientY: handleClientY,
+            clientX: newClientX,
+            clientY: newClientY,
             fromScale: scale,
             toScale,
           }),
@@ -342,21 +320,24 @@ export default class PhotoView extends React.Component<
   };
 
   handleUp = (newClientX: number, newClientY: number) => {
-    const { touched, maskTouched } = this.state;
+    // 重置响应状态
+    this.initialTouchState = TouchStartEnum.Normal;
+    const {
+      x,
+      y,
+      lastX,
+      lastY,
+      scale,
+      touchedTime,
+      clientX,
+      clientY,
+      touched,
+      maskTouched,
+    } = this.state;
     const { current } = this.photoRef;
     if ((touched || maskTouched) && current) {
       const { onReachUp, onPhotoTap, onMaskTap } = this.props;
       const { width, height, naturalWidth } = current.state;
-      const {
-        x,
-        y,
-        lastX,
-        lastY,
-        scale,
-        touchedTime,
-        clientX,
-        clientY,
-      } = this.state;
       const hasMove = clientX !== newClientX || clientY !== newClientY;
       this.setState({
         touched: false,
@@ -367,7 +348,6 @@ export default class PhotoView extends React.Component<
           minScale,
         ),
         reachState: ReachTypeEnum.Normal, // 重置触发状态
-        initialTouchState: TouchStartEnum.Normal,
         ...hasMove
           ? slideToPosition({
             x,
@@ -416,76 +396,10 @@ export default class PhotoView extends React.Component<
     }
   };
 
-  handleReachCallback = ({
-    x,
-    y,
-    clientX,
-    clientY,
-    horizontalCloseEdge,
-    verticalCloseEdge,
-    scale,
-    reachState,
-  }: {
-    x: number,
-    y: number,
-    clientX: number,
-    clientY: number,
-    horizontalCloseEdge: CloseEdgeEnum,
-    verticalCloseEdge: CloseEdgeEnum,
-    scale: number,
-    reachState: ReachTypeEnum,
-  }): ReachTypeEnum => {
-    const {
-      onReachTopMove,
-      onReachRightMove,
-      onReachBottomMove,
-      onReachLeftMove,
-    } = this.props;
-    //  触碰到边缘
-    if (
-      onReachLeftMove
-      && (horizontalCloseEdge
-      && x > minReachOffset
-      && reachState === ReachTypeEnum.Normal
-      || reachState === ReachTypeEnum.XReach)
-    ) {
-      onReachLeftMove(clientX, clientY);
-      return ReachTypeEnum.XReach;
-    } else if (
-      onReachRightMove
-      && (horizontalCloseEdge
-      && x < -minReachOffset
-      && reachState === ReachTypeEnum.Normal
-      || reachState === ReachTypeEnum.XReach)
-    ) {
-      onReachRightMove(clientX, clientY);
-      return ReachTypeEnum.XReach;
-    } else if (
-      onReachTopMove
-      && (verticalCloseEdge
-      && y > minReachOffset
-      && reachState === ReachTypeEnum.Normal
-      || reachState === ReachTypeEnum.YReach)
-    ) {
-      onReachTopMove(clientX, clientY, scale);
-      return ReachTypeEnum.YReach;
-    } else if (
-      onReachBottomMove
-      && (verticalCloseEdge
-      && y < -minReachOffset
-      && reachState === ReachTypeEnum.Normal
-      || reachState === ReachTypeEnum.YReach)
-    ) {
-      onReachBottomMove(clientX, clientY, scale);
-      return ReachTypeEnum.YReach;
-    }
-    return ReachTypeEnum.Normal;
-  };
-
   render() {
     const {
       src,
-      wrapClassName,
+      viewClassName,
       className,
       style,
       loadingElement,
@@ -496,7 +410,7 @@ export default class PhotoView extends React.Component<
     const transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
 
     return (
-      <div className={classNames('PhotoView__PhotoWrap', wrapClassName)} style={style}>
+      <div className={classNames('PhotoView__PhotoWrap', viewClassName)} style={style}>
         <div
           className="PhotoView__PhotoMask"
           onMouseDown={isMobile ? undefined : this.handleMaskMouseDown}
