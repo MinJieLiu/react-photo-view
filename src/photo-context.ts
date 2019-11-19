@@ -10,7 +10,13 @@ export type addItemType = (
 
 export type removeItemType = (key?: string) => void;
 
-export default React.createContext({
+export interface PhotoContextType {
+  onShow: onShowType,
+  addItem: addItemType,
+  removeItem: removeItemType,
+}
+
+export default React.createContext<PhotoContextType>({
   onShow() {},
   addItem() {},
   removeItem() {},

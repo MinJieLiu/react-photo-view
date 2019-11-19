@@ -7,12 +7,15 @@ const SlideWrap: React.FC<{ className?: string }> = ({
   className,
   children,
 }) => {
-  const [dialogNode] = React.useState(() => {
-    // 创建容器
-    const dialogNode = document.createElement('section');
-    document.body.appendChild(dialogNode);
-    return dialogNode;
-  });
+  const dialogNode = React.useMemo(
+    () => {
+      // 容器
+      const dialogNode = document.createElement('section');
+      document.body.appendChild(dialogNode);
+      return dialogNode;
+    },
+    [] as readonly [],
+  );
   const originalOverflowCallback = React.useRef('');
 
   React.useEffect(

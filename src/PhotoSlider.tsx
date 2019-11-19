@@ -83,6 +83,8 @@ export default class PhotoSlider extends React.Component<
       canPullClose: true,
     };
     this.handleResize = debounce(this.handleResize, 32);
+    // 避免事件穿透
+    this.handlePhotoMaskTap = debounce(this.handlePhotoMaskTap, 200);
   }
 
   componentDidMount() {
