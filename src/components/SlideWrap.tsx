@@ -35,7 +35,7 @@ const SlideWrap: React.FC<{ className?: string }> = ({
   );
 
   return createPortal(
-    <div className={classNames('PhotoView__SlideWrap', className)}>
+    <div className={classNames('PhotoView-SlideWrap', className)}>
       {children}
     </div>,
     dialogNode,

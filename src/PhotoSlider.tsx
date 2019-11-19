@@ -87,12 +87,39 @@ export default class PhotoSlider extends React.Component<
     this.handlePhotoMaskTap = debounce(this.handlePhotoMaskTap, 200);
   }
 
+  private computeMousePosition: { x: number; y: number } | null; // 保存触发位置
+  private mousePositionEventBind: boolean = false; // 点击事件状态
+
   componentDidMount() {
     const { index = 0 } = this.props;
     this.setState({
       translateX: index * -(window.innerWidth + horizontalOffset),
       photoIndex: index,
     });
+
+    if (this.mousePositionEventBind) {
+      return;
+    }
+    // 只有点击事件支持从鼠标位置动画展开
+    let thisTimeOut;
+    document.addEventListener(
+      'click',
+      e => {
+        this.computeMousePosition = {
+          x: e.pageX,
+          y: e.pageY,
+        };
+        // 20ms 内发生过点击事件，则从点击位置动画展示
+        // 否则直接动画展示
+        // 这样可以兼容非点击方式展开
+        clearTimeout(thisTimeOut);
+        thisTimeOut = setTimeout(() => {
+          this.computeMousePosition = null;
+        }, 20);
+      },
+      true,
+    );
+    this.mousePositionEventBind = true;
   }
 
   handleClose = () => {
@@ -349,6 +376,9 @@ export default class PhotoSlider extends React.Component<
                   loadingElement={loadingElement}
                   brokenElement={brokenElement}
                   onPhotoResize={this.handleResize}
+                  transformOrigin={this.computeMousePosition
+                    ? `${this.computeMousePosition.x}px ${this.computeMousePosition.y}px`
+                    : undefined}
                 />
               );
             })}

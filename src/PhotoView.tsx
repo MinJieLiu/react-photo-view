@@ -37,6 +37,8 @@ export interface IPhotoViewProps {
   // 加载失败 Element
   brokenElement?: JSX.Element;
 
+  transformOrigin: string | undefined;
+
   // Photo 点击事件
   onPhotoTap: PhotoTapFunction;
   // Mask 点击事件
@@ -417,6 +419,7 @@ export default class PhotoView extends React.Component<
       style,
       loadingElement,
       brokenElement,
+      transformOrigin,
     } = this.props;
     const { x, y, scale, touched } = this.state;
 
@@ -429,24 +432,26 @@ export default class PhotoView extends React.Component<
           onMouseDown={isMobile ? undefined : this.handleMaskMouseDown}
           onTouchStart={isMobile ? this.handleMaskTouchStart : undefined}
         />
-        <Photo
-          className={className}
-          src={src}
-          ref={this.photoRef}
-          onMouseDown={isMobile ? undefined : this.handleMouseDown}
-          onTouchStart={isMobile ? this.handleTouchStart : undefined}
-          onWheel={this.handleWheel}
-          onPhotoResize={this.handleResize}
-          style={{
-            WebkitTransform: transform,
-            transform,
-            transition: touched
-              ? undefined
-              : 'transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
-          }}
-          loadingElement={loadingElement}
-          brokenElement={brokenElement}
-        />
+        <div className="PhotoView__animateIn" style={{ transformOrigin }}>
+          <Photo
+            className={className}
+            src={src}
+            ref={this.photoRef}
+            onMouseDown={isMobile ? undefined : this.handleMouseDown}
+            onTouchStart={isMobile ? this.handleTouchStart : undefined}
+            onWheel={this.handleWheel}
+            onPhotoResize={this.handleResize}
+            style={{
+              WebkitTransform: transform,
+              transform,
+              transition: touched
+                ? undefined
+                : 'transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
+            }}
+            loadingElement={loadingElement}
+            brokenElement={brokenElement}
+          />
+        </div>
       </div>
     );
   }
