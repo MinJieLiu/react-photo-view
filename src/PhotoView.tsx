@@ -19,7 +19,6 @@ import {
   ReachFunction,
   PhotoTapFunction,
   ReachTypeEnum,
-  CloseEdgeEnum,
   TouchStartEnum,
 } from './types';
 import './PhotoView.less';
@@ -177,7 +176,7 @@ export default class PhotoView extends React.Component<
         const {
           onReachMove,
         } = this.props;
-        const planX = newClientX - clientX + lastX;
+        currentX = newClientX - clientX + lastX;
         const planY = newClientY - clientY + lastY;
         const touchYOffset = this.initialTouchState === TouchStartEnum.YPush
           ? minStartTouchOffset
@@ -185,14 +184,12 @@ export default class PhotoView extends React.Component<
         // 边缘超出状态
         const { horizontalCloseEdge, verticalCloseEdge } = getCloseEdgeResult({
           initialTouchState: this.initialTouchState,
-          planX,
+          planX: currentX,
           planY,
           scale,
           width,
           height,
         });
-        // X 方向响应距离减小
-        currentX = (planX - lastX) / (horizontalCloseEdge !== CloseEdgeEnum.Normal ? 2 : 1) + lastX;
         // Y 方向在初始响应状态下需要补一个距离
         currentY = planY +
           (this.initialTouchState === TouchStartEnum.Normal ? 0 : touchYOffset);

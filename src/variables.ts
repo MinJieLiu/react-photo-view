@@ -16,7 +16,7 @@ export const horizontalOffset: number = 20;
 /**
  * 最小初始响应距离
  */
-export const minStartTouchOffset: number = 20;
+export const minStartTouchOffset: number = 10;
 
 /**
  * 默认背景透明度

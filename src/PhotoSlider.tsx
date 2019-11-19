@@ -153,6 +153,7 @@ export default class PhotoSlider extends React.Component<
 
   handleReachHorizontalMove = clientX => {
     const { innerWidth } = window;
+    const { images } = this.props;
     this.setState(({ lastClientX, translateX, photoIndex }) => {
       if (lastClientX === undefined) {
         return {
@@ -161,7 +162,16 @@ export default class PhotoSlider extends React.Component<
           translateX,
         };
       }
-      const offsetClientX = clientX - lastClientX;
+      const originOffsetClientX = clientX - lastClientX;
+      let offsetClientX = originOffsetClientX;
+
+      // 第一张和最后一张超出距离减半
+      if (
+        (photoIndex === 0 && originOffsetClientX > 0) ||
+        (photoIndex === images.length - 1 && originOffsetClientX < 0)
+      ) {
+        offsetClientX = originOffsetClientX / 2;
+      }
       return {
         touched: true,
         lastClientX: lastClientX,
