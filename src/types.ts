@@ -91,5 +91,6 @@ export enum ReachTypeEnum {
 export enum TouchStartEnum {
   Normal, // 未触发
   X, // X 轴优先
-  Y, // Y 轴优先
+  YPush, // Y 轴往上
+  YPull, // Y 轴往下
 }

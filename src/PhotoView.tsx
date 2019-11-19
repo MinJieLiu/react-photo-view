@@ -6,7 +6,7 @@ import isMobile from './utils/isMobile';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import slideToPosition from './utils/slideToPosition';
-import { getClosedHorizontal, getClosedVertical, getReachType } from './utils/getCloseEdge';
+import { getReachType, getCloseEdgeResult } from './utils/getCloseEdge';
 import withContinuousTap, { TapFuncType } from './utils/withContinuousTap';
 import {
   maxScale,
@@ -161,7 +161,11 @@ export default class PhotoView extends React.Component<
           return;
         }
         // 设置响应状态
-        this.initialTouchState = isBeyondX ? TouchStartEnum.X : TouchStartEnum.Y;
+        this.initialTouchState = isBeyondX
+          ? TouchStartEnum.X
+          : newClientY > clientY
+            ? TouchStartEnum.YPull
+            : TouchStartEnum.YPush;
       }
 
       const { width, height, naturalWidth } = current.state;
@@ -174,16 +178,24 @@ export default class PhotoView extends React.Component<
           onReachMove,
         } = this.props;
         const planX = newClientX - clientX + lastX;
-        currentY = newClientY - clientY + lastY;
+        const planY = newClientY - clientY + lastY;
+        const touchYOffset = this.initialTouchState === TouchStartEnum.YPush
+          ? minStartTouchOffset
+          : -minStartTouchOffset;
         // 边缘超出状态
-        const horizontalCloseEdge = this.initialTouchState === TouchStartEnum.X
-          ? CloseEdgeEnum.Small
-          : getClosedHorizontal(planX, scale, width);
-        const verticalCloseEdge = this.initialTouchState === TouchStartEnum.Y
-          ? CloseEdgeEnum.Small
-          : getClosedVertical(currentY, scale, height);
+        const { horizontalCloseEdge, verticalCloseEdge } = getCloseEdgeResult({
+          initialTouchState: this.initialTouchState,
+          planX,
+          planY,
+          scale,
+          width,
+          height,
+        });
         // X 方向响应距离减小
-        currentX = (newClientX - clientX) / (horizontalCloseEdge !== CloseEdgeEnum.Normal ? 2 : 1)  + lastX;
+        currentX = (planX - lastX) / (horizontalCloseEdge !== CloseEdgeEnum.Normal ? 2 : 1) + lastX;
+        // Y 方向在初始响应状态下需要补一个距离
+        currentY = planY +
+          (this.initialTouchState === TouchStartEnum.Normal ? 0 : touchYOffset);
         // 边缘触发检测
         currentReachState = getReachType({ horizontalCloseEdge, verticalCloseEdge, reachState });
 

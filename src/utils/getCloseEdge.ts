@@ -1,4 +1,4 @@
-import { CloseEdgeEnum, ReachTypeEnum } from '../types';
+import { CloseEdgeEnum, ReachTypeEnum, TouchStartEnum } from '../types';
 
 /**
  * 接触左边或右边边缘
@@ -80,4 +80,51 @@ export function getReachType({
     return ReachTypeEnum.YReach;
   }
   return ReachTypeEnum.Normal;
+}
+
+/**
+ * 边缘超出状态
+ * @param initialTouchState
+ * @param planX
+ * @param planY
+ * @param scale
+ * @param width
+ * @param height
+ */
+export function getCloseEdgeResult({
+  initialTouchState,
+  planX,
+  planY,
+  scale,
+  width,
+  height,
+}: {
+  initialTouchState: TouchStartEnum;
+  planX: number;
+  planY: number;
+  scale: number;
+  width: number;
+  height: number;
+}): {
+  horizontalCloseEdge: CloseEdgeEnum;
+  verticalCloseEdge: CloseEdgeEnum;
+} {
+  if (initialTouchState !== TouchStartEnum.Normal) {
+    const isHorizontal = initialTouchState === TouchStartEnum.X;
+    return {
+      horizontalCloseEdge:
+        isHorizontal
+          ? CloseEdgeEnum.Small
+          : CloseEdgeEnum.Normal,
+      verticalCloseEdge:
+        !isHorizontal
+          ? CloseEdgeEnum.Small
+          : CloseEdgeEnum.Normal,
+    };
+  }
+
+  return {
+    horizontalCloseEdge: getClosedHorizontal(planX, scale, width),
+    verticalCloseEdge: getClosedVertical(planY, scale, height),
+  };
 }
