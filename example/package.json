@@ -10,7 +10,7 @@
   "scripts": {
     "start": "start-storybook -p 6006",
     "build": "build-storybook",
-    "deploy-storybook": "storybook-to-ghpages"
+    "deploy": "storybook-to-ghpages"
   },
   "eslintConfig": {
     "extends": "react-app"

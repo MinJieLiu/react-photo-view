@@ -13,7 +13,7 @@ export interface IPhotoProps extends React.HTMLAttributes<any> {
   width: number;
   height: number;
   className?: string;
-  onPhotoResize: () => void;
+  onPhotoResize?: () => void;
   onImageLoad: (PhotoParams, callback?: Function) => void;
   loadingElement?: JSX.Element;
   brokenElement?: JSX.Element;
@@ -79,11 +79,12 @@ export default class Photo extends React.PureComponent<
   handleResize = () => {
     const { loaded, naturalWidth, naturalHeight } = this.props;
     if (loaded && this.isMount) {
-      const { onPhotoResize, onImageLoad } = this.props;
-      onImageLoad(
-        getSuitableImageSize(naturalWidth, naturalHeight),
-        onPhotoResize,
-      );
+      const { onImageLoad, onPhotoResize } = this.props;
+      onImageLoad(getSuitableImageSize(naturalWidth, naturalHeight));
+
+      if (onPhotoResize) {
+        onPhotoResize();
+      }
     }
   };
 

@@ -143,10 +143,8 @@ export default class PhotoView extends React.Component<
     }
   }
 
-  handleImageLoad = (imageParams, callback) => {
-    this.setState({
-      ...imageParams,
-    }, callback);
+  handleImageLoad = imageParams => {
+    this.setState(imageParams);
   };
 
   handleStart = (clientX: number, clientY: number, touchLength: number = 0) => {
@@ -423,14 +421,6 @@ export default class PhotoView extends React.Component<
     this.handleUp(clientX, clientY);
   };
 
-  handleResize = () => {
-    this.setState(initialState);
-    const { onPhotoResize } = this.props;
-    if (onPhotoResize) {
-      onPhotoResize();
-    }
-  };
-
   render() {
     const {
       src,
@@ -439,6 +429,8 @@ export default class PhotoView extends React.Component<
       style,
       loadingElement,
       brokenElement,
+      onPhotoResize,
+
       showAnimateType,
       originRect,
       onShowAnimateEnd,
@@ -485,7 +477,7 @@ export default class PhotoView extends React.Component<
             onMouseDown={isMobile ? undefined : this.handleMouseDown}
             onTouchStart={isMobile ? this.handleTouchStart : undefined}
             onWheel={this.handleWheel}
-            onPhotoResize={this.handleResize}
+            onPhotoResize={onPhotoResize}
             style={{
               WebkitTransform: transform,
               transform,
