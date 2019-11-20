@@ -3,11 +3,17 @@ import classNames from 'classnames';
 import debounce from 'lodash.debounce';
 import PhotoView from './PhotoView';
 import SlideWrap from './components/SlideWrap';
+import VisibleAnimationHandle from './components/VisibleAnimationHandle';
 import CloseSVG from './components/CloseSVG';
 import isMobile from './utils/isMobile';
-import './PhotoSlider.less';
-import { dataType, IPhotoProviderBase, ReachTypeEnum } from './types';
+import {
+  dataType,
+  IPhotoProviderBase,
+  ReachTypeEnum,
+  ShowAnimateEnum,
+} from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
+import './PhotoSlider.less';
 
 export interface IPhotoSliderProps extends IPhotoProviderBase {
   // 图片列表
@@ -87,39 +93,12 @@ export default class PhotoSlider extends React.Component<
     this.handlePhotoMaskTap = debounce(this.handlePhotoMaskTap, 200);
   }
 
-  private computeMousePosition: { x: number; y: number } | null; // 保存触发位置
-  private mousePositionEventBind: boolean = false; // 点击事件状态
-
   componentDidMount() {
     const { index = 0 } = this.props;
     this.setState({
       translateX: index * -(window.innerWidth + horizontalOffset),
       photoIndex: index,
     });
-
-    if (this.mousePositionEventBind) {
-      return;
-    }
-    // 只有点击事件支持从鼠标位置动画展开
-    let thisTimeOut;
-    document.addEventListener(
-      'click',
-      e => {
-        this.computeMousePosition = {
-          x: e.pageX,
-          y: e.pageY,
-        };
-        // 20ms 内发生过点击事件，则从点击位置动画展示
-        // 否则直接动画展示
-        // 这样可以兼容非点击方式展开
-        clearTimeout(thisTimeOut);
-        thisTimeOut = setTimeout(() => {
-          this.computeMousePosition = null;
-        }, 20);
-      },
-      true,
-    );
-    this.mousePositionEventBind = true;
   }
 
   handleClose = () => {
@@ -311,99 +290,120 @@ export default class PhotoSlider extends React.Component<
       overlayVisible,
     } = this.state;
     const imageLength = images.length;
+    const currentImage = images.length ? images[photoIndex] : undefined;
     const transform = `translate3d(${translateX}px, 0px, 0)`;
     // Overlay
-    const overlayIntro = imageLength ? images[photoIndex].intro : undefined;
-    const overlayStyle = { opacity: +overlayVisible };
+    const overlayIntro = currentImage && currentImage.intro;
 
-    if (visible) {
-      const { innerWidth } = window;
+    return (
+      <VisibleAnimationHandle visible={visible} currentImage={currentImage}>
+        {({ photoVisible, showAnimateType, originRect, onShowAnimateEnd }) => {
+          if (photoVisible) {
+            const { innerWidth } = window;
+            const overlayStyle = {
+              opacity:
+                overlayVisible && showAnimateType === ShowAnimateEnum.None
+                  ? 1
+                  : 0,
+            };
 
-      return (
-        <SlideWrap className={className}>
-          <div
-            className={classNames(
-              'PhotoView-PhotoSlider__Backdrop',
-              maskClassName,
-            )}
-            style={{ background: `rgba(0, 0, 0, ${backdropOpacity})` }}
-          />
-          {bannerVisible && (
-            <div
-              className="PhotoView-PhotoSlider__BannerWrap"
-              style={overlayStyle}
-            >
-              <div className="PhotoView-PhotoSlider__Counter">
-                {photoIndex + 1} / {imageLength}
-              </div>
-              <div className="PhotoView-PhotoSlider__BannerRight">
-                <CloseSVG
-                  className="PhotoView-PhotoSlider__Close"
-                  onTouchEnd={isMobile ? onClose : undefined}
-                  onClick={isMobile ? undefined : onClose}
+            return (
+              <SlideWrap className={className}>
+                <div
+                  className={classNames(
+                    'PhotoView-PhotoSlider__Backdrop',
+                    maskClassName,
+                    {
+                      'PhotoView-PhotoSlider__fadeIn':
+                        showAnimateType === ShowAnimateEnum.In,
+                      'PhotoView-PhotoSlider__fadeOut':
+                        showAnimateType === ShowAnimateEnum.Out,
+                    },
+                  )}
+                  style={{ background: `rgba(0, 0, 0, ${backdropOpacity})` }}
                 />
-              </div>
-            </div>
-          )}
-          {images
-            .slice(
-              // 加载相邻三张
-              Math.max(photoIndex - 1, 0),
-              Math.min(photoIndex + 2, imageLength + 1),
-            )
-            .map((item: dataType, index) => {
-              // 截取之前的索引位置
-              const realIndex =
-                photoIndex === 0 ? photoIndex + index : photoIndex - 1 + index;
-              return (
-                <PhotoView
-                  key={item.key || realIndex}
-                  src={item.src}
-                  onReachMove={this.handleReachMove}
-                  onReachUp={this.handleReachUp}
-                  onPhotoTap={this.handlePhotoTap}
-                  onMaskTap={this.handlePhotoMaskTap}
-                  viewClassName={viewClassName}
-                  className={imageClassName}
-                  style={{
-                    left: `${(innerWidth + horizontalOffset) * realIndex}px`,
-                    WebkitTransform: transform,
-                    transform,
-                    transition: touched
-                      ? undefined
-                      : 'transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)',
-                  }}
-                  loadingElement={loadingElement}
-                  brokenElement={brokenElement}
-                  onPhotoResize={this.handleResize}
-                  transformOrigin={this.computeMousePosition
-                    ? `${this.computeMousePosition.x}px ${this.computeMousePosition.y}px`
-                    : undefined}
-                />
-              );
-            })}
-          {introVisible && overlayIntro ? (
-            <div
-              className="PhotoView-PhotoSlider__FooterWrap"
-              style={overlayStyle}
-            >
-              {overlayIntro}
-            </div>
-          ) : (
-            undefined
-          )}
-          {overlayRender &&
-            overlayRender({
-              images,
-              index: photoIndex,
-              visible,
-              onClose,
-              onIndexChange: this.handleIndexChange,
-              overlayVisible,
-            })}
-        </SlideWrap>
-      );
-    }
-    return null;
+                {bannerVisible && (
+                  <div
+                    className="PhotoView-PhotoSlider__BannerWrap"
+                    style={overlayStyle}
+                  >
+                    <div className="PhotoView-PhotoSlider__Counter">
+                      {photoIndex + 1} / {imageLength}
+                    </div>
+                    <div className="PhotoView-PhotoSlider__BannerRight">
+                      <CloseSVG
+                        className="PhotoView-PhotoSlider__Close"
+                        onTouchEnd={isMobile ? onClose : undefined}
+                        onClick={isMobile ? undefined : onClose}
+                      />
+                    </div>
+                  </div>
+                )}
+                {images
+                  .slice(
+                    // 加载相邻三张
+                    Math.max(photoIndex - 1, 0),
+                    Math.min(photoIndex + 2, imageLength + 1),
+                  )
+                  .map((item: dataType, index) => {
+                    // 截取之前的索引位置
+                    const realIndex =
+                      photoIndex === 0
+                        ? photoIndex + index
+                        : photoIndex - 1 + index;
+                    return (
+                      <PhotoView
+                        key={item.key || realIndex}
+                        src={item.src}
+                        onReachMove={this.handleReachMove}
+                        onReachUp={this.handleReachUp}
+                        onPhotoTap={this.handlePhotoTap}
+                        onMaskTap={this.handlePhotoMaskTap}
+                        viewClassName={viewClassName}
+                        className={imageClassName}
+                        style={{
+                          left: `${(innerWidth + horizontalOffset) *
+                            realIndex}px`,
+                          WebkitTransform: transform,
+                          transform,
+                          transition: touched
+                            ? undefined
+                            : 'transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                        }}
+                        loadingElement={loadingElement}
+                        brokenElement={brokenElement}
+                        onPhotoResize={this.handleResize}
+                        showAnimateType={showAnimateType}
+                        originRect={originRect}
+                        onShowAnimateEnd={onShowAnimateEnd}
+                      />
+                    );
+                  })}
+                {introVisible && overlayIntro ? (
+                  <div
+                    className="PhotoView-PhotoSlider__FooterWrap"
+                    style={overlayStyle}
+                  >
+                    {overlayIntro}
+                  </div>
+                ) : (
+                  undefined
+                )}
+                {overlayRender &&
+                  overlayRender({
+                    images,
+                    index: photoIndex,
+                    visible,
+                    onClose,
+                    onIndexChange: this.handleIndexChange,
+                    overlayVisible,
+                  })}
+              </SlideWrap>
+            );
+          }
+          return null;
+        }}
+      </VisibleAnimationHandle>
+    );
   }
 }

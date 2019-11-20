@@ -1,3 +1,12 @@
+@keyframes PhotoView__fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .PhotoView {
   &-PhotoSlider__Backdrop {
     position: absolute;
@@ -7,6 +16,16 @@
     height: 100%;
     background: rgba(0, 0, 0, 0.6);
     z-index: -1;
+  }
+
+  &-PhotoSlider__fadeIn {
+    opacity: 0;
+    animation: PhotoView__fade 0.4s linear both;
+  }
+
+  &-PhotoSlider__fadeOut {
+    opacity: 0;
+    animation: PhotoView__fade 0.4s linear both reverse;
   }
 
   &-PhotoSlider__BannerWrap {

@@ -19,10 +19,16 @@ const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
     clientX: undefined,
     clientY: undefined,
   });
+  const photoTriggerRef = React.useRef<HTMLElement | null>(null);
 
   React.useEffect(
     () => {
-      photoContext.addItem(key, src, intro);
+      photoContext.addItem({
+        key,
+        src,
+        originRef: photoTriggerRef.current,
+        intro,
+      });
       return () => {
         photoContext.removeItem(key);
       };
@@ -75,8 +81,9 @@ const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
           ? {
               onTouchStart: handleTouchStart,
               onTouchEnd: handleTouchEnd,
+              ref: photoTriggerRef,
             }
-          : { onClick: handleClick },
+          : { onClick: handleClick, ref: photoTriggerRef },
       ),
     );
   }

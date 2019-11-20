@@ -37,13 +37,9 @@ export default class PhotoProvider extends React.Component<
     };
   }
 
-  handleAddItem = (key: string, src: string, intro: React.ReactNode) => {
+  handleAddItem: addItemType = imageItem => {
     this.setState(prev => ({
-      images: prev.images.concat({
-        key,
-        src,
-        intro,
-      }),
+      images: prev.images.concat(imageItem),
     }));
   };
 

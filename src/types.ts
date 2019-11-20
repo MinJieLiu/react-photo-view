@@ -8,6 +8,8 @@ export type dataType = {
   key?: string;
   // 图片地址
   src: string;
+  // 原触发 ref
+  originRef: HTMLElement | null;
   // 图片介绍
   intro?: React.ReactNode;
 };
@@ -59,10 +61,7 @@ export type ReachMoveFunction = (
   scale?: number,
 ) => void;
 
-export type ReachFunction = (
-  clientX: number,
-  clientY: number,
-) => void;
+export type ReachFunction = (clientX: number, clientY: number) => void;
 
 export type PhotoTapFunction = (clientX: number, clientY: number) => void;
 
@@ -94,3 +93,20 @@ export enum TouchStartEnum {
   YPush, // Y 轴往上
   YPull, // Y 轴往下
 }
+
+/**
+ * 动画类型
+ */
+export enum ShowAnimateEnum {
+  None, // 无
+  In, // 进入
+  Out, // 离开
+}
+
+/**
+ * 触发源位置
+ */
+export type OriginRectType = {
+  clientX: number;
+  clientY: number;
+} | undefined;

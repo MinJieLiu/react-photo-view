@@ -7,19 +7,20 @@ import './Photo.less';
 
 export interface IPhotoProps extends React.HTMLAttributes<any> {
   src: string;
+  loaded: boolean;
+  naturalWidth: number;
+  naturalHeight: number;
+  width: number;
+  height: number;
   className?: string;
   onPhotoResize: () => void;
+  onImageLoad: (PhotoParams, callback?: Function) => void;
   loadingElement?: JSX.Element;
   brokenElement?: JSX.Element;
 }
 
 type PhotoState = {
-  loaded: boolean;
   broken: boolean;
-  naturalWidth: number;
-  naturalHeight: number;
-  width: number;
-  height: number;
 };
 
 export default class Photo extends React.PureComponent<
@@ -29,12 +30,7 @@ export default class Photo extends React.PureComponent<
   static displayName = 'Photo';
 
   readonly state = {
-    loaded: false,
     broken: false,
-    naturalWidth: 1,
-    naturalHeight: 1,
-    width: 1,
-    height: 1,
   };
 
   private isMount = true;
@@ -62,7 +58,8 @@ export default class Photo extends React.PureComponent<
   handleImageLoaded = e => {
     const { naturalWidth, naturalHeight } = e.target;
     if (this.isMount) {
-      this.setState({
+      const { onImageLoad } = this.props;
+      onImageLoad({
         loaded: true,
         naturalWidth,
         naturalHeight,
@@ -80,10 +77,10 @@ export default class Photo extends React.PureComponent<
   };
 
   handleResize = () => {
-    const { loaded, naturalWidth, naturalHeight } = this.state;
+    const { loaded, naturalWidth, naturalHeight } = this.props;
     if (loaded && this.isMount) {
-      const { onPhotoResize } = this.props;
-      this.setState(
+      const { onPhotoResize, onImageLoad } = this.props;
+      onImageLoad(
         getSuitableImageSize(naturalWidth, naturalHeight),
         onPhotoResize,
       );
@@ -93,13 +90,20 @@ export default class Photo extends React.PureComponent<
   render() {
     const {
       src,
+      loaded,
+      width,
+      height,
       className,
       loadingElement,
       brokenElement,
+      // ignore
+      naturalWidth,
+      naturalHeight,
       onPhotoResize,
+      onImageLoad,
       ...restProps
     } = this.props;
-    const { loaded, broken, width, height } = this.state;
+    const { broken } = this.state;
 
     if (src && !broken) {
       if (loaded) {
