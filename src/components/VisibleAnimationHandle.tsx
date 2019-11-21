@@ -42,7 +42,7 @@ export default function VisibleAnimationHandle({
       return;
     }
     const originRef = currentImage.originRef;
-    if (originRef) {
+    if (originRef && originRef.nodeType === 1) {
       // 获取触发时节点位置
       const { top, left, width, height } = originRef.getBoundingClientRect();
       updateOriginRect({
