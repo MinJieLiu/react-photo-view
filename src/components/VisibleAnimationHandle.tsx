@@ -49,6 +49,8 @@ export default function VisibleAnimationHandle({
         clientX: left + width / 2,
         clientY: top + height / 2,
       });
+    } else if (originRect && !originRef) {
+      updateOriginRect(undefined);
     }
 
     if (visible) {

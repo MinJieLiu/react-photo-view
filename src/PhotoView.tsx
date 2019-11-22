@@ -50,6 +50,8 @@ export interface IPhotoViewProps {
   onReachUp: ReachFunction;
   // Resize 事件
   onPhotoResize?: () => void;
+  // 是否在当前操作中
+  isActive: boolean;
 
   // 动画类型
   showAnimateType?: ShowAnimateEnum;
@@ -161,6 +163,10 @@ export default class PhotoView extends React.Component<
 
   onMove = (newClientX: number, newClientY: number, touchLength: number = 0) => {
     const {
+      onReachMove,
+      isActive,
+    } = this.props;
+    const {
       width,
       height,
       naturalWidth,
@@ -176,7 +182,7 @@ export default class PhotoView extends React.Component<
       touched,
       maskTouched,
     } = this.state;
-    if (touched || maskTouched) {
+    if ((touched || maskTouched) && isActive) {
       // 单指最小缩放下，以初始移动距离来判断意图
       if (touchLength === 0 && scale === minScale && this.initialTouchState === TouchStartEnum.Normal) {
         const isBeyondX = Math.abs(newClientX - clientX) > minStartTouchOffset;
@@ -198,9 +204,6 @@ export default class PhotoView extends React.Component<
       // 边缘触发状态
       let currentReachState = ReachTypeEnum.Normal;
       if (touchLength === 0) {
-        const {
-          onReachMove,
-        } = this.props;
         currentX = newClientX - clientX + lastX;
         const planY = newClientY - clientY + lastY;
         const touchYOffset = this.initialTouchState === TouchStartEnum.YPush
@@ -354,6 +357,7 @@ export default class PhotoView extends React.Component<
   handleUp = (newClientX: number, newClientY: number) => {
     // 重置响应状态
     this.initialTouchState = TouchStartEnum.Normal;
+    const { onReachUp, onPhotoTap, onMaskTap, isActive } = this.props;
     const {
       width,
       height,
@@ -369,8 +373,7 @@ export default class PhotoView extends React.Component<
       touched,
       maskTouched,
     } = this.state;
-    if (touched || maskTouched) {
-      const { onReachUp, onPhotoTap, onMaskTap } = this.props;
+    if ((touched || maskTouched) && isActive) {
       const hasMove = clientX !== newClientX || clientY !== newClientY;
       this.setState({
         touched: false,
@@ -430,6 +433,7 @@ export default class PhotoView extends React.Component<
       loadingElement,
       brokenElement,
       onPhotoResize,
+      isActive,
 
       showAnimateType,
       originRect,
@@ -453,8 +457,8 @@ export default class PhotoView extends React.Component<
       <div className={classNames('PhotoView__PhotoWrap', viewClassName)} style={style}>
         <div
           className="PhotoView__PhotoMask"
-          onMouseDown={isMobile ? undefined : this.handleMaskMouseDown}
-          onTouchStart={isMobile ? this.handleMaskTouchStart : undefined}
+          onMouseDown={!isMobile && isActive ? this.handleMaskMouseDown: undefined}
+          onTouchStart={isMobile && isActive ? this.handleMaskTouchStart : undefined}
         />
         <div
           className={classNames({

@@ -97,6 +97,16 @@ export default class PhotoSlider extends React.Component<
       translateX: index * -(window.innerWidth + horizontalOffset),
       photoIndex: index,
     });
+
+    if (!isMobile) {
+      window.addEventListener('keydown', this.handleKeyDown);
+    }
+  }
+
+  componentWillUnmount() {
+    if (!isMobile) {
+      window.removeEventListener('keydown', this.handleKeyDown);
+    }
   }
 
   handleClose = () => {
@@ -131,6 +141,23 @@ export default class PhotoSlider extends React.Component<
         lastClientY: undefined,
       };
     });
+  };
+
+  handleKeyDown = (evt: KeyboardEvent) => {
+    const { visible } = this.props;
+    if (visible) {
+      switch (evt.key) {
+        case 'ArrowLeft':
+          this.handlePrevious();
+          break;
+        case 'ArrowRight':
+          this.handleNext();
+          break;
+        case 'Escape':
+          this.handleClose();
+          break;
+      }
+    }
   };
 
   handleReachVerticalMove = (clientY, scale) => {
@@ -197,6 +224,21 @@ export default class PhotoSlider extends React.Component<
     const { onIndexChange } = this.props;
     if (onIndexChange) {
       onIndexChange(photoIndex);
+    }
+  };
+
+  handlePrevious = () => {
+    const { photoIndex } = this.state;
+    if (photoIndex > 0) {
+      this.handleIndexChange(photoIndex - 1);
+    }
+  };
+
+  handleNext = () => {
+    const { images } = this.props;
+    const { photoIndex } = this.state;
+    if (photoIndex < images.length - 1) {
+      this.handleIndexChange(photoIndex + 1);
     }
   };
 
@@ -371,6 +413,7 @@ export default class PhotoSlider extends React.Component<
                         loadingElement={loadingElement}
                         brokenElement={brokenElement}
                         onPhotoResize={this.handleResize}
+                        isActive={photoIndex === realIndex}
                         showAnimateType={showAnimateType}
                         originRect={originRect}
                         onShowAnimateEnd={onShowAnimateEnd}
