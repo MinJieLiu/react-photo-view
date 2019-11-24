@@ -36,6 +36,8 @@ type PhotoSliderState = {
 
   // 图片处于触摸的状态
   touched: boolean;
+  // 该状态是否需要 transition
+  shouldTransition: boolean;
   // Reach 开始时 x 坐标
   lastClientX: number | undefined;
   // Reach 开始时 y 坐标
@@ -81,6 +83,7 @@ export default class PhotoSlider extends React.Component<
       translateX: 0,
       photoIndex: 0,
       touched: false,
+      shouldTransition: true,
 
       lastClientX: undefined,
       lastClientY: undefined,
@@ -148,10 +151,10 @@ export default class PhotoSlider extends React.Component<
     if (visible) {
       switch (evt.key) {
         case 'ArrowLeft':
-          this.handlePrevious();
+          this.handlePrevious(false);
           break;
         case 'ArrowRight':
-          this.handleNext();
+          this.handleNext(false);
           break;
         case 'Escape':
           this.handleClose();
@@ -214,12 +217,19 @@ export default class PhotoSlider extends React.Component<
     });
   };
 
-  handleIndexChange = (photoIndex: number) => {
+  handleIndexChange = (
+    photoIndex: number,
+    shouldTransition: boolean = true,
+  ) => {
     const singlePageWidth = window.innerWidth + horizontalOffset;
     const translateX = -singlePageWidth * photoIndex;
     this.setState({
+      touched: false,
+      lastClientX: undefined,
+      lastClientY: undefined,
       translateX,
       photoIndex,
+      shouldTransition,
     });
     const { onIndexChange } = this.props;
     if (onIndexChange) {
@@ -227,18 +237,18 @@ export default class PhotoSlider extends React.Component<
     }
   };
 
-  handlePrevious = () => {
+  handlePrevious = (shouldTransition?: boolean) => {
     const { photoIndex } = this.state;
     if (photoIndex > 0) {
-      this.handleIndexChange(photoIndex - 1);
+      this.handleIndexChange(photoIndex - 1, shouldTransition);
     }
   };
 
-  handleNext = () => {
+  handleNext = (shouldTransition?: boolean) => {
     const { images } = this.props;
     const { photoIndex } = this.state;
     if (photoIndex < images.length - 1) {
-      this.handleIndexChange(photoIndex + 1);
+      this.handleIndexChange(photoIndex + 1, shouldTransition);
     }
   };
 
@@ -256,8 +266,7 @@ export default class PhotoSlider extends React.Component<
   };
 
   handleReachUp = (clientX: number, clientY: number) => {
-    const { innerWidth, innerHeight } = window;
-    const { images, onIndexChange, onClose } = this.props;
+    const { images, onClose } = this.props;
     const {
       lastClientX = clientX,
       lastClientY = clientY,
@@ -268,33 +277,26 @@ export default class PhotoSlider extends React.Component<
 
     const offsetClientX = clientX - lastClientX;
     const offsetClientY = clientY - lastClientY;
-    const singlePageWidth = innerWidth + horizontalOffset;
+    let isChangeVisible = false;
+    // 下一张
+    if (offsetClientX < -maxMoveOffset && photoIndex < images.length - 1) {
+      this.handleIndexChange(photoIndex + 1);
+      return;
+    }
+    // 上一张
+    if (offsetClientX > maxMoveOffset && photoIndex > 0) {
+      this.handleIndexChange(photoIndex - 1);
+      return;
+    }
+    const singlePageWidth = window.innerWidth + horizontalOffset;
 
     // 当前偏移
     let currentTranslateX = -singlePageWidth * photoIndex;
     let currentPhotoIndex = photoIndex;
-    let isChangeVisible = false;
 
-    if (Math.abs(offsetClientY) > innerHeight * 0.14 && canPullClose) {
+    if (Math.abs(offsetClientY) > window.innerHeight * 0.14 && canPullClose) {
       isChangeVisible = true;
       onClose();
-      // 下一张
-    } else if (
-      offsetClientX < -maxMoveOffset &&
-      photoIndex < images.length - 1
-    ) {
-      currentPhotoIndex = photoIndex + 1;
-      currentTranslateX = -singlePageWidth * currentPhotoIndex;
-      if (onIndexChange) {
-        onIndexChange(currentPhotoIndex);
-      }
-      // 上一张
-    } else if (offsetClientX > maxMoveOffset && photoIndex > 0) {
-      currentPhotoIndex = photoIndex - 1;
-      currentTranslateX = -singlePageWidth * currentPhotoIndex;
-      if (onIndexChange) {
-        onIndexChange(currentPhotoIndex);
-      }
     }
     this.setState({
       touched: false,
@@ -328,6 +330,7 @@ export default class PhotoSlider extends React.Component<
       photoIndex,
       backdropOpacity,
       overlayVisible,
+      shouldTransition,
     } = this.state;
     const imageLength = images.length;
     const currentImage = images.length ? images[photoIndex] : undefined;
@@ -406,9 +409,10 @@ export default class PhotoSlider extends React.Component<
                             realIndex}px`,
                           WebkitTransform: transform,
                           transform,
-                          transition: touched
-                            ? undefined
-                            : 'transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                          transition:
+                            touched || !shouldTransition
+                              ? undefined
+                              : 'transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)',
                         }}
                         loadingElement={loadingElement}
                         brokenElement={brokenElement}

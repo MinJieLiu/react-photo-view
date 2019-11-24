@@ -25,6 +25,7 @@ import {
   OriginRectType,
 } from './types';
 import './PhotoView.less';
+import getSuitableImageSize from './utils/getSuitableImageSize';
 
 export interface IPhotoViewProps {
   // 图片地址
@@ -118,6 +119,7 @@ export default class PhotoView extends React.Component<
   constructor(props: IPhotoViewProps) {
     super(props);
     this.onMove = throttle(this.onMove, 8);
+    this.handleResize = throttle(this.handleResize, 8);
     // 单击与双击事件处理
     this.handlePhotoTap = withContinuousTap(
       this.onPhotoTap,
@@ -133,6 +135,7 @@ export default class PhotoView extends React.Component<
       window.addEventListener('mousemove', this.handleMouseMove);
       window.addEventListener('mouseup', this.handleMouseUp);
     }
+    window.addEventListener('resize', this.handleResize);
   }
 
   componentWillUnmount() {
@@ -143,10 +146,22 @@ export default class PhotoView extends React.Component<
       window.removeEventListener('mousemove', this.handleMouseMove);
       window.removeEventListener('mouseup', this.handleMouseUp);
     }
+    window.removeEventListener('resize', this.handleResize);
   }
 
   handleImageLoad = imageParams => {
     this.setState(imageParams);
+  };
+
+  handleResize = () => {
+    const { onPhotoResize } = this.props;
+    const { loaded, naturalWidth, naturalHeight } = this.state;
+    if (loaded) {
+      this.setState(getSuitableImageSize(naturalWidth, naturalHeight));
+      if (onPhotoResize) {
+        onPhotoResize();
+      }
+    }
   };
 
   handleStart = (clientX: number, clientY: number, touchLength: number = 0) => {
@@ -432,7 +447,6 @@ export default class PhotoView extends React.Component<
       style,
       loadingElement,
       brokenElement,
-      onPhotoResize,
       isActive,
 
       showAnimateType,
@@ -442,8 +456,6 @@ export default class PhotoView extends React.Component<
     const {
       width,
       height,
-      naturalWidth,
-      naturalHeight,
       loaded,
       x,
       y,
@@ -475,13 +487,10 @@ export default class PhotoView extends React.Component<
             src={src}
             width={width}
             height={height}
-            naturalWidth={naturalWidth}
-            naturalHeight={naturalHeight}
             loaded={loaded}
             onMouseDown={isMobile ? undefined : this.handleMouseDown}
             onTouchStart={isMobile ? this.handleTouchStart : undefined}
             onWheel={this.handleWheel}
-            onPhotoResize={onPhotoResize}
             style={{
               WebkitTransform: transform,
               transform,

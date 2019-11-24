@@ -3,9 +3,10 @@ import { createPortal } from 'react-dom';
 import classNames from 'classnames';
 import './SlideWrap.less';
 
-const SlideWrap: React.FC<{ className?: string }> = ({
+const SlideWrap: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   className,
   children,
+  ...restProps
 }) => {
   const dialogNode = React.useMemo(
     () => {
@@ -35,7 +36,10 @@ const SlideWrap: React.FC<{ className?: string }> = ({
   );
 
   return createPortal(
-    <div className={classNames('PhotoView-SlideWrap', className)}>
+    <div
+      className={classNames('PhotoView-SlideWrap', className)}
+      {...restProps}
+    >
       {children}
     </div>,
     dialogNode,

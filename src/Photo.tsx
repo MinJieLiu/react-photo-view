@@ -1,64 +1,38 @@
 import React from 'react';
 import classNames from 'classnames';
-import throttle from './utils/throttle';
 import Spinner from './components/Spinner';
 import getSuitableImageSize from './utils/getSuitableImageSize';
+import useMountedState from './utils/useMountedState';
 import './Photo.less';
 
 export interface IPhotoProps extends React.HTMLAttributes<any> {
   src: string;
   loaded: boolean;
-  naturalWidth: number;
-  naturalHeight: number;
   width: number;
   height: number;
   className?: string;
-  onPhotoResize?: () => void;
   onImageLoad: (PhotoParams, callback?: Function) => void;
   loadingElement?: JSX.Element;
   brokenElement?: JSX.Element;
 }
 
-type PhotoState = {
-  broken: boolean;
-};
+const Photo: React.FC<IPhotoProps> = ({
+  src,
+  loaded,
+  width,
+  height,
+  className,
+  onImageLoad,
+  loadingElement,
+  brokenElement,
+  ...restProps
+}) => {
+  const [broken, setBroken] = React.useState<boolean>(false);
+  const isMounted = useMountedState();
 
-export default class Photo extends React.PureComponent<
-  IPhotoProps,
-  PhotoState
-> {
-  static displayName = 'Photo';
-
-  readonly state = {
-    broken: false,
-  };
-
-  private isMount = true;
-
-  constructor(props: IPhotoProps) {
-    super(props);
-    this.handleResize = throttle(this.handleResize, 8);
-  }
-
-  componentDidMount() {
-    const { src } = this.props;
-    const currPhoto = new Image();
-    currPhoto.onload = this.handleImageLoaded;
-    currPhoto.onerror = this.handleImageBroken;
-    currPhoto.src = src;
-
-    window.addEventListener('resize', this.handleResize);
-  }
-
-  componentWillUnmount() {
-    this.isMount = false;
-    window.removeEventListener('resize', this.handleResize);
-  }
-
-  handleImageLoaded = e => {
+  function handleImageLoaded(e) {
     const { naturalWidth, naturalHeight } = e.target;
-    if (this.isMount) {
-      const { onImageLoad } = this.props;
+    if (isMounted()) {
       onImageLoad({
         loaded: true,
         naturalWidth,
@@ -66,61 +40,39 @@ export default class Photo extends React.PureComponent<
         ...getSuitableImageSize(naturalWidth, naturalHeight),
       });
     }
-  };
-
-  handleImageBroken = () => {
-    if (this.isMount) {
-      this.setState({
-        broken: true,
-      });
-    }
-  };
-
-  handleResize = () => {
-    const { loaded, naturalWidth, naturalHeight } = this.props;
-    if (loaded && this.isMount) {
-      const { onImageLoad, onPhotoResize } = this.props;
-      onImageLoad(getSuitableImageSize(naturalWidth, naturalHeight));
-
-      if (onPhotoResize) {
-        onPhotoResize();
-      }
-    }
-  };
-
-  render() {
-    const {
-      src,
-      loaded,
-      width,
-      height,
-      className,
-      loadingElement,
-      brokenElement,
-      // ignore
-      naturalWidth,
-      naturalHeight,
-      onPhotoResize,
-      onImageLoad,
-      ...restProps
-    } = this.props;
-    const { broken } = this.state;
-
-    if (src && !broken) {
-      if (loaded) {
-        return (
-          <img
-            className={classNames('PhotoView__Photo', className)}
-            src={src}
-            width={width}
-            height={height}
-            alt=""
-            {...restProps}
-          />
-        );
-      }
-      return loadingElement || <Spinner />;
-    }
-    return brokenElement || null;
   }
-}
+
+  function handleImageBroken() {
+    if (isMounted()) {
+      setBroken(true);
+    }
+  }
+
+  React.useEffect(() => {
+    const currPhoto = new Image();
+    currPhoto.onload = handleImageLoaded;
+    currPhoto.onerror = handleImageBroken;
+    currPhoto.src = src;
+  }, []);
+
+  if (src && !broken) {
+    if (loaded) {
+      return (
+        <img
+          className={classNames('PhotoView__Photo', className)}
+          src={src}
+          width={width}
+          height={height}
+          alt=""
+          {...restProps}
+        />
+      );
+    }
+    return loadingElement || <Spinner />;
+  }
+  return brokenElement || null;
+};
+
+Photo.displayName = 'Photo';
+
+export default Photo;

@@ -15,7 +15,8 @@
     "react-photo",
     "react-photo-view",
     "photo",
-    "photo-view"
+    "photo-view",
+    "gallery"
   ],
   "engines": {
     "node": ">=8",
