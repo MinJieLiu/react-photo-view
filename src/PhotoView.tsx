@@ -244,6 +244,8 @@ export default class PhotoView extends React.Component<
           onReachMove(currentReachState, newClientX, newClientY, scale);
         }
       }
+      currentX = newClientX - clientX + lastX;
+      currentY = newClientY - clientY + lastY;
       // 横向边缘触发、背景触发禁用当前滑动
       if (currentReachState === ReachTypeEnum.XReach || maskTouched) {
         this.setState({
@@ -266,8 +268,12 @@ export default class PhotoView extends React.Component<
           ...getPositionOnMoveOrScale({
             x: currentX,
             y: currentY,
+            lastX: x,
+            lastY: y,
             clientX: newClientX,
             clientY: newClientY,
+            lastClientX: clientX,
+            lastClientY: clientY,
             fromScale: scale,
             toScale,
           }),
