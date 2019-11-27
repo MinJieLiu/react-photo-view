@@ -8,6 +8,7 @@ import './Photo.less';
 export interface IPhotoProps extends React.HTMLAttributes<any> {
   src: string;
   loaded: boolean;
+  broken: boolean;
   width: number;
   height: number;
   className?: string;
@@ -19,6 +20,7 @@ export interface IPhotoProps extends React.HTMLAttributes<any> {
 const Photo: React.FC<IPhotoProps> = ({
   src,
   loaded,
+  broken,
   width,
   height,
   className,
@@ -27,7 +29,6 @@ const Photo: React.FC<IPhotoProps> = ({
   brokenElement,
   ...restProps
 }) => {
-  const [broken, setBroken] = React.useState<boolean>(false);
   const isMounted = useMountedState();
 
   function handleImageLoaded(e) {
@@ -44,7 +45,9 @@ const Photo: React.FC<IPhotoProps> = ({
 
   function handleImageBroken() {
     if (isMounted()) {
-      setBroken(true);
+      onImageLoad({
+        broken: true,
+      });
     }
   }
 

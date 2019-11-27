@@ -364,6 +364,7 @@ export default class PhotoSlider extends React.Component<
                     },
                   )}
                   style={{ background: `rgba(0, 0, 0, ${backdropOpacity})` }}
+                  onAnimationEnd={onShowAnimateEnd}
                 />
                 {bannerVisible && (
                   <div
@@ -420,7 +421,6 @@ export default class PhotoSlider extends React.Component<
                         isActive={photoIndex === realIndex}
                         showAnimateType={showAnimateType}
                         originRect={originRect}
-                        onShowAnimateEnd={onShowAnimateEnd}
                       />
                     );
                   })}

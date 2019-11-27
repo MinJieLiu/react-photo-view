@@ -26,9 +26,12 @@ const SmallImage = styled.img`
   cursor: pointer;
 `;
 
-export default {
-  title: '基本操作',
-};
+const Button = styled.button`
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  cursor: pointer;
+`;
 
 storiesOf('基本操作', module)
   .add('默认预览', () => (
@@ -42,7 +45,7 @@ storiesOf('基本操作', module)
       </ImageList>
     </PhotoProvider>
   ))
-  .add('只展示两张图片', () => (
+  .add('只展示两张', () => (
     <PhotoProvider>
       <ImageList>
         {photoImages.map((item, index) => (
@@ -50,6 +53,24 @@ storiesOf('基本操作', module)
             {index < 2 ? <SmallImage src={item} /> : undefined}
           </PhotoConsumer>
         ))}
+      </ImageList>
+    </PhotoProvider>
+  ))
+  .add('错误图片地址', () => (
+    <PhotoProvider>
+      <ImageList>
+        <PhotoConsumer src={null}>
+          <SmallImage src={image1} />
+        </PhotoConsumer>
+      </ImageList>
+    </PhotoProvider>
+  ))
+  .add('按钮触发', () => (
+    <PhotoProvider>
+      <ImageList>
+        <PhotoConsumer src={image4}>
+          <Button>打开预览</Button>
+        </PhotoConsumer>
       </ImageList>
     </PhotoProvider>
   ));

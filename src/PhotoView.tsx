@@ -58,8 +58,6 @@ export interface IPhotoViewProps {
   showAnimateType?: ShowAnimateEnum;
   // 动画源位置
   originRect?: OriginRectType;
-  // 进入或结束动画回调
-  onShowAnimateEnd?: () => void;
 }
 
 const initialState = {
@@ -73,6 +71,8 @@ const initialState = {
   height: 1,
   // 加载成功状态
   loaded: false,
+  // 破碎状态
+  broken: false,
 
   // 图片 X 偏移量
   x: 0,
@@ -457,7 +457,6 @@ export default class PhotoView extends React.Component<
 
       showAnimateType,
       originRect,
-      onShowAnimateEnd,
     } = this.props;
     const {
       width,
@@ -467,6 +466,7 @@ export default class PhotoView extends React.Component<
       y,
       scale,
       touched,
+      broken,
     } = this.state;
 
     const transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
@@ -480,13 +480,12 @@ export default class PhotoView extends React.Component<
         />
         <div
           className={classNames({
-            PhotoView__animateIn: loaded && showAnimateType === ShowAnimateEnum.In,
-            PhotoView__animateOut: loaded && showAnimateType === ShowAnimateEnum.Out,
+            PhotoView__animateIn: (loaded || broken) && showAnimateType === ShowAnimateEnum.In,
+            PhotoView__animateOut: (loaded || broken) && showAnimateType === ShowAnimateEnum.Out,
           })}
           style={{
             transformOrigin: loaded ? getAnimateOrigin(originRect, width, height) : undefined,
           }}
-          onAnimationEnd={onShowAnimateEnd}
         >
           <Photo
             className={className}
@@ -494,6 +493,7 @@ export default class PhotoView extends React.Component<
             width={width}
             height={height}
             loaded={loaded}
+            broken={broken}
             onMouseDown={isMobile ? undefined : this.handleMouseDown}
             onTouchStart={isMobile ? this.handleTouchStart : undefined}
             onWheel={this.handleWheel}
