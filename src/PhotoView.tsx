@@ -94,6 +94,10 @@ const initialState = {
   lastX: 0,
   // 触摸开始时图片 y 偏移量
   lastY: 0,
+  // 上一个触摸状态 x 原始坐标
+  lastMoveClientX: 0,
+  // 上一个触摸状态 y 原始坐标
+  lastMoveClientY: 0,
 
   // 触摸开始时时间
   touchedTime: 0,
@@ -169,6 +173,8 @@ export default class PhotoView extends React.Component<
       touched: true,
       clientX,
       clientY,
+      lastMoveClientX: clientX,
+      lastMoveClientY: clientY,
       lastX: prevState.x,
       lastY: prevState.y,
       lastTouchLength: touchLength,
@@ -189,6 +195,8 @@ export default class PhotoView extends React.Component<
       y,
       clientX,
       clientY,
+      lastMoveClientX,
+      lastMoveClientY,
       lastX,
       lastY,
       scale,
@@ -199,43 +207,41 @@ export default class PhotoView extends React.Component<
     } = this.state;
     if ((touched || maskTouched) && isActive) {
       // 单指最小缩放下，以初始移动距离来判断意图
-      if (touchLength === 0 && scale === minScale && this.initialTouchState === TouchStartEnum.Normal) {
-        const isBeyondX = Math.abs(newClientX - clientX) > minStartTouchOffset;
-        const isBeyondY = Math.abs(newClientY - clientY) > minStartTouchOffset;
-        // 初始移动距离不足则不处理
-        if (!(isBeyondX || isBeyondY)) {
+      if (touchLength === 0 && this.initialTouchState === TouchStartEnum.Normal) {
+        const isStillX = Math.abs(newClientX - clientX) <= minStartTouchOffset;
+        const isStillY = Math.abs(newClientY - clientY) <= minStartTouchOffset;
+        // 初始移动距离不足
+        if (isStillX && isStillY) {
+          // Y 方向记录上次移动距离，以便平滑过渡
+          if (isStillY) {
+            this.setState({
+              lastMoveClientY: newClientY,
+            });
+          }
           return;
         }
         // 设置响应状态
-        this.initialTouchState = isBeyondX
+        this.initialTouchState = !isStillX
           ? TouchStartEnum.X
           : newClientY > clientY
             ? TouchStartEnum.YPull
             : TouchStartEnum.YPush;
       }
 
-      let currentX = x;
-      let currentY = y;
+      let offsetX = newClientX - lastMoveClientX;
+      let offsetY = newClientY - lastMoveClientY;
       // 边缘触发状态
       let currentReachState = ReachTypeEnum.Normal;
       if (touchLength === 0) {
-        currentX = newClientX - clientX + lastX;
-        const planY = newClientY - clientY + lastY;
-        const touchYOffset = this.initialTouchState === TouchStartEnum.YPush
-          ? minStartTouchOffset
-          : -minStartTouchOffset;
         // 边缘超出状态
         const { horizontalCloseEdge, verticalCloseEdge } = getCloseEdgeResult({
           initialTouchState: this.initialTouchState,
-          planX: currentX,
-          planY,
+          planX: offsetX + lastX,
+          planY: offsetY + lastY,
           scale,
           width,
           height,
         });
-        // Y 方向在初始响应状态下需要补一个距离
-        currentY = planY +
-          (this.initialTouchState === TouchStartEnum.Normal ? 0 : touchYOffset);
         // 边缘触发检测
         currentReachState = getReachType({ horizontalCloseEdge, verticalCloseEdge, reachState });
 
@@ -244,8 +250,6 @@ export default class PhotoView extends React.Component<
           onReachMove(currentReachState, newClientX, newClientY, scale);
         }
       }
-      currentX = newClientX - clientX + lastX;
-      currentY = newClientY - clientY + lastY;
       // 横向边缘触发、背景触发禁用当前滑动
       if (currentReachState === ReachTypeEnum.XReach || maskTouched) {
         this.setState({
@@ -266,14 +270,12 @@ export default class PhotoView extends React.Component<
           lastTouchLength: touchLength,
           reachState: currentReachState,
           ...getPositionOnMoveOrScale({
-            x: currentX,
-            y: currentY,
-            lastX: x,
-            lastY: y,
+            x,
+            y,
             clientX: newClientX,
             clientY: newClientY,
-            lastClientX: clientX,
-            lastClientY: clientY,
+            offsetX,
+            offsetY,
             fromScale: scale,
             toScale,
           }),
@@ -480,8 +482,8 @@ export default class PhotoView extends React.Component<
         />
         <div
           className={classNames({
-            PhotoView__animateIn: (loaded || broken) && showAnimateType === ShowAnimateEnum.In,
-            PhotoView__animateOut: (loaded || broken) && showAnimateType === ShowAnimateEnum.Out,
+            PhotoView__animateIn: loaded && showAnimateType === ShowAnimateEnum.In,
+            PhotoView__animateOut: loaded && showAnimateType === ShowAnimateEnum.Out,
           })}
           style={{
             transformOrigin: loaded ? getAnimateOrigin(originRect, width, height) : undefined,

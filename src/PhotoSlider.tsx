@@ -196,6 +196,7 @@ export default class PhotoSlider extends React.Component<
           touched: true,
           lastClientX: clientX,
           translateX,
+          shouldTransition: true,
         };
       }
       const originOffsetClientX = clientX - lastClientX;
@@ -213,6 +214,7 @@ export default class PhotoSlider extends React.Component<
         lastClientX: lastClientX,
         translateX:
           -(innerWidth + horizontalOffset) * photoIndex + offsetClientX,
+        shouldTransition: true,
       };
     });
   };

@@ -8,6 +8,7 @@ import image2 from './static/2.jpg';
 import image3 from './static/3.jpg';
 import image4 from './static/4.jpg';
 import image5 from './static/5.jpg';
+import defaultPhoto from './static/default-photo.svg';
 
 const photoImages = [image1, image2, image3, image4, image5];
 
@@ -31,6 +32,15 @@ const Button = styled.button`
   border: 1px solid #ccc;
   border-radius: 2px;
   cursor: pointer;
+
+  &:not(:last-child) {
+    margin-right: 12px;
+  }
+`;
+
+const DefaultImage = styled.img`
+  width: 100px;
+  height: 100px;
 `;
 
 storiesOf('基本操作', module)
@@ -56,15 +66,6 @@ storiesOf('基本操作', module)
       </ImageList>
     </PhotoProvider>
   ))
-  .add('错误图片地址', () => (
-    <PhotoProvider>
-      <ImageList>
-        <PhotoConsumer src={null}>
-          <SmallImage src={image1} />
-        </PhotoConsumer>
-      </ImageList>
-    </PhotoProvider>
-  ))
   .add('按钮触发', () => (
     <PhotoProvider>
       <ImageList>
@@ -73,4 +74,18 @@ storiesOf('基本操作', module)
         </PhotoConsumer>
       </ImageList>
     </PhotoProvider>
+  ))
+  .add('错误图片地址', () => (
+    <ImageList>
+      <PhotoProvider>
+        <PhotoConsumer src={null}>
+          <Button>无默认图</Button>
+        </PhotoConsumer>
+      </PhotoProvider>
+      <PhotoProvider brokenElement={<DefaultImage src={defaultPhoto} />}>
+        <PhotoConsumer src={null}>
+          <Button>自定义默认图</Button>
+        </PhotoConsumer>
+      </PhotoProvider>
+    </ImageList>
   ));

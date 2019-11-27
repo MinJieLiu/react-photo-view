@@ -4,38 +4,34 @@
 export default function getPositionOnMoveOrScale({
   x,
   y,
-  lastX = x,
-  lastY = y,
   clientX,
   clientY,
-  lastClientX = clientX,
-  lastClientY = clientY,
+  offsetX = 0,
+  offsetY = 0,
   fromScale,
   toScale,
 }: {
   x: number;
   y: number;
-  lastX?: number;
-  lastY?: number;
   clientX: number;
   clientY: number;
-  lastClientX?: number;
-  lastClientY?: number;
+  offsetX?: number;
+  offsetY?: number;
   fromScale: number;
   toScale: number;
 }): {
   x: number;
   y: number;
   scale: number;
-  clientX: number;
-  clientY: number;
+  lastMoveClientX: number;
+  lastMoveClientY: number;
 } {
   const { innerWidth, innerHeight } = window;
   const centerClientX = innerWidth / 2;
   const centerClientY = innerHeight / 2;
   // 坐标偏移
-  const lastPositionX = centerClientX + lastX;
-  const lastPositionY = centerClientY + lastY;
+  const lastPositionX = centerClientX + x;
+  const lastPositionY = centerClientY + y;
 
   // 放大偏移量
   const offsetScale = toScale / fromScale;
@@ -45,10 +41,10 @@ export default function getPositionOnMoveOrScale({
   const originY =
     clientY - (clientY - lastPositionY) * offsetScale - centerClientY;
   return {
-    x: originX + (clientX - lastClientX),
-    y: originY + (clientY - lastClientY),
+    x: originX + offsetX,
+    y: originY + offsetY,
     scale: toScale,
-    clientX,
-    clientY,
+    lastMoveClientX: clientX,
+    lastMoveClientY: clientY,
   };
 }
