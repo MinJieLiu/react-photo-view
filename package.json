@@ -1,7 +1,7 @@
 {
   "name": "react-photo-view",
-  "version": "0.3.6",
-  "description": "React photo preview.",
+  "version": "0.3.7",
+  "description": "一款精致的 React 的图片预览组件",
   "author": "MinJieLiu",
   "license": "MIT",
   "repository": "https://github.com/MinJieLiu/react-photo-view.git",

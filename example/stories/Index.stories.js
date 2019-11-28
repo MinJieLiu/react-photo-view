@@ -73,7 +73,7 @@ storiesOf('react-photo-view', module)
     <PhotoProvider>
       <ImageList>
         {photoImages.map((item, index) => (
-          <PhotoConsumer key={index} src={item} intro={item}>
+          <PhotoConsumer key={index} src={item}>
             {index < 2 ? <ViewBox viewImage={item} /> : undefined}
           </PhotoConsumer>
         ))}
