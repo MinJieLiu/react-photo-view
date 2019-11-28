@@ -1,6 +1,6 @@
 {
   "name": "react-photo-view",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "React photo preview.",
   "author": "MinJieLiu",
   "license": "MIT",
@@ -27,9 +27,7 @@
     "test:watch": "react-scripts-ts test --env=jsdom",
     "build": "rollup -c",
     "start": "rollup -c -w",
-    "prepare": "npm run build",
-    "predeploy": "cd example && npm install && npm run build",
-    "deploy": "gh-pages -d example/build"
+    "prepare": "npm run build"
   },
   "dependencies": {
     "lodash.debounce": "^4.0.8",
@@ -53,7 +51,6 @@
     "babel-runtime": "^6.26.0",
     "classnames": "^2.2.6",
     "cross-env": "^6.0.3",
-    "gh-pages": "^2.1.1",
     "less": "^3.10.3",
     "prettier": "^1.18.2",
     "react": "^16.11.0",

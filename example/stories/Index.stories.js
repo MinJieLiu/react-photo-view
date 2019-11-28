@@ -3,14 +3,26 @@ import styled from 'styled-components';
 import { storiesOf } from '@storybook/react';
 import { PhotoProvider, PhotoConsumer } from 'react-photo-view';
 import 'react-photo-view/dist/index.css';
-import image1 from './static/1.png';
+import image1 from './static/1.jpg';
 import image2 from './static/2.jpg';
 import image3 from './static/3.jpg';
 import image4 from './static/4.jpg';
 import image5 from './static/5.jpg';
+import image6 from './static/6.jpg';
+import image7 from './static/7.jpg';
+import image8 from './static/8.jpg';
 import defaultPhoto from './static/default-photo.svg';
 
-const photoImages = [image1, image2, image3, image4, image5];
+const photoImages = [
+  image1,
+  image2,
+  image3,
+  image4,
+  image5,
+  image6,
+  image7,
+  image8,
+];
 
 const ImageList = styled.div`
   padding: 40px;
@@ -19,12 +31,14 @@ const ImageList = styled.div`
   align-items: center;
 `;
 
-const SmallImage = styled.img`
+const ViewBox = styled.div`
   margin-right: 20px;
   margin-bottom: 20px;
   width: 100px;
   height: 100px;
   cursor: pointer;
+  background: url('${props => props.viewImage}') no-repeat center;
+  background-size: cover;
 `;
 
 const Button = styled.button`
@@ -43,30 +57,30 @@ const DefaultImage = styled.img`
   height: 100px;
 `;
 
-storiesOf('基本操作', module)
-  .add('默认预览', () => (
+storiesOf('react-photo-view', module)
+  .add('默认展示', () => (
     <PhotoProvider>
       <ImageList>
         {photoImages.map((item, index) => (
           <PhotoConsumer key={index} src={item} intro={item}>
-            <SmallImage src={item} />
+            <ViewBox viewImage={item} />
           </PhotoConsumer>
         ))}
       </ImageList>
     </PhotoProvider>
   ))
-  .add('只展示两张', () => (
+  .add('两张预览', () => (
     <PhotoProvider>
       <ImageList>
         {photoImages.map((item, index) => (
           <PhotoConsumer key={index} src={item} intro={item}>
-            {index < 2 ? <SmallImage src={item} /> : undefined}
+            {index < 2 ? <ViewBox viewImage={item} /> : undefined}
           </PhotoConsumer>
         ))}
       </ImageList>
     </PhotoProvider>
   ))
-  .add('按钮触发', () => (
+  .add('通过按钮触发', () => (
     <PhotoProvider>
       <ImageList>
         <PhotoConsumer src={image4}>
@@ -75,7 +89,7 @@ storiesOf('基本操作', module)
       </ImageList>
     </PhotoProvider>
   ))
-  .add('错误图片地址', () => (
+  .add('自定义加载失败', () => (
     <ImageList>
       <PhotoProvider>
         <PhotoConsumer src={null}>

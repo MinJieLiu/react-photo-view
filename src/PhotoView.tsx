@@ -6,7 +6,7 @@ import isMobile from './utils/isMobile';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import slideToPosition from './utils/slideToPosition';
-import { getReachType, getCloseEdgeResult } from './utils/getCloseEdge';
+import { getReachType, getClosedHorizontal, getClosedVertical } from './utils/getCloseEdge';
 import withContinuousTap, { TapFuncType } from './utils/withContinuousTap';
 import getAnimateOrigin from './utils/getAnimateOrigin';
 import {
@@ -234,16 +234,15 @@ export default class PhotoView extends React.Component<
       let currentReachState = ReachTypeEnum.Normal;
       if (touchLength === 0) {
         // 边缘超出状态
-        const { horizontalCloseEdge, verticalCloseEdge } = getCloseEdgeResult({
-          initialTouchState: this.initialTouchState,
-          planX: offsetX + lastX,
-          planY: offsetY + lastY,
-          scale,
-          width,
-          height,
-        });
+        const horizontalCloseEdge = getClosedHorizontal(offsetX + lastX, scale, width);
+        const verticalCloseEdge = getClosedVertical(offsetY + lastY, scale, height);
         // 边缘触发检测
-        currentReachState = getReachType({ horizontalCloseEdge, verticalCloseEdge, reachState });
+        currentReachState = getReachType({
+          initialTouchState: this.initialTouchState,
+          horizontalCloseEdge,
+          verticalCloseEdge,
+          reachState,
+        });
 
         // 接触边缘
         if (currentReachState != ReachTypeEnum.Normal) {
@@ -456,7 +455,6 @@ export default class PhotoView extends React.Component<
       loadingElement,
       brokenElement,
       isActive,
-
       showAnimateType,
       originRect,
     } = this.props;

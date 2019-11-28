@@ -55,76 +55,35 @@ export function getClosedVertical(
 
 /**
  * 获取接触边缘类型
+ * @param initialTouchState
  * @param horizontalCloseEdge
  * @param verticalCloseEdge
  * @param reachState
  */
 export function getReachType({
+  initialTouchState,
   horizontalCloseEdge,
   verticalCloseEdge,
   reachState,
 }: {
+  initialTouchState: TouchStartEnum;
   horizontalCloseEdge: CloseEdgeEnum;
   verticalCloseEdge: CloseEdgeEnum;
   reachState: ReachTypeEnum;
 }): ReachTypeEnum {
   if (
-    (horizontalCloseEdge && reachState === ReachTypeEnum.Normal) ||
+    (horizontalCloseEdge > 0 &&
+      initialTouchState === TouchStartEnum.X) ||
     reachState === ReachTypeEnum.XReach
   ) {
     return ReachTypeEnum.XReach;
   } else if (
-    (verticalCloseEdge && reachState === ReachTypeEnum.Normal) ||
+    (verticalCloseEdge > 0 &&
+      (initialTouchState === TouchStartEnum.YPull ||
+        initialTouchState === TouchStartEnum.YPush)) ||
     reachState === ReachTypeEnum.YReach
   ) {
     return ReachTypeEnum.YReach;
   }
   return ReachTypeEnum.Normal;
-}
-
-/**
- * 边缘超出状态
- * @param initialTouchState
- * @param planX
- * @param planY
- * @param scale
- * @param width
- * @param height
- */
-export function getCloseEdgeResult({
-  initialTouchState,
-  planX,
-  planY,
-  scale,
-  width,
-  height,
-}: {
-  initialTouchState: TouchStartEnum;
-  planX: number;
-  planY: number;
-  scale: number;
-  width: number;
-  height: number;
-}): {
-  horizontalCloseEdge: CloseEdgeEnum;
-  verticalCloseEdge: CloseEdgeEnum;
-} {
-  if (initialTouchState !== TouchStartEnum.Normal) {
-    const isHorizontal = initialTouchState === TouchStartEnum.X;
-    return {
-      horizontalCloseEdge:
-        isHorizontal
-          ? CloseEdgeEnum.Small
-          : CloseEdgeEnum.Normal,
-      verticalCloseEdge:
-        !isHorizontal
-          ? CloseEdgeEnum.Small
-          : CloseEdgeEnum.Normal,
-    };
-  }
-
-  return {
-    horizontalCloseEdge: getClosedHorizontal(planX, scale, width),
-    verticalCloseEdge: getClosedVertical(planY, scale, height),
-  };
 }
