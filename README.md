@@ -82,7 +82,7 @@ function ImageView() {
 | onClose       | (evt) => void | 是   | 关闭事件     |
 | onIndexChange | Function      | 否   | 索引改变回调 |
 
-### 谁在使用
+## 谁在使用
 
 <a href="http://www.saastrip.com/"><img src="https://minjieliu.github.io/assets/md-image/saastrip_logo.png" align="left" height="48" width="48"></a>
 <a href="http://www.zhinanmao.com/"><img src="https://minjieliu.github.io/assets/md-image/zhinanmao_logo.png" align="left" height="48" width="48"></a>
