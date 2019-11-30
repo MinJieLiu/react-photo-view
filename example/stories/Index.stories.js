@@ -1,7 +1,7 @@
 import * as React from 'react';
 import styled from 'styled-components';
 import { storiesOf } from '@storybook/react';
-import { PhotoProvider, PhotoConsumer } from 'react-photo-view';
+import { PhotoProvider, PhotoConsumer, PhotoSlider } from 'react-photo-view';
 import 'react-photo-view/dist/index.css';
 import image1 from './static/1.jpg';
 import image2 from './static/2.jpg';
@@ -49,6 +49,12 @@ const Button = styled.button`
 
   &:not(:last-child) {
     margin-right: 12px;
+  }
+
+  &[type='primary'] {
+    background: deepskyblue;
+    border-color: deepskyblue;
+    color: white;
   }
 `;
 
@@ -102,4 +108,32 @@ storiesOf('react-photo-view', module)
         </PhotoConsumer>
       </PhotoProvider>
     </ImageList>
-  ));
+  ))
+  .add('受控 PhotoSlider', () => {
+    const [visible, setVisible] = React.useState(false);
+    const [photoIndex, setPhotoIndex] = React.useState(0);
+
+    function handleShowSlider() {
+      setVisible(true);
+    }
+    function handleCloseSlider() {
+      setVisible(false);
+    }
+    return (
+      <ImageList>
+        <Button onClick={() => setPhotoIndex(2)}>setPhotoIndex(2)</Button>
+        <Button onClick={() => setPhotoIndex(4)}>setPhotoIndex(4)</Button>
+        <Button onClick={handleShowSlider} type="primary">
+          打开 PhotoSlider
+        </Button>
+
+        <PhotoSlider
+          images={photoImages.map(item => ({ src: item }))}
+          visible={visible}
+          onClose={handleCloseSlider}
+          index={photoIndex}
+          onIndexChange={setPhotoIndex}
+        />
+      </ImageList>
+    );
+  });

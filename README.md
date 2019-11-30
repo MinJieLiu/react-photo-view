@@ -41,6 +41,28 @@ function ImageView() {
 }
 ```
 
+受控 `PhotoSlider`
+
+```js
+function ImageView() {
+  const [visible, setVisible] = React.useState(false);
+  const [photoIndex, setPhotoIndex] = React.useState(0);
+
+  return (
+    <div>
+      <Button onClick={() => setVisible(true)}>打开</Button>
+      <PhotoSlider
+        images={photoImages.map(item => ({ src: item }))}
+        visible={visible}
+        onClose={() => setVisible(false)}
+        index={photoIndex}
+        onIndexChange={setPhotoIndex}
+      />
+    </div>
+  );
+}
+```
+
 ### API
 
 #### PhotoProvider
@@ -68,7 +90,10 @@ function ImageView() {
 | intro    | React.ReactNode    | 否   | 图片介绍 |
 | children | React.ReactElement | 否   |          |
 
-注意：展开/关闭动画源位置需要`PhotoConsumer` 的 `children` 提供真实 DOM 的 `Ref`，比如可以使用 `React.forwardRef` API。
+注意：若 `PhotoConsumer` 的 `children` 为自定义组件
+
+1. 需要向外部参数暴露 `React.HTMLAttributes`
+1. 展开/关闭动画精准位置则需要用 `React.forwardRef` 暴露内部 `React.ReactHTMLElement` 节点的 `Ref`
 
 #### PhotoSlider
 
