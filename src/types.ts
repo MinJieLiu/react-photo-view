@@ -9,7 +9,7 @@ export type dataType = {
   // 图片地址
   src: string;
   // 原触发 ref
-  originRef: HTMLElement | null;
+  originRef?: HTMLElement | null;
   // 图片介绍
   intro?: React.ReactNode;
 };

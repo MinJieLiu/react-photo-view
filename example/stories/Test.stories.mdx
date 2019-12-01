@@ -1,0 +1,91 @@
+import styled from 'styled-components';
+import { Meta, Story, Preview, Props } from '@storybook/addon-docs/blocks';
+import { PhotoProvider, PhotoConsumer, PhotoSlider } from 'react-photo-view';
+import 'react-photo-view/dist/index.css';
+import {
+  photoImages,
+  ImageList,
+  ViewBox,
+  Button,
+  DefaultImage,
+  ControlledView,
+} from '../src';
+
+<Meta title="React-photo-view" />
+
+## 默认展示
+
+<Preview>
+  <Story name="默认展示">
+    <PhotoProvider>
+      <ImageList>
+        {photoImages.map((item, index) => (
+          <PhotoConsumer key={index} src={item} intro={item}>
+            <ViewBox viewImage={item} />
+          </PhotoConsumer>
+        ))}
+      </ImageList>
+    </PhotoProvider>
+  </Story>
+</Preview>
+
+## 两张预览
+
+<Preview>
+  <Story name="两张预览">
+    <PhotoProvider>
+      <ImageList>
+        {photoImages.map((item, index) => (
+          <PhotoConsumer key={index} src={item}>
+            {index < 2 ? <ViewBox viewImage={item} /> : undefined}
+          </PhotoConsumer>
+        ))}
+      </ImageList>
+    </PhotoProvider>
+  </Story>
+</Preview>
+
+## 通过按钮触发
+
+<Preview>
+  <Story name="通过按钮触发">
+    <PhotoProvider>
+      <ImageList>
+        <PhotoConsumer src={photoImages[3]}>
+          <Button>打开预览</Button>
+        </PhotoConsumer>
+      </ImageList>
+    </PhotoProvider>
+  </Story>
+</Preview>
+
+## 自定义加载失败
+
+<Preview>
+  <Story name="自定义加载失败">
+    <ImageList>
+      <PhotoProvider>
+        <PhotoConsumer src="">
+          <Button>无默认图</Button>
+        </PhotoConsumer>
+      </PhotoProvider>
+      <PhotoProvider brokenElement={<DefaultImage src="default-photo.svg" />}>
+        <PhotoConsumer src="">
+          <Button>自定义默认图</Button>
+        </PhotoConsumer>
+      </PhotoProvider>
+    </ImageList>
+  </Story>
+</Preview>
+
+## 受控 PhotoSlider
+
+<Preview>
+  <Story name="受控 PhotoSlider">
+    <ControlledView />
+  </Story>
+</Preview>
+
+# Props
+
+<Props of={PhotoSlider} />
