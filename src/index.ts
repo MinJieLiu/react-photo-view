@@ -1,3 +1,5 @@
-export { default as PhotoProvider } from './PhotoProvider';
-export { default as PhotoConsumer } from './PhotoConsumer';
-export { default as PhotoSlider } from './PhotoSlider';
+import PhotoProvider from './PhotoProvider';
+import PhotoConsumer from './PhotoConsumer';
+import PhotoSlider from './PhotoSlider';
+
+export { PhotoProvider, PhotoConsumer, PhotoSlider };

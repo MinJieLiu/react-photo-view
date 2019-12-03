@@ -1,6 +1,6 @@
-import styled from 'styled-components';
 import * as React from 'react';
-import { PhotoSlider } from '../../dist';
+import styled from 'styled-components';
+import { PhotoSlider } from 'react-photo-view';
 
 export const photoImages = [
   '1.jpg',

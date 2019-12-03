@@ -15,5 +15,5 @@
     "noEmit": true,
     "jsx": "react"
   },
-  "include": ["stories", "src"]
+  "include": ["src"]
 }
