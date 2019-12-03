@@ -9,6 +9,10 @@ import {
   Button,
   DefaultImage,
   ControlledView,
+  
+  IPhotoProviderForwardProps,
+  IPhotoConsumerForwardProps,
+  IPhotoSliderForwardProps,
 } from '../';
 
 <Meta title="React-photo-view" />
@@ -88,4 +92,14 @@ import {
 
 # Props
 
-<Props of={PhotoConsumer} />
+### PhotoProvider
+
+<Props of={IPhotoProviderForwardProps} />
+
+### PhotoConsumer
+
+<Props of={IPhotoConsumerForwardProps} />
+
+### PhotoSlider
+
+<Props of={IPhotoSliderForwardProps} />

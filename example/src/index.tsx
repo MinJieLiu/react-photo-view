@@ -1,6 +1,9 @@
 import * as React from 'react';
 import styled from 'styled-components';
 import { PhotoSlider } from 'react-photo-view';
+import { IPhotoProvider } from 'react-photo-view/dist/PhotoProvider';
+import { IPhotoConsumer } from 'react-photo-view/dist/PhotoConsumer';
+import { IPhotoSliderProps } from 'react-photo-view/dist/PhotoSlider';
 
 export const photoImages = [
   '1.jpg',
@@ -80,3 +83,9 @@ export const ControlledView = () => {
     </ImageList>
   );
 };
+
+export function IPhotoProviderForwardProps(props: IPhotoProvider) {}
+
+export function IPhotoConsumerForwardProps(props: IPhotoProvider) {}
+
+export function IPhotoSliderForwardProps(props: IPhotoProvider) {}
