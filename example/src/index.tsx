@@ -86,6 +86,6 @@ export const ControlledView = () => {
 
 export function IPhotoProviderForwardProps(props: IPhotoProvider) {}
 
-export function IPhotoConsumerForwardProps(props: IPhotoProvider) {}
+export function IPhotoConsumerForwardProps(props: IPhotoConsumer) {}
 
-export function IPhotoSliderForwardProps(props: IPhotoProvider) {}
+export function IPhotoSliderForwardProps(props: IPhotoSliderProps) {}
