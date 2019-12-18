@@ -3,7 +3,8 @@
 一款精致的 `React` 的图片预览组件
 
 [![npm](https://img.shields.io/npm/v/react-photo-view.svg?style=flat-square)](https://www.npmjs.com/package/react-photo-view)
-[![npm](https://img.shields.io/npm/dt/react-photo-view.svg?style=flat-square)](https://github.com/MinJieLiu/react-photo-view)
+[![react-photo-view](https://badgen.net/bundlephobia/minzip/react-photo-view)](https://github.com/MinJieLiu/react-photo-view)
+[![react-photo-view](https://badgen.net/npm/dt/react-photo-view)](https://github.com/MinJieLiu/react-photo-view)
 
 Demo: [https://minjieliu.github.io/react-photo-view](https://minjieliu.github.io/react-photo-view)
 
@@ -17,6 +18,11 @@ Demo: [https://minjieliu.github.io/react-photo-view](https://minjieliu.github.io
 1.  高度的扩展性
 1.  支持服务端渲染
 1.  基于 `typescript` 友好的语法提示
+
+<img src="http://minjieliu.gitee.io/assets/md-image/photo-view-2.gif" align="left" width="380" />
+<img src="http://minjieliu.gitee.io/assets/md-image/photo-view-3.gif" align="left" width="380" />
+<img src="http://minjieliu.gitee.io/assets/md-image/photo-view-4.gif" align="left" width="380" />
+<img src="http://minjieliu.gitee.io/assets/md-image/photo-view-6.gif" align="left" width="380" />
 
 ## 开始使用
 
@@ -109,5 +115,5 @@ function ImageView() {
 
 ## 谁在使用
 
-<a href="http://www.saastrip.com/"><img src="https://minjieliu.github.io/assets/md-image/saastrip_logo.png" align="left" height="48" width="48"></a>
-<a href="http://www.zhinanmao.com/"><img src="https://minjieliu.github.io/assets/md-image/zhinanmao_logo.png" align="left" height="48" width="48"></a>
+<a href="http://www.saastrip.com/"><img src="https://minjieliu.github.io/assets/md-image/saastrip_logo.png" align="left" height="48" width="48" /></a>
+<a href="http://www.zhinanmao.com/"><img src="https://minjieliu.github.io/assets/md-image/zhinanmao_logo.png" align="left" height="48" width="48" /></a>
