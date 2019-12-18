@@ -19,11 +19,6 @@ Demo: [https://minjieliu.github.io/react-photo-view](https://minjieliu.github.io
 1.  支持服务端渲染
 1.  基于 `typescript` 友好的语法提示
 
-<img src="http://minjieliu.gitee.io/assets/md-image/photo-view-2.gif" align="left" width="380" />
-<img src="http://minjieliu.gitee.io/assets/md-image/photo-view-3.gif" align="left" width="380" />
-<img src="http://minjieliu.gitee.io/assets/md-image/photo-view-4.gif" align="left" width="380" />
-<img src="http://minjieliu.gitee.io/assets/md-image/photo-view-6.gif" align="left" width="380" />
-
 ## 开始使用
 
     yarn add react-photo-view
