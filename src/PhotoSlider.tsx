@@ -44,6 +44,8 @@ type PhotoSliderState = {
   lastClientY: number | undefined;
   // 背景透明度
   backdropOpacity: number;
+  // 上次关闭的背景透明度
+  lastBackdropOpacity: number;
   // 覆盖物可见度
   overlayVisible: boolean;
   // 可下拉关闭
@@ -88,6 +90,7 @@ export default class PhotoSlider extends React.Component<
       lastClientX: undefined,
       lastClientY: undefined,
       backdropOpacity: defaultOpacity,
+      lastBackdropOpacity: defaultOpacity,
       overlayVisible: true,
       canPullClose: true,
     };
@@ -113,14 +116,19 @@ export default class PhotoSlider extends React.Component<
   }
 
   handleClose = () => {
-    this.props.onClose();
+    const { onClose } = this.props;
+    const { backdropOpacity } = this.state;
+    onClose();
     this.setState({
       overlayVisible: true,
+      // 记录当前关闭时的透明度
+      lastBackdropOpacity: backdropOpacity,
     });
   };
 
   handlePhotoTap = () => {
-    if (this.props.photoClosable) {
+    const { photoClosable } = this.props;
+    if (photoClosable) {
       this.handleClose();
     } else {
       this.setState(prevState => ({
@@ -130,7 +138,8 @@ export default class PhotoSlider extends React.Component<
   };
 
   handlePhotoMaskTap = () => {
-    if (this.props.maskClosable) {
+    const { maskClosable } = this.props;
+    if (maskClosable) {
       this.handleClose();
     }
   };
@@ -268,7 +277,7 @@ export default class PhotoSlider extends React.Component<
   };
 
   handleReachUp = (clientX: number, clientY: number) => {
-    const { images, onClose } = this.props;
+    const { images } = this.props;
     const {
       lastClientX = clientX,
       lastClientY = clientY,
@@ -279,7 +288,7 @@ export default class PhotoSlider extends React.Component<
 
     const offsetClientX = clientX - lastClientX;
     const offsetClientY = clientY - lastClientY;
-    let isChangeVisible = false;
+    let willClose = false;
     // 下一张
     if (offsetClientX < -maxMoveOffset && photoIndex < images.length - 1) {
       this.handleIndexChange(photoIndex + 1);
@@ -297,8 +306,8 @@ export default class PhotoSlider extends React.Component<
     let currentPhotoIndex = photoIndex;
 
     if (Math.abs(offsetClientY) > window.innerHeight * 0.14 && canPullClose) {
-      isChangeVisible = true;
-      onClose();
+      willClose = true;
+      this.handleClose();
     }
     this.setState({
       touched: false,
@@ -307,7 +316,7 @@ export default class PhotoSlider extends React.Component<
       lastClientX: undefined,
       lastClientY: undefined,
       backdropOpacity: defaultOpacity,
-      overlayVisible: isChangeVisible ? true : overlayVisible,
+      overlayVisible: willClose ? true : overlayVisible,
     });
   };
 
@@ -319,7 +328,6 @@ export default class PhotoSlider extends React.Component<
       maskClassName,
       viewClassName,
       imageClassName,
-      onClose,
       bannerVisible,
       introVisible,
       overlayRender,
@@ -331,6 +339,7 @@ export default class PhotoSlider extends React.Component<
       touched,
       photoIndex,
       backdropOpacity,
+      lastBackdropOpacity,
       overlayVisible,
       shouldTransition,
     } = this.state;
@@ -345,12 +354,15 @@ export default class PhotoSlider extends React.Component<
         {({ photoVisible, showAnimateType, originRect, onShowAnimateEnd }) => {
           if (photoVisible) {
             const { innerWidth } = window;
+            const currentOverlayVisible =
+              overlayVisible && showAnimateType === ShowAnimateEnum.None;
             const overlayStyle = {
-              opacity:
-                overlayVisible && showAnimateType === ShowAnimateEnum.None
-                  ? 1
-                  : 0,
+              opacity: +currentOverlayVisible,
             };
+            // 关闭过程中使用下拉保存的透明度
+            const currentOpacity = visible
+              ? backdropOpacity
+              : lastBackdropOpacity;
 
             return (
               <SlideWrap className={className}>
@@ -365,7 +377,9 @@ export default class PhotoSlider extends React.Component<
                         showAnimateType === ShowAnimateEnum.Out,
                     },
                   )}
-                  style={{ background: `rgba(0, 0, 0, ${backdropOpacity})` }}
+                  style={{
+                    background: `rgba(0, 0, 0, ${currentOpacity})`,
+                  }}
                   onAnimationEnd={onShowAnimateEnd}
                 />
                 {bannerVisible && (
@@ -379,8 +393,8 @@ export default class PhotoSlider extends React.Component<
                     <div className="PhotoView-PhotoSlider__BannerRight">
                       <CloseSVG
                         className="PhotoView-PhotoSlider__Close"
-                        onTouchEnd={isMobile ? onClose : undefined}
-                        onClick={isMobile ? undefined : onClose}
+                        onTouchEnd={isMobile ? this.handleClose : undefined}
+                        onClick={isMobile ? undefined : this.handleClose}
                       />
                     </div>
                   </div>
@@ -441,9 +455,9 @@ export default class PhotoSlider extends React.Component<
                     images,
                     index: photoIndex,
                     visible,
-                    onClose,
+                    onClose: this.handleClose,
                     onIndexChange: this.handleIndexChange,
-                    overlayVisible,
+                    overlayVisible: currentOverlayVisible,
                   })}
               </SlideWrap>
             );
