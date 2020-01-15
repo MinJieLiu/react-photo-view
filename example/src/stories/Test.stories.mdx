@@ -14,6 +14,7 @@ import {
   IPhotoConsumerForwardProps,
   IPhotoSliderForwardProps,
 } from '../';
+import defaultPhoto from '../default-photo.svg';
 
 <Meta title="React-photo-view" />
 
@@ -26,22 +27,6 @@ import {
         {photoImages.map((item, index) => (
           <PhotoConsumer key={index} src={item} intro={item}>
             <ViewBox viewImage={item} />
-          </PhotoConsumer>
-        ))}
-      </ImageList>
-    </PhotoProvider>
-  </Story>
-</Preview>
-
-## 两张预览
-
-<Preview>
-  <Story name="两张预览">
-    <PhotoProvider>
-      <ImageList>
-        {photoImages.map((item, index) => (
-          <PhotoConsumer key={index} src={item}>
-            {index < 2 ? <ViewBox viewImage={item} /> : undefined}
           </PhotoConsumer>
         ))}
       </ImageList>
@@ -73,7 +58,7 @@ import {
           <Button>无默认图</Button>
         </PhotoConsumer>
       </PhotoProvider>
-      <PhotoProvider brokenElement={<DefaultImage src="default-photo.svg" />}>
+      <PhotoProvider brokenElement={<DefaultImage src={defaultPhoto} />}>
         <PhotoConsumer src="">
           <Button>自定义默认图</Button>
         </PhotoConsumer>
@@ -87,6 +72,22 @@ import {
 <Preview>
   <Story name="受控 PhotoSlider">
     <ControlledView />
+  </Story>
+</Preview>
+
+## 两张预览
+
+<Preview>
+  <Story name="两张预览">
+    <PhotoProvider>
+      <ImageList>
+        {photoImages.map((item, index) => (
+          <PhotoConsumer key={index} src={item}>
+            {index < 2 ? <ViewBox viewImage={item} /> : undefined}
+          </PhotoConsumer>
+        ))}
+      </ImageList>
+    </PhotoProvider>
   </Story>
 </Preview>
 
