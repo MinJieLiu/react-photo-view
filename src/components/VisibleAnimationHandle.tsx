@@ -17,15 +17,9 @@ interface VisibleHandleProps {
   }) => JSX.Element | null;
 }
 
-export default function VisibleAnimationHandle({
-  visible,
-  currentImage,
-  children,
-}: VisibleHandleProps) {
+export default function VisibleAnimationHandle({ visible, currentImage, children }: VisibleHandleProps) {
   const [photoVisible, updatePhotoVisible] = React.useState(visible);
-  const [showAnimateType, updateAnimateStatus] = React.useState<
-    ShowAnimateEnum
-  >(ShowAnimateEnum.None);
+  const [showAnimateType, updateAnimateStatus] = React.useState<ShowAnimateEnum>(ShowAnimateEnum.None);
   const [originRect, updateOriginRect] = React.useState<OriginRectType>();
 
   function onShowAnimateEnd() {

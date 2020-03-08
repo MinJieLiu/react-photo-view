@@ -16,9 +16,7 @@ export default function getMultipleTouchPosition(
     return {
       clientX: (clientX + nextClientX) / 2,
       clientY: (clientY + nextClientY) / 2,
-      touchLength: Math.sqrt(
-        Math.pow(nextClientX - clientX, 2) + Math.pow(nextClientY - clientY, 2),
-      ),
+      touchLength: Math.sqrt(Math.pow(nextClientX - clientX, 2) + Math.pow(nextClientY - clientY, 2)),
     };
   }
   return { clientX, clientY, touchLength: 0 };

@@ -9,6 +9,6 @@ export default function throttle(func, wait: number) {
   return debounce(func, wait, {
     leading: true,
     maxWait: wait,
-    trailing: true
+    trailing: true,
   });
 }

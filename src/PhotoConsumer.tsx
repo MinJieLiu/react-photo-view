@@ -1,6 +1,6 @@
 import React from 'react';
 import uniqueId from 'lodash.uniqueid';
-import isMobile from './utils/isMobile';
+import isTouchDevice from './utils/isTouchDevice';
 import PhotoContext, { PhotoContextType } from './photo-context';
 
 export interface IPhotoConsumer {
@@ -21,20 +21,17 @@ const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
   });
   const photoTriggerRef = React.useRef<HTMLElement | null>(null);
 
-  React.useEffect(
-    () => {
-      photoContext.addItem({
-        key,
-        src,
-        originRef: photoTriggerRef.current,
-        intro,
-      });
-      return () => {
-        photoContext.removeItem(key);
-      };
-    },
-    [] as readonly [],
-  );
+  React.useEffect(() => {
+    photoContext.addItem({
+      key,
+      src,
+      originRef: photoTriggerRef.current,
+      intro,
+    });
+    return () => {
+      photoContext.removeItem(key);
+    };
+  }, [] as readonly []);
 
   function handleTouchStart(e) {
     const { clientX, clientY } = e.touches[0];
@@ -77,7 +74,7 @@ const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
     return React.Children.only(
       React.cloneElement(
         children,
-        isMobile
+        isTouchDevice
           ? {
               onTouchStart: handleTouchStart,
               onTouchEnd: handleTouchEnd,

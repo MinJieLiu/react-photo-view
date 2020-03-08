@@ -1,9 +1,5 @@
 import React from 'react';
-import PhotoContext, {
-  onShowType,
-  addItemType,
-  removeItemType,
-} from './photo-context';
+import PhotoContext, { onShowType, addItemType, removeItemType } from './photo-context';
 import PhotoSlider from './PhotoSlider';
 import { dataType, IPhotoProviderBase } from './types';
 
@@ -20,10 +16,7 @@ type PhotoProviderState = {
   removeItem: removeItemType;
 };
 
-export default class PhotoProvider extends React.Component<
-  IPhotoProvider,
-  PhotoProviderState
-> {
+export default class PhotoProvider extends React.Component<IPhotoProvider, PhotoProviderState> {
   constructor(props) {
     super(props);
 

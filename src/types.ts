@@ -54,12 +54,7 @@ export interface IPhotoProviderBase {
   brokenElement?: JSX.Element;
 }
 
-export type ReachMoveFunction = (
-  reachState: ReachTypeEnum,
-  clientX: number,
-  clientY: number,
-  scale?: number,
-) => void;
+export type ReachMoveFunction = (reachState: ReachTypeEnum, clientX: number, clientY: number, scale?: number) => void;
 
 export type ReachFunction = (clientX: number, clientY: number) => void;
 
@@ -106,7 +101,9 @@ export enum ShowAnimateEnum {
 /**
  * 触发源位置
  */
-export type OriginRectType = {
-  clientX: number;
-  clientY: number;
-} | undefined;
+export type OriginRectType =
+  | {
+      clientX: number;
+      clientY: number;
+    }
+  | undefined;

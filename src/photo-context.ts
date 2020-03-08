@@ -3,12 +3,7 @@ import { dataType } from './types';
 
 export type onShowType = (key?: string) => void;
 
-export type addItemType = ({
-  key,
-  src,
-  originRef,
-  intro,
-}: dataType) => void;
+export type addItemType = ({ key, src, originRef, intro }: dataType) => void;
 
 export type removeItemType = (key?: string) => void;
 

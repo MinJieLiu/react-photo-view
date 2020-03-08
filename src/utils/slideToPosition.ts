@@ -72,8 +72,7 @@ export default function slideToPosition({
   // 时间过长
   if (
     moveTime >= maxTouchTime &&
-    (horizontalCloseEdge === CloseEdgeEnum.Normal &&
-      verticalCloseEdge === CloseEdgeEnum.Normal)
+    horizontalCloseEdge === CloseEdgeEnum.Normal && verticalCloseEdge === CloseEdgeEnum.Normal
   ) {
     return {
       x,

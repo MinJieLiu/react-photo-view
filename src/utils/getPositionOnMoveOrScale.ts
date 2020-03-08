@@ -36,10 +36,8 @@ export default function getPositionOnMoveOrScale({
   // 放大偏移量
   const offsetScale = toScale / fromScale;
   // 偏移位置
-  const originX =
-    clientX - (clientX - lastPositionX) * offsetScale - centerClientX;
-  const originY =
-    clientY - (clientY - lastPositionY) * offsetScale - centerClientY;
+  const originX = clientX - (clientX - lastPositionX) * offsetScale - centerClientX;
+  const originY = clientY - (clientY - lastPositionY) * offsetScale - centerClientY;
   return {
     x: originX + offsetX,
     y: originY + offsetY,

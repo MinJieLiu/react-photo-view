@@ -5,13 +5,8 @@ import PhotoView from './PhotoView';
 import SlideWrap from './components/SlideWrap';
 import VisibleAnimationHandle from './components/VisibleAnimationHandle';
 import CloseSVG from './components/CloseSVG';
-import isMobile from './utils/isMobile';
-import {
-  dataType,
-  IPhotoProviderBase,
-  ReachTypeEnum,
-  ShowAnimateEnum,
-} from './types';
+import isTouchDevice from './utils/isTouchDevice';
+import { dataType, IPhotoProviderBase, ReachTypeEnum, ShowAnimateEnum } from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
 import './PhotoSlider.less';
 
@@ -52,10 +47,7 @@ type PhotoSliderState = {
   canPullClose: boolean;
 };
 
-export default class PhotoSlider extends React.Component<
-  IPhotoSliderProps,
-  PhotoSliderState
-> {
+export default class PhotoSlider extends React.Component<IPhotoSliderProps, PhotoSliderState> {
   static displayName = 'PhotoSlider';
 
   static defaultProps = {
@@ -66,10 +58,7 @@ export default class PhotoSlider extends React.Component<
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    if (
-      nextProps.index !== undefined &&
-      nextProps.index !== prevState.photoIndex
-    ) {
+    if (nextProps.index !== undefined && nextProps.index !== prevState.photoIndex) {
       return {
         photoIndex: nextProps.index,
         translateX: -(window.innerWidth + horizontalOffset) * nextProps.index,
@@ -103,16 +92,11 @@ export default class PhotoSlider extends React.Component<
       translateX: index * -(window.innerWidth + horizontalOffset),
       photoIndex: index,
     });
-
-    if (!isMobile) {
-      window.addEventListener('keydown', this.handleKeyDown);
-    }
+    window.addEventListener('keydown', this.handleKeyDown);
   }
 
   componentWillUnmount() {
-    if (!isMobile) {
-      window.removeEventListener('keydown', this.handleKeyDown);
-    }
+    window.removeEventListener('keydown', this.handleKeyDown);
   }
 
   handleClose = () => {
@@ -183,10 +167,7 @@ export default class PhotoSlider extends React.Component<
         };
       }
       const offsetClientY = Math.abs(clientY - lastClientY);
-      const opacity = Math.max(
-        Math.min(defaultOpacity, defaultOpacity - offsetClientY / 100 / 2),
-        0,
-      );
+      const opacity = Math.max(Math.min(defaultOpacity, defaultOpacity - offsetClientY / 100 / 2), 0);
       return {
         touched: true,
         lastClientY,
@@ -221,17 +202,13 @@ export default class PhotoSlider extends React.Component<
       return {
         touched: true,
         lastClientX: lastClientX,
-        translateX:
-          -(innerWidth + horizontalOffset) * photoIndex + offsetClientX,
+        translateX: -(innerWidth + horizontalOffset) * photoIndex + offsetClientX,
         shouldTransition: true,
       };
     });
   };
 
-  handleIndexChange = (
-    photoIndex: number,
-    shouldTransition: boolean = true,
-  ) => {
+  handleIndexChange = (photoIndex: number, shouldTransition: boolean = true) => {
     const singlePageWidth = window.innerWidth + horizontalOffset;
     const translateX = -singlePageWidth * photoIndex;
     this.setState({
@@ -263,12 +240,7 @@ export default class PhotoSlider extends React.Component<
     }
   };
 
-  handleReachMove = (
-    reachState: ReachTypeEnum,
-    clientX: number,
-    clientY: number,
-    scale?: number,
-  ) => {
+  handleReachMove = (reachState: ReachTypeEnum, clientX: number, clientY: number, scale?: number) => {
     if (reachState === ReachTypeEnum.XReach) {
       this.handleReachHorizontalMove(clientX);
     } else if (reachState === ReachTypeEnum.YReach) {
@@ -278,13 +250,7 @@ export default class PhotoSlider extends React.Component<
 
   handleReachUp = (clientX: number, clientY: number) => {
     const { images } = this.props;
-    const {
-      lastClientX = clientX,
-      lastClientY = clientY,
-      photoIndex,
-      overlayVisible,
-      canPullClose,
-    } = this.state;
+    const { lastClientX = clientX, lastClientY = clientY, photoIndex, overlayVisible, canPullClose } = this.state;
 
     const offsetClientX = clientX - lastClientX;
     const offsetClientY = clientY - lastClientY;
@@ -354,47 +320,35 @@ export default class PhotoSlider extends React.Component<
         {({ photoVisible, showAnimateType, originRect, onShowAnimateEnd }) => {
           if (photoVisible) {
             const { innerWidth } = window;
-            const currentOverlayVisible =
-              overlayVisible && showAnimateType === ShowAnimateEnum.None;
+            const currentOverlayVisible = overlayVisible && showAnimateType === ShowAnimateEnum.None;
             const overlayStyle = {
               opacity: +currentOverlayVisible,
             };
             // 关闭过程中使用下拉保存的透明度
-            const currentOpacity = visible
-              ? backdropOpacity
-              : lastBackdropOpacity;
+            const currentOpacity = visible ? backdropOpacity : lastBackdropOpacity;
 
             return (
               <SlideWrap className={className}>
                 <div
-                  className={classNames(
-                    'PhotoView-PhotoSlider__Backdrop',
-                    maskClassName,
-                    {
-                      'PhotoView-PhotoSlider__fadeIn':
-                        showAnimateType === ShowAnimateEnum.In,
-                      'PhotoView-PhotoSlider__fadeOut':
-                        showAnimateType === ShowAnimateEnum.Out,
-                    },
-                  )}
+                  className={classNames('PhotoView-PhotoSlider__Backdrop', maskClassName, {
+                    'PhotoView-PhotoSlider__fadeIn': showAnimateType === ShowAnimateEnum.In,
+                    'PhotoView-PhotoSlider__fadeOut': showAnimateType === ShowAnimateEnum.Out,
+                  })}
                   style={{
                     background: `rgba(0, 0, 0, ${currentOpacity})`,
                   }}
                   onAnimationEnd={onShowAnimateEnd}
                 />
                 {bannerVisible && (
-                  <div
-                    className="PhotoView-PhotoSlider__BannerWrap"
-                    style={overlayStyle}
-                  >
+                  <div className="PhotoView-PhotoSlider__BannerWrap" style={overlayStyle}>
                     <div className="PhotoView-PhotoSlider__Counter">
                       {photoIndex + 1} / {imageLength}
                     </div>
                     <div className="PhotoView-PhotoSlider__BannerRight">
                       <CloseSVG
                         className="PhotoView-PhotoSlider__Close"
-                        onTouchEnd={isMobile ? this.handleClose : undefined}
-                        onClick={isMobile ? undefined : this.handleClose}
+                        onTouchEnd={isTouchDevice ? this.handleClose : undefined}
+                        onClick={isTouchDevice ? undefined : this.handleClose}
                       />
                     </div>
                   </div>
@@ -407,10 +361,7 @@ export default class PhotoSlider extends React.Component<
                   )
                   .map((item: dataType, index) => {
                     // 截取之前的索引位置
-                    const realIndex =
-                      photoIndex === 0
-                        ? photoIndex + index
-                        : photoIndex - 1 + index;
+                    const realIndex = photoIndex === 0 ? photoIndex + index : photoIndex - 1 + index;
                     return (
                       <PhotoView
                         key={item.key || realIndex}
@@ -422,8 +373,7 @@ export default class PhotoSlider extends React.Component<
                         viewClassName={viewClassName}
                         className={imageClassName}
                         style={{
-                          left: `${(innerWidth + horizontalOffset) *
-                            realIndex}px`,
+                          left: `${(innerWidth + horizontalOffset) * realIndex}px`,
                           WebkitTransform: transform,
                           transform,
                           transition:
@@ -440,15 +390,10 @@ export default class PhotoSlider extends React.Component<
                       />
                     );
                   })}
-                {introVisible && overlayIntro ? (
-                  <div
-                    className="PhotoView-PhotoSlider__FooterWrap"
-                    style={overlayStyle}
-                  >
+                {Boolean(introVisible && overlayIntro) && (
+                  <div className="PhotoView-PhotoSlider__FooterWrap" style={overlayStyle}>
                     {overlayIntro}
                   </div>
-                ) : (
-                  undefined
                 )}
                 {overlayRender &&
                   overlayRender({

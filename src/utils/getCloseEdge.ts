@@ -7,11 +7,7 @@ import { CloseEdgeEnum, ReachTypeEnum, TouchStartEnum } from '../types';
  * @param width
  * @return CloseEdgeEnum
  */
-export function getClosedHorizontal(
-  x: number,
-  scale: number,
-  width: number,
-): CloseEdgeEnum {
+export function getClosedHorizontal(x: number, scale: number, width: number): CloseEdgeEnum {
   const { innerWidth } = window;
   const currentWidth = width * scale;
   // 图片超出的宽度
@@ -33,11 +29,7 @@ export function getClosedHorizontal(
  * @param height
  * @return CloseEdgeEnum
  */
-export function getClosedVertical(
-  y: number,
-  scale: number,
-  height: number,
-): CloseEdgeEnum {
+export function getClosedVertical(y: number, scale: number, height: number): CloseEdgeEnum {
   const { innerHeight } = window;
   const currentHeight = height * scale;
   // 图片超出的高度
@@ -71,16 +63,11 @@ export function getReachType({
   verticalCloseEdge: CloseEdgeEnum;
   reachState: ReachTypeEnum;
 }): ReachTypeEnum {
-  if (
-    (horizontalCloseEdge > 0 &&
-      initialTouchState === TouchStartEnum.X) ||
-    reachState === ReachTypeEnum.XReach
-  ) {
+  if ((horizontalCloseEdge > 0 && initialTouchState === TouchStartEnum.X) || reachState === ReachTypeEnum.XReach) {
     return ReachTypeEnum.XReach;
   } else if (
     (verticalCloseEdge > 0 &&
-      (initialTouchState === TouchStartEnum.YPull ||
-        initialTouchState === TouchStartEnum.YPush)) ||
+      (initialTouchState === TouchStartEnum.YPull || initialTouchState === TouchStartEnum.YPush)) ||
     reachState === ReachTypeEnum.YReach
   ) {
     return ReachTypeEnum.YReach;

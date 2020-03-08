@@ -2,19 +2,14 @@ import React from 'react';
 import classNames from 'classnames';
 import Photo from './Photo';
 import throttle from './utils/throttle';
-import isMobile from './utils/isMobile';
+import isTouchDevice from './utils/isTouchDevice';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import slideToPosition from './utils/slideToPosition';
 import { getReachType, getClosedHorizontal, getClosedVertical } from './utils/getCloseEdge';
 import withContinuousTap, { TapFuncType } from './utils/withContinuousTap';
 import getAnimateOrigin from './utils/getAnimateOrigin';
-import {
-  maxScale,
-  minStartTouchOffset,
-  minScale,
-  scaleBuffer,
-} from './variables';
+import { maxScale, minStartTouchOffset, minScale, scaleBuffer } from './variables';
 import {
   ReachMoveFunction,
   ReachFunction,
@@ -108,10 +103,7 @@ const initialState = {
   reachState: ReachTypeEnum.Normal,
 };
 
-export default class PhotoView extends React.Component<
-  IPhotoViewProps,
-  typeof initialState
-> {
+export default class PhotoView extends React.Component<IPhotoViewProps, typeof initialState> {
   static displayName = 'PhotoView';
 
   readonly state = initialState;
@@ -125,17 +117,22 @@ export default class PhotoView extends React.Component<
     this.onMove = throttle(this.onMove, 8);
     this.handleResize = throttle(this.handleResize, 8);
     // 单击与双击事件处理
-    this.handlePhotoTap = withContinuousTap(
-      this.onPhotoTap,
-      this.onDoubleTap,
-    );
+    this.handlePhotoTap = withContinuousTap(this.onPhotoTap, this.onDoubleTap);
   }
 
   componentDidMount() {
-    if (isMobile) {
-      window.addEventListener('touchmove', this.handleTouchMove, { passive: false });
-      window.addEventListener('touchend', this.handleTouchEnd, { passive: false });
+    if (isTouchDevice) {
+      // window.addEventListener('touchstart', this.handleTouchStart, {
+      //   passive: false,
+      // });
+      window.addEventListener('touchmove', this.handleTouchMove, {
+        passive: false,
+      });
+      window.addEventListener('touchend', this.handleTouchEnd, {
+        passive: false,
+      });
     } else {
+      // window.addEventListener('mousedown', this.handleMouseDown);
       window.addEventListener('mousemove', this.handleMouseMove);
       window.addEventListener('mouseup', this.handleMouseUp);
     }
@@ -143,10 +140,12 @@ export default class PhotoView extends React.Component<
   }
 
   componentWillUnmount() {
-    if (isMobile) {
+    if (isTouchDevice) {
+      window.removeEventListener('touchstart', this.handleTouchStart);
       window.removeEventListener('touchmove', this.handleTouchMove);
       window.removeEventListener('touchend', this.handleTouchEnd);
     } else {
+      window.removeEventListener('mousedown', this.handleMouseDown);
       window.removeEventListener('mousemove', this.handleMouseMove);
       window.removeEventListener('mouseup', this.handleMouseUp);
     }
@@ -183,10 +182,7 @@ export default class PhotoView extends React.Component<
   };
 
   onMove = (newClientX: number, newClientY: number, touchLength: number = 0) => {
-    const {
-      onReachMove,
-      isActive,
-    } = this.props;
+    const { onReachMove, isActive } = this.props;
     const {
       width,
       height,
@@ -224,8 +220,8 @@ export default class PhotoView extends React.Component<
         this.initialTouchState = !isStillX
           ? TouchStartEnum.X
           : newClientY > clientY
-            ? TouchStartEnum.YPull
-            : TouchStartEnum.YPush;
+          ? TouchStartEnum.YPull
+          : TouchStartEnum.YPush;
       }
 
       let offsetX = newClientX - lastMoveClientX;
@@ -256,15 +252,9 @@ export default class PhotoView extends React.Component<
         });
       } else {
         // 目标倍数
-        const endScale = scale + (touchLength - lastTouchLength) / 100 / 2 * scale;
+        const endScale = scale + ((touchLength - lastTouchLength) / 100 / 2) * scale;
         // 限制最大倍数和最小倍数
-        const toScale = Math.max(
-          Math.min(
-            endScale,
-            Math.max(maxScale, naturalWidth / width)
-          ),
-          minScale - scaleBuffer,
-        );
+        const toScale = Math.max(Math.min(endScale, Math.max(maxScale, naturalWidth / width)), minScale - scaleBuffer);
         this.setState({
           lastTouchLength: touchLength,
           reachState: currentReachState,
@@ -308,19 +298,13 @@ export default class PhotoView extends React.Component<
     });
   };
 
-  handleWheel = (e) => {
+  handleWheel = e => {
     const { clientX, clientY, deltaY } = e;
     const { width, naturalWidth } = this.state;
     this.setState(({ x, y, scale }) => {
       const endScale = scale - deltaY / 100 / 2;
       // 限制最大倍数和最小倍数
-      const toScale = Math.max(
-        Math.min(
-          endScale,
-          Math.max(maxScale, naturalWidth / width)
-        ),
-        minScale,
-      );
+      const toScale = Math.max(Math.min(endScale, Math.max(maxScale, naturalWidth / width)), minScale);
       return {
         clientX,
         clientY,
@@ -346,32 +330,34 @@ export default class PhotoView extends React.Component<
     }));
   };
 
-  handleMaskMouseDown = (e) => {
+  handleMaskMouseDown = e => {
     this.handleMaskStart(e.clientX, e.clientY);
   };
 
-  handleMaskTouchStart = (e) => {
+  handleMaskTouchStart = e => {
+    e.preventDefault();
     const { clientX, clientY } = e.touches[0];
     this.handleMaskStart(clientX, clientY);
   };
 
-  handleTouchStart = (e) => {
+  handleTouchStart = e => {
+    e.preventDefault();
     const { clientX, clientY, touchLength } = getMultipleTouchPosition(e);
     this.handleStart(clientX, clientY, touchLength);
   };
 
-  handleMouseDown = (e) => {
+  handleMouseDown = e => {
     e.preventDefault();
     this.handleStart(e.clientX, e.clientY, 0);
   };
 
-  handleTouchMove = (e) => {
+  handleTouchMove = e => {
     e.preventDefault();
     const { clientX, clientY, touchLength } = getMultipleTouchPosition(e);
     this.onMove(clientX, clientY, touchLength);
   };
 
-  handleMouseMove = (e) => {
+  handleMouseMove = e => {
     e.preventDefault();
     this.onMove(e.clientX, e.clientY);
   };
@@ -397,51 +383,52 @@ export default class PhotoView extends React.Component<
     } = this.state;
     if ((touched || maskTouched) && isActive) {
       const hasMove = clientX !== newClientX || clientY !== newClientY;
-      this.setState({
-        touched: false,
-        maskTouched: false,
-        // 限制缩放
-        scale: Math.max(
-          Math.min(scale, Math.max(maxScale, naturalWidth / width)),
-          minScale,
-        ),
-        reachState: ReachTypeEnum.Normal, // 重置触发状态
-        ...hasMove
-          ? slideToPosition({
-            x,
-            y,
-            lastX,
-            lastY,
-            width,
-            height,
-            scale,
-            touchedTime,
-          }) : {
-            x,
-            y,
-          },
-      }, () => {
-        if (onReachUp) {
-          onReachUp(newClientX, newClientY);
-        }
-        // 触发 Tap 事件
-        if (!hasMove) {
-          if (touched && onPhotoTap) {
-            this.handlePhotoTap(newClientX, newClientY);
-          } else if (maskTouched && onMaskTap) {
-            onMaskTap(newClientX, newClientY);
+      this.setState(
+        {
+          touched: false,
+          maskTouched: false,
+          // 限制缩放
+          scale: Math.max(Math.min(scale, Math.max(maxScale, naturalWidth / width)), minScale),
+          reachState: ReachTypeEnum.Normal, // 重置触发状态
+          ...(hasMove
+            ? slideToPosition({
+                x,
+                y,
+                lastX,
+                lastY,
+                width,
+                height,
+                scale,
+                touchedTime,
+              })
+            : {
+                x,
+                y,
+              }),
+        },
+        () => {
+          if (onReachUp) {
+            onReachUp(newClientX, newClientY);
           }
-        }
-      });
+          // 触发 Tap 事件
+          if (!hasMove) {
+            if (touched && onPhotoTap) {
+              this.handlePhotoTap(newClientX, newClientY);
+            } else if (maskTouched && onMaskTap) {
+              onMaskTap(newClientX, newClientY);
+            }
+          }
+        },
+      );
     }
   };
 
-  handleTouchEnd = (e) => {
+  handleTouchEnd = e => {
     const { clientX, clientY } = e.changedTouches[0];
     this.handleUp(clientX, clientY);
   };
 
-  handleMouseUp = (e) => {
+  handleMouseUp = e => {
     const { clientX, clientY } = e;
     this.handleUp(clientX, clientY);
   };
@@ -458,16 +445,7 @@ export default class PhotoView extends React.Component<
       showAnimateType,
       originRect,
     } = this.props;
-    const {
-      width,
-      height,
-      loaded,
-      x,
-      y,
-      scale,
-      touched,
-      broken,
-    } = this.state;
+    const { width, height, loaded, x, y, scale, touched, broken } = this.state;
 
     const transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
 
@@ -475,8 +453,8 @@ export default class PhotoView extends React.Component<
       <div className={classNames('PhotoView__PhotoWrap', viewClassName)} style={style}>
         <div
           className="PhotoView__PhotoMask"
-          onMouseDown={!isMobile && isActive ? this.handleMaskMouseDown: undefined}
-          onTouchStart={isMobile && isActive ? this.handleMaskTouchStart : undefined}
+          onMouseDown={!isTouchDevice && isActive ? this.handleMaskMouseDown : undefined}
+          onTouchStart={isTouchDevice && isActive ? this.handleMaskTouchStart : undefined}
         />
         <div
           className={classNames({
@@ -494,15 +472,13 @@ export default class PhotoView extends React.Component<
             height={height}
             loaded={loaded}
             broken={broken}
-            onMouseDown={isMobile ? undefined : this.handleMouseDown}
-            onTouchStart={isMobile ? this.handleTouchStart : undefined}
+            onMouseDown={isTouchDevice ? undefined : this.handleMouseDown}
+            onTouchStart={isTouchDevice ? this.handleTouchStart : undefined}
             onWheel={this.handleWheel}
             style={{
               WebkitTransform: transform,
               transform,
-              transition: touched
-                ? undefined
-                : 'transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
+              transition: touched ? undefined : 'transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
             }}
             onImageLoad={this.handleImageLoad}
             loadingElement={loadingElement}

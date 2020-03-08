@@ -8,10 +8,7 @@ export type TapFuncType<T> = (...args: T[]) => void;
  * @param doubleTap - 双击事件
  * @return invokeTap
  */
-export default function withContinuousTap<T>(
-  singleTap: TapFuncType<T>,
-  doubleTap: TapFuncType<T>,
-): TapFuncType<T> {
+export default function withContinuousTap<T>(singleTap: TapFuncType<T>, doubleTap: TapFuncType<T>): TapFuncType<T> {
   // 当前连续点击次数
   let continuousClick = 0;
 
