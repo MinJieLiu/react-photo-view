@@ -122,17 +122,9 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
 
   componentDidMount() {
     if (isTouchDevice) {
-      // window.addEventListener('touchstart', this.handleTouchStart, {
-      //   passive: false,
-      // });
-      window.addEventListener('touchmove', this.handleTouchMove, {
-        passive: false,
-      });
-      window.addEventListener('touchend', this.handleTouchEnd, {
-        passive: false,
-      });
+      window.addEventListener('touchmove', this.handleTouchMove, { passive: false });
+      window.addEventListener('touchend', this.handleTouchEnd, { passive: false });
     } else {
-      // window.addEventListener('mousedown', this.handleMouseDown);
       window.addEventListener('mousemove', this.handleMouseMove);
       window.addEventListener('mouseup', this.handleMouseUp);
     }
