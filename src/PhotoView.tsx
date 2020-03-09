@@ -133,11 +133,9 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
 
   componentWillUnmount() {
     if (isTouchDevice) {
-      window.removeEventListener('touchstart', this.handleTouchStart);
       window.removeEventListener('touchmove', this.handleTouchMove);
       window.removeEventListener('touchend', this.handleTouchEnd);
     } else {
-      window.removeEventListener('mousedown', this.handleMouseDown);
       window.removeEventListener('mousemove', this.handleMouseMove);
       window.removeEventListener('mouseup', this.handleMouseUp);
     }
@@ -200,12 +198,11 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
         const isStillY = Math.abs(newClientY - clientY) <= minStartTouchOffset;
         // 初始移动距离不足
         if (isStillX && isStillY) {
-          // Y 方向记录上次移动距离，以便平滑过渡
-          if (isStillY) {
-            this.setState({
-              lastMoveClientY: newClientY,
-            });
-          }
+          // 方向记录上次移动距离，以便平滑过渡
+          this.setState({
+            lastMoveClientX: newClientX,
+            lastMoveClientY: newClientY,
+          });
           return;
         }
         // 设置响应状态
@@ -327,13 +324,11 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   };
 
   handleMaskTouchStart = e => {
-    e.preventDefault();
     const { clientX, clientY } = e.touches[0];
     this.handleMaskStart(clientX, clientY);
   };
 
   handleTouchStart = e => {
-    e.preventDefault();
     const { clientX, clientY, touchLength } = getMultipleTouchPosition(e);
     this.handleStart(clientX, clientY, touchLength);
   };

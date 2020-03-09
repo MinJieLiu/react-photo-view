@@ -8,6 +8,15 @@
 }
 
 .PhotoView {
+  &-PhotoSlider__clean {
+    .PhotoView-PhotoSlider__BannerWrap,
+    .PhotoView-PhotoSlider__ArrowLeft,
+    .PhotoView-PhotoSlider__ArrowRight,
+    .PhotoView-PhotoSlider__FooterWrap {
+      opacity: 0;
+    }
+  }
+
   &-PhotoSlider__Backdrop {
     position: absolute;
     top: 0;
@@ -41,6 +50,10 @@
     background-color: rgba(0, 0, 0, 0.5);
     transition: opacity 0.2s ease-out;
     z-index: 20;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 
   &-PhotoSlider__Counter {
@@ -63,6 +76,45 @@
     &:hover {
       opacity: 1;
     }
+  }
+
+  &-PhotoSlider__ArrowLeft,
+  &-PhotoSlider__ArrowRight {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70px;
+    height: 100px;
+    margin: auto;
+    opacity: 0.75;
+    z-index: 20;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.2s linear;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    svg {
+      box-sizing: content-box;
+      padding: 10px;
+      width: 24px;
+      height: 24px;
+      fill: white;
+      background: rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  &-PhotoSlider__ArrowLeft {
+    left: 0;
+  }
+
+  &-PhotoSlider__ArrowRight {
+    right: 0;
   }
 
   &-PhotoSlider__FooterWrap {

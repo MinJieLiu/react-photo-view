@@ -5,6 +5,8 @@ import PhotoView from './PhotoView';
 import SlideWrap from './components/SlideWrap';
 import VisibleAnimationHandle from './components/VisibleAnimationHandle';
 import CloseSVG from './components/CloseSVG';
+import ArrowLeft from './components/ArrowLeft';
+import ArrowRight from './components/ArrowRight';
 import isTouchDevice from './utils/isTouchDevice';
 import { dataType, IPhotoProviderBase, ReachTypeEnum, ShowAnimateEnum } from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
@@ -321,14 +323,13 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
           if (photoVisible) {
             const { innerWidth } = window;
             const currentOverlayVisible = overlayVisible && showAnimateType === ShowAnimateEnum.None;
-            const overlayStyle = {
-              opacity: +currentOverlayVisible,
-            };
             // 关闭过程中使用下拉保存的透明度
             const currentOpacity = visible ? backdropOpacity : lastBackdropOpacity;
 
             return (
-              <SlideWrap className={className}>
+              <SlideWrap
+                className={classNames({ 'PhotoView-PhotoSlider__clean': !currentOverlayVisible }, className)}
+              >
                 <div
                   className={classNames('PhotoView-PhotoSlider__Backdrop', maskClassName, {
                     'PhotoView-PhotoSlider__fadeIn': showAnimateType === ShowAnimateEnum.In,
@@ -340,7 +341,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
                   onAnimationEnd={onShowAnimateEnd}
                 />
                 {bannerVisible && (
-                  <div className="PhotoView-PhotoSlider__BannerWrap" style={overlayStyle}>
+                  <div className="PhotoView-PhotoSlider__BannerWrap">
                     <div className="PhotoView-PhotoSlider__Counter">
                       {photoIndex + 1} / {imageLength}
                     </div>
@@ -390,10 +391,22 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
                       />
                     );
                   })}
+                {!isTouchDevice && bannerVisible && (
+                  <>
+                    {photoIndex !== 0 && (
+                      <div className="PhotoView-PhotoSlider__ArrowLeft" onClick={() => this.handlePrevious(false)}>
+                        <ArrowLeft />
+                      </div>
+                    )}
+                    {photoIndex + 1 < imageLength && (
+                      <div className="PhotoView-PhotoSlider__ArrowRight" onClick={() => this.handleNext(false)}>
+                        <ArrowRight />
+                      </div>
+                    )}
+                  </>
+                )}
                 {Boolean(introVisible && overlayIntro) && (
-                  <div className="PhotoView-PhotoSlider__FooterWrap" style={overlayStyle}>
-                    {overlayIntro}
-                  </div>
+                  <div className="PhotoView-PhotoSlider__FooterWrap">{overlayIntro}</div>
                 )}
                 {overlayRender &&
                   overlayRender({
