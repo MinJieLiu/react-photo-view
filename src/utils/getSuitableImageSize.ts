@@ -8,8 +8,8 @@ export default function getSuitableImageSize(
   width: number;
   height: number;
 } {
-  let width = 0;
-  let height = 0;
+  let width;
+  let height;
   const { innerWidth, innerHeight } = window;
   if (naturalWidth < innerWidth && naturalHeight < innerHeight) {
     width = naturalWidth;

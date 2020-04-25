@@ -21,6 +21,7 @@ import {
 } from './types';
 import './PhotoView.less';
 import getSuitableImageSize from './utils/getSuitableImageSize';
+import correctSuitablePosition from './utils/correctSuitablePosition';
 
 export interface IPhotoViewProps {
   // 图片地址
@@ -274,18 +275,20 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
     if (reachState !== ReachTypeEnum.Normal) {
       return;
     }
+    const position = getPositionOnMoveOrScale({
+      x,
+      y,
+      clientX,
+      clientY,
+      fromScale: scale,
+      // 若图片足够大，则放大适应的倍数
+      toScale: scale !== 1 ? 1 : Math.max(2, naturalWidth / width),
+    });
     this.setState({
       clientX,
       clientY,
-      ...getPositionOnMoveOrScale({
-        x,
-        y,
-        clientX,
-        clientY,
-        fromScale: scale,
-        // 若图片足够大，则放大适应的倍数
-        toScale: scale !== 1 ? 1 : Math.max(2, naturalWidth / width),
-      }),
+      ...position,
+      ...correctSuitablePosition(position),
     });
   };
 
@@ -299,17 +302,20 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
       const endScale = scale - deltaY / 100 / 2;
       // 限制最大倍数和最小倍数
       const toScale = Math.max(Math.min(endScale, Math.max(maxScale, naturalWidth / width)), minScale);
+
+      const position = getPositionOnMoveOrScale({
+        x,
+        y,
+        clientX,
+        clientY,
+        fromScale: scale,
+        toScale,
+      });
       return {
         clientX,
         clientY,
-        ...getPositionOnMoveOrScale({
-          x,
-          y,
-          clientX,
-          clientY,
-          fromScale: scale,
-          toScale,
-        }),
+        ...position,
+        ...correctSuitablePosition(position),
       };
     });
   };
