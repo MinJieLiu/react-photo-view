@@ -4,7 +4,7 @@ import debounce from 'lodash.debounce';
 import PhotoView from './PhotoView';
 import SlideWrap from './components/SlideWrap';
 import VisibleAnimationHandle from './components/VisibleAnimationHandle';
-import CloseSVG from './components/CloseSVG';
+import Close from './components/Close';
 import ArrowLeft from './components/ArrowLeft';
 import ArrowRight from './components/ArrowRight';
 import isTouchDevice from './utils/isTouchDevice';
@@ -169,7 +169,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
         };
       }
       const offsetClientY = Math.abs(clientY - lastClientY);
-      const opacity = Math.max(Math.min(defaultOpacity, defaultOpacity - offsetClientY / 100 / 2), 0);
+      const opacity = Math.max(Math.min(defaultOpacity, defaultOpacity - offsetClientY / 100 / 4), 0);
       return {
         touched: true,
         lastClientY,
@@ -354,7 +354,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
                       {photoIndex + 1} / {imageLength}
                     </div>
                     <div className="PhotoView-PhotoSlider__BannerRight">
-                      <CloseSVG className="PhotoView-PhotoSlider__Close" onClick={this.handleClose} />
+                      <Close className="PhotoView-PhotoSlider__Close" onClick={this.handleClose} />
                     </div>
                   </div>
                 )}
