@@ -328,7 +328,13 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
 
             return (
               <SlideWrap
-                className={classNames({ 'PhotoView-PhotoSlider__clean': !visible }, className)}
+                className={classNames(
+                  {
+                    'PhotoView-PhotoSlider__clean': !currentOverlayVisible,
+                    'PhotoView-PhotoSlider__willClose': !visible,
+                  },
+                  className,
+                )}
                 role="dialog"
                 onClick={e => e.stopPropagation()}
               >
