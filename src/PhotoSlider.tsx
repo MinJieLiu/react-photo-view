@@ -101,10 +101,10 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
     window.removeEventListener('keydown', this.handleKeyDown);
   }
 
-  handleClose = () => {
+  handleClose = (evt?: React.MouseEvent | React.TouchEvent) => {
     const { onClose } = this.props;
     const { backdropOpacity } = this.state;
-    onClose();
+    onClose(evt);
     this.setState({
       overlayVisible: true,
       // 记录当前关闭时的透明度
@@ -328,7 +328,8 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
 
             return (
               <SlideWrap
-                className={classNames({ 'PhotoView-PhotoSlider__clean': !currentOverlayVisible }, className)}
+                className={classNames({ 'PhotoView-PhotoSlider__clean': !visible }, className)}
+                onClick={e => e.stopPropagation()}
               >
                 <div
                   className={classNames('PhotoView-PhotoSlider__Backdrop', maskClassName, {
@@ -346,11 +347,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
                       {photoIndex + 1} / {imageLength}
                     </div>
                     <div className="PhotoView-PhotoSlider__BannerRight">
-                      <CloseSVG
-                        className="PhotoView-PhotoSlider__Close"
-                        onTouchEnd={isTouchDevice ? this.handleClose : undefined}
-                        onClick={isTouchDevice ? undefined : this.handleClose}
-                      />
+                      <CloseSVG className="PhotoView-PhotoSlider__Close" onClick={this.handleClose} />
                     </div>
                   </div>
                 )}

@@ -1,6 +1,5 @@
 import React from 'react';
 import classNames from 'classnames';
-import debounce from 'lodash.debounce';
 import Photo from './Photo';
 import throttle from './utils/throttle';
 import isTouchDevice from './utils/isTouchDevice';
@@ -112,14 +111,11 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   private initialTouchState = TouchStartEnum.Normal;
 
   private readonly handlePhotoTap: TapFuncType<number>;
-  private readonly handleScaleEnd;
 
   constructor(props: IPhotoViewProps) {
     super(props);
     this.onMove = throttle(this.onMove, 8);
     this.handleResize = throttle(this.handleResize, 8);
-    // 放大/缩小后自适应
-    this.handleScaleEnd = debounce(this.onScaleEnd, 600);
     // 单击与双击事件处理
     this.handlePhotoTap = withContinuousTap(this.onPhotoTap, this.onDoubleTap);
   }
@@ -162,7 +158,6 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   };
 
   handleStart = (clientX: number, clientY: number, touchLength: number = 0) => {
-    this.handleScaleEnd.cancel();
     this.setState(prevState => ({
       touched: true,
       clientX,
@@ -274,22 +269,6 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
     }
   };
 
-  onScaleEnd = () => {
-    const { width, height, x, y, lastX, lastY, scale, touchedTime } = this.state;
-    this.setState(
-      slideToPosition({
-        x,
-        y,
-        lastX,
-        lastY,
-        width,
-        height,
-        scale,
-        touchedTime,
-      }),
-    );
-  };
-
   onDoubleTap: TapFuncType<number> = (clientX, clientY) => {
     const { width, naturalWidth, x, y, scale, reachState } = this.state;
     if (reachState !== ReachTypeEnum.Normal) {
@@ -308,7 +287,6 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
         toScale: scale !== 1 ? 1 : Math.max(2, naturalWidth / width),
       }),
     });
-    this.handleScaleEnd();
   };
 
   handleWheel = e => {
@@ -334,7 +312,6 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
         }),
       };
     });
-    this.handleScaleEnd();
   };
 
   handleMaskStart = (clientX: number, clientY: number) => {
