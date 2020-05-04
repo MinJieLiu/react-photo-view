@@ -7,7 +7,7 @@ import { IPhotoSliderProps } from 'react-photo-view/dist/PhotoSlider';
 import photo1 from './1.jpg';
 import photo2 from './2.jpg';
 import photo3 from './3.jpg';
-import photo4 from './4.jpg';
+import photo4 from './4.png';
 import photo5 from './5.jpg';
 import photo6 from './6.png';
 import photo7 from './7.jpg';

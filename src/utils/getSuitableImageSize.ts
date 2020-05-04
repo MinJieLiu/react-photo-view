@@ -32,7 +32,7 @@ export default function getSuitableImageSize(
     height = autoHeight;
   }
   // 长图模式
-  else if (naturalHeight / naturalWidth > 3) {
+  else if (naturalHeight / naturalWidth >= 3) {
     width = innerWidth;
     height = autoHeight;
     // 默认定位到顶部区域
