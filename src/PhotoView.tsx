@@ -455,7 +455,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
           onTouchStart={isTouchDevice && isActive ? this.handleMaskTouchStart : undefined}
         />
         <div
-          className={classNames({
+          className={classNames('PhotoView__PhotoBox', {
             PhotoView__animateIn: loaded && showAnimateType === ShowAnimateEnum.In,
             PhotoView__animateOut: loaded && showAnimateType === ShowAnimateEnum.Out,
           })}
