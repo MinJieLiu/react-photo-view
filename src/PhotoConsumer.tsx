@@ -11,7 +11,7 @@ export interface IPhotoConsumer {
 
 const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
   const photoContext = React.useContext<PhotoContextType>(PhotoContext);
-  const key = React.useMemo<string>(() => uniqueId(), [] as readonly []);
+  const key = React.useMemo<string>(() => uniqueId(), []);
   const [position, updatePosition] = React.useState<{
     clientX: number | undefined;
     clientY: number | undefined;
@@ -31,7 +31,7 @@ const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
     return () => {
       photoContext.removeItem(key);
     };
-  }, [] as readonly []);
+  }, []);
 
   function handleTouchStart(e) {
     const { clientX, clientY } = e.touches[0];

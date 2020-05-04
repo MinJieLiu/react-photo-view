@@ -18,7 +18,7 @@ const SlideWrap: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, 
       // 清除容器
       document.body.removeChild(dialogNode.current);
     };
-  }, [] as readonly []);
+  }, []);
 
   return createPortal(
     <div className={classNames('PhotoView-SlideWrap', className)} {...restProps}>

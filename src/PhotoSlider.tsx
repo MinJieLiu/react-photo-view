@@ -1,6 +1,5 @@
 import React from 'react';
 import classNames from 'classnames';
-import debounce from 'lodash.debounce';
 import PhotoView from './PhotoView';
 import SlideWrap from './components/SlideWrap';
 import VisibleAnimationHandle from './components/VisibleAnimationHandle';
@@ -85,7 +84,6 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
       overlayVisible: true,
       canPullClose: true,
     };
-    this.handleResize = debounce(this.handleResize, 32);
   }
 
   componentDidMount() {
@@ -137,6 +135,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
         translateX: -(innerWidth + horizontalOffset) * photoIndex,
         lastClientX: undefined,
         lastClientY: undefined,
+        shouldTransition: false,
       };
     });
   };
