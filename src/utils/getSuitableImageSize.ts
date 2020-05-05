@@ -4,6 +4,7 @@
 export default function getSuitableImageSize(
   naturalWidth: number,
   naturalHeight: number,
+  rotate: number,
 ): {
   width: number;
   height: number;
@@ -14,7 +15,14 @@ export default function getSuitableImageSize(
   let width;
   let height;
   let y = 0;
-  const { innerWidth, innerHeight } = window;
+  let { innerWidth, innerHeight } = window;
+  const isVertical = rotate % 180 !== 0;
+
+  // 若图片不是水平则调换宽高
+  if (isVertical) {
+    [innerHeight, innerWidth] = [innerWidth, innerHeight];
+  }
+
   const autoWidth = (naturalWidth / naturalHeight) * innerHeight;
   const autoHeight = (naturalHeight / naturalWidth) * innerWidth;
 
@@ -32,7 +40,7 @@ export default function getSuitableImageSize(
     height = autoHeight;
   }
   // 长图模式
-  else if (naturalHeight / naturalWidth >= 3) {
+  else if (naturalHeight / naturalWidth >= 3 && !isVertical) {
     width = innerWidth;
     height = autoHeight;
     // 默认定位到顶部区域

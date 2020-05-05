@@ -14,7 +14,7 @@ export type dataType = {
   intro?: React.ReactNode;
 };
 
-type overlayRenderProps = {
+export type overlayRenderProps = {
   // 图片列表
   images: dataType[];
   // 图片当前索引
@@ -27,6 +27,10 @@ type overlayRenderProps = {
   onIndexChange: (photoIndex: number) => void;
   // 覆盖物可见度
   overlayVisible: boolean;
+  // 当前图片旋转角度
+  rotate: number;
+  // 旋转事件
+  onRotate: (rotate: number) => void;
 };
 
 export interface IPhotoProviderBase {
@@ -40,6 +44,8 @@ export interface IPhotoProviderBase {
   introVisible?: boolean;
   // 自定义渲染
   overlayRender?: (overlayProps: overlayRenderProps) => React.ReactNode;
+  // 工具栏渲染
+  toolbarRender?: (overlayProps: overlayRenderProps) => React.ReactNode;
   // className
   className?: string;
   // 遮罩 className

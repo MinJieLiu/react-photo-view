@@ -10,14 +10,15 @@ Demo: [https://minjieliu.github.io/react-photo-view](https://minjieliu.github.io
 
 ### 特性
 
-1.  支持左右切换导航、上/下滑关闭、双击放大/缩小、双指放大/缩小/平移、键盘导航/关闭、点击切换控件等
+1.  支持左右切换导航、上/下滑关闭、双击放大/缩小、双指放大/缩小/平移、键盘导航/关闭、旋转、点击切换控件等
 1.  打开/关闭缩放动画
 1.  自适应图像适应
+1.  长图模式
 1.  支持桌面端（兼容 IE10+）/移动端
 1.  轻量的体积
 1.  高度的扩展性
 1.  支持服务端渲染
-1.  基于 `typescript` 友好的语法提示
+1.  基于 `typescript`
 
 ## 开始使用
 
@@ -76,6 +77,7 @@ function ImageView() {
 | bannerVisible  | boolean                           | 否   | 导航条 visible，默认 true  |
 | introVisible   | boolean                           | 否   | 简介 visible，默认 true    |
 | overlayRender  | (overlayProps) => React.ReactNode | 否   | 自定义渲染                 |
+| toolbarRender  | (overlayProps) => React.ReactNode | 否   | 工具栏渲染                 |
 | className      | string                            | 否   | className                  |
 | maskClassName  | string                            | 否   | 遮罩 className             |
 | viewClassName  | string                            | 否   | 图片容器 className         |

@@ -1,45 +1,22 @@
 import { CloseEdgeEnum, ReachTypeEnum, TouchStartEnum } from '../types';
 
 /**
- * 接触左边或右边边缘
- * @param x
+ * 接触左边/上边 或 右边/下边边缘
+ * @param position - x/y
  * @param scale
- * @param width
+ * @param size - width/height
+ * @param innerSize - innerWidth/innerHeight
  * @return CloseEdgeEnum
  */
-export function getClosedHorizontal(x: number, scale: number, width: number): CloseEdgeEnum {
-  const { innerWidth } = window;
-  const currentWidth = width * scale;
+export function getClosedEdge(position: number, scale: number, size: number, innerSize: number): CloseEdgeEnum {
+  const currentWidth = size * scale;
   // 图片超出的宽度
-  const outOffsetX = (currentWidth - innerWidth) / 2;
-  if (currentWidth <= innerWidth) {
+  const outOffsetX = (currentWidth - innerSize) / 2;
+  if (currentWidth <= innerSize) {
     return CloseEdgeEnum.Small;
-  } else if (x > 0 && outOffsetX - x <= 0) {
+  } else if (position > 0 && outOffsetX - position <= 0) {
     return CloseEdgeEnum.Before;
-  } else if (x < 0 && outOffsetX + x <= 0) {
-    return CloseEdgeEnum.After;
-  }
-  return CloseEdgeEnum.Normal;
-}
-
-/**
- * 接触上边或下边边缘
- * @param y
- * @param scale
- * @param height
- * @return CloseEdgeEnum
- */
-export function getClosedVertical(y: number, scale: number, height: number): CloseEdgeEnum {
-  const { innerHeight } = window;
-  const currentHeight = height * scale;
-  // 图片超出的高度
-  const outOffsetY = (currentHeight - innerHeight) / 2;
-
-  if (currentHeight <= innerHeight) {
-    return CloseEdgeEnum.Small;
-  } else if (y > 0 && outOffsetY - y <= 0) {
-    return CloseEdgeEnum.Before;
-  } else if (y < 0 && outOffsetY + y <= 0) {
+  } else if (position < 0 && outOffsetX + position <= 0) {
     return CloseEdgeEnum.After;
   }
   return CloseEdgeEnum.Normal;
