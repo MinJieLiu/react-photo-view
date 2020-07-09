@@ -1,6 +1,6 @@
 import { maxTouchTime, slideAcceleration } from '../variables';
 import { CloseEdgeEnum } from '../types';
-import { getClosedHorizontal, getClosedVertical } from './getCloseEdge';
+import { getClosedEdge } from './getCloseEdge';
 
 /**
  * 适应到合适的图片偏移量
@@ -13,6 +13,7 @@ export default function slideToPosition({
   width,
   height,
   scale,
+  rotate,
   touchedTime,
 }: {
   x: number;
@@ -22,6 +23,7 @@ export default function slideToPosition({
   width: number;
   height: number;
   scale: number;
+  rotate: number;
   touchedTime: number;
 }): {
   x: number;
@@ -38,8 +40,13 @@ export default function slideToPosition({
   const slideTimeY = Math.abs(speedY / slideAcceleration);
 
   // 计划滑动位置
-  const planX = Math.floor(x + speedX * slideTimeX);
-  const planY = Math.floor(y + speedY * slideTimeY);
+  let planX = Math.floor(x + speedX * slideTimeX);
+  let planY = Math.floor(y + speedY * slideTimeY);
+
+  // 若图片不是水平则调换属性
+  if (rotate % 180 !== 0) {
+    [width, height] = [height, width];
+  }
 
   let currentX = planX;
   let currentY = planY;
@@ -49,8 +56,8 @@ export default function slideToPosition({
   const outOffsetX = (width * scale - innerWidth) / 2;
   const outOffsetY = (height * scale - innerHeight) / 2;
 
-  const horizontalCloseEdge = getClosedHorizontal(planX, scale, width);
-  const verticalCloseEdge = getClosedVertical(planY, scale, height);
+  const horizontalCloseEdge = getClosedEdge(planX, scale, width, innerWidth);
+  const verticalCloseEdge = getClosedEdge(planY, scale, height, innerHeight);
 
   // x
   if (horizontalCloseEdge === CloseEdgeEnum.Small) {
@@ -72,7 +79,8 @@ export default function slideToPosition({
   // 时间过长
   if (
     moveTime >= maxTouchTime &&
-    horizontalCloseEdge === CloseEdgeEnum.Normal && verticalCloseEdge === CloseEdgeEnum.Normal
+    horizontalCloseEdge === CloseEdgeEnum.Normal &&
+    verticalCloseEdge === CloseEdgeEnum.Normal
   ) {
     return {
       x,

@@ -1,13 +1,12 @@
 import React from 'react';
 import classNames from 'classnames';
-import debounce from 'lodash.debounce';
 import Photo from './Photo';
 import throttle from './utils/throttle';
 import isTouchDevice from './utils/isTouchDevice';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import slideToPosition from './utils/slideToPosition';
-import { getReachType, getClosedHorizontal, getClosedVertical } from './utils/getCloseEdge';
+import { getReachType, getClosedEdge } from './utils/getCloseEdge';
 import withContinuousTap, { TapFuncType } from './utils/withContinuousTap';
 import getAnimateOrigin from './utils/getAnimateOrigin';
 import { maxScale, minStartTouchOffset, minScale, scaleBuffer } from './variables';
@@ -22,6 +21,7 @@ import {
 } from './types';
 import './PhotoView.less';
 import getSuitableImageSize from './utils/getSuitableImageSize';
+import correctSuitablePosition from './utils/correctSuitablePosition';
 
 export interface IPhotoViewProps {
   // 图片地址
@@ -36,6 +36,8 @@ export interface IPhotoViewProps {
   loadingElement?: JSX.Element;
   // 加载失败 Element
   brokenElement?: JSX.Element;
+  // 旋转状态
+  rotate: number;
 
   // Photo 点击事件
   onPhotoTap: PhotoTapFunction;
@@ -112,14 +114,11 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   private initialTouchState = TouchStartEnum.Normal;
 
   private readonly handlePhotoTap: TapFuncType<number>;
-  private readonly handleScaleEnd;
 
   constructor(props: IPhotoViewProps) {
     super(props);
     this.onMove = throttle(this.onMove, 8);
     this.handleResize = throttle(this.handleResize, 8);
-    // 放大/缩小后自适应
-    this.handleScaleEnd = debounce(this.onScaleEnd, 600);
     // 单击与双击事件处理
     this.handlePhotoTap = withContinuousTap(this.onPhotoTap, this.onDoubleTap);
   }
@@ -135,14 +134,19 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
     window.addEventListener('resize', this.handleResize);
   }
 
-  componentWillUnmount() {
-    if (isTouchDevice) {
-      window.removeEventListener('touchmove', this.handleTouchMove);
-      window.removeEventListener('touchend', this.handleTouchEnd);
-    } else {
-      window.removeEventListener('mousemove', this.handleMouseMove);
-      window.removeEventListener('mouseup', this.handleMouseUp);
+  componentDidUpdate(prevProps: Readonly<IPhotoViewProps>) {
+    const { rotate } = this.props;
+    if (rotate !== prevProps.rotate) {
+      const { naturalWidth, naturalHeight } = this.state;
+      this.setState(getSuitableImageSize(naturalWidth, naturalHeight, rotate));
     }
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('touchmove', this.handleTouchMove);
+    window.removeEventListener('touchend', this.handleTouchEnd);
+    window.removeEventListener('mousemove', this.handleMouseMove);
+    window.removeEventListener('mouseup', this.handleMouseUp);
     window.removeEventListener('resize', this.handleResize);
   }
 
@@ -151,10 +155,10 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   };
 
   handleResize = () => {
-    const { onPhotoResize } = this.props;
+    const { onPhotoResize, rotate } = this.props;
     const { loaded, naturalWidth, naturalHeight } = this.state;
     if (loaded) {
-      this.setState(getSuitableImageSize(naturalWidth, naturalHeight));
+      this.setState(getSuitableImageSize(naturalWidth, naturalHeight, rotate));
       if (onPhotoResize) {
         onPhotoResize();
       }
@@ -162,7 +166,6 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   };
 
   handleStart = (clientX: number, clientY: number, touchLength: number = 0) => {
-    this.handleScaleEnd.cancel();
     this.setState(prevState => ({
       touched: true,
       clientX,
@@ -177,10 +180,8 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   };
 
   onMove = (newClientX: number, newClientY: number, touchLength: number = 0) => {
-    const { onReachMove, isActive } = this.props;
+    const { onReachMove, isActive, rotate } = this.props;
     const {
-      width,
-      height,
       naturalWidth,
       x,
       y,
@@ -197,6 +198,11 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
       maskTouched,
     } = this.state;
     if ((touched || maskTouched) && isActive) {
+      let { width, height } = this.state;
+      // 若图片不是水平则调换属性
+      if (rotate % 180 !== 0) {
+        [width, height] = [height, width];
+      }
       // 单指最小缩放下，以初始移动距离来判断意图
       if (touchLength === 0 && this.initialTouchState === TouchStartEnum.Normal) {
         const isStillX = Math.abs(newClientX - clientX) <= minStartTouchOffset;
@@ -224,8 +230,8 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
       let currentReachState = ReachTypeEnum.Normal;
       if (touchLength === 0) {
         // 边缘超出状态
-        const horizontalCloseEdge = getClosedHorizontal(offsetX + lastX, scale, width);
-        const verticalCloseEdge = getClosedVertical(offsetY + lastY, scale, height);
+        const horizontalCloseEdge = getClosedEdge(offsetX + lastX, scale, width, window.innerWidth);
+        const verticalCloseEdge = getClosedEdge(offsetY + lastY, scale, height, window.innerHeight);
         // 边缘触发检测
         currentReachState = getReachType({
           initialTouchState: this.initialTouchState,
@@ -274,41 +280,26 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
     }
   };
 
-  onScaleEnd = () => {
-    const { width, height, x, y, lastX, lastY, scale, touchedTime } = this.state;
-    this.setState(
-      slideToPosition({
-        x,
-        y,
-        lastX,
-        lastY,
-        width,
-        height,
-        scale,
-        touchedTime,
-      }),
-    );
-  };
-
   onDoubleTap: TapFuncType<number> = (clientX, clientY) => {
     const { width, naturalWidth, x, y, scale, reachState } = this.state;
     if (reachState !== ReachTypeEnum.Normal) {
       return;
     }
+    const position = getPositionOnMoveOrScale({
+      x,
+      y,
+      clientX,
+      clientY,
+      fromScale: scale,
+      // 若图片足够大，则放大适应的倍数
+      toScale: scale !== 1 ? 1 : Math.max(2, naturalWidth / width),
+    });
     this.setState({
       clientX,
       clientY,
-      ...getPositionOnMoveOrScale({
-        x,
-        y,
-        clientX,
-        clientY,
-        fromScale: scale,
-        // 若图片足够大，则放大适应的倍数
-        toScale: scale !== 1 ? 1 : Math.max(2, naturalWidth / width),
-      }),
+      ...position,
+      ...correctSuitablePosition(position),
     });
-    this.handleScaleEnd();
   };
 
   handleWheel = e => {
@@ -321,20 +312,22 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
       const endScale = scale - deltaY / 100 / 2;
       // 限制最大倍数和最小倍数
       const toScale = Math.max(Math.min(endScale, Math.max(maxScale, naturalWidth / width)), minScale);
+
+      const position = getPositionOnMoveOrScale({
+        x,
+        y,
+        clientX,
+        clientY,
+        fromScale: scale,
+        toScale,
+      });
       return {
         clientX,
         clientY,
-        ...getPositionOnMoveOrScale({
-          x,
-          y,
-          clientX,
-          clientY,
-          fromScale: scale,
-          toScale,
-        }),
+        ...position,
+        ...correctSuitablePosition(position),
       };
     });
-    this.handleScaleEnd();
   };
 
   handleMaskStart = (clientX: number, clientY: number) => {
@@ -380,7 +373,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   handleUp = (newClientX: number, newClientY: number) => {
     // 重置响应状态
     this.initialTouchState = TouchStartEnum.Normal;
-    const { onReachUp, onPhotoTap, onMaskTap, isActive } = this.props;
+    const { onReachUp, onPhotoTap, onMaskTap, isActive, rotate } = this.props;
     const {
       width,
       height,
@@ -414,6 +407,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
                 width,
                 height,
                 scale,
+                rotate,
                 touchedTime,
               })
             : {
@@ -454,6 +448,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
       viewClassName,
       className,
       style,
+      rotate,
       loadingElement,
       brokenElement,
       isActive,
@@ -462,7 +457,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
     } = this.props;
     const { width, height, loaded, x, y, scale, touched, broken } = this.state;
 
-    const transform = `translate3d(${x}px, ${y}px, 0) scale(1)`;
+    const transform = `translate3d(${x}px, ${y}px, 0) scale(1) rotate(${rotate}deg)`;
 
     return (
       <div className={classNames('PhotoView__PhotoWrap', viewClassName)} style={style}>
@@ -472,12 +467,12 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
           onTouchStart={isTouchDevice && isActive ? this.handleMaskTouchStart : undefined}
         />
         <div
-          className={classNames({
+          className={classNames('PhotoView__PhotoBox', {
             PhotoView__animateIn: loaded && showAnimateType === ShowAnimateEnum.In,
             PhotoView__animateOut: loaded && showAnimateType === ShowAnimateEnum.Out,
           })}
           style={{
-            transformOrigin: loaded ? getAnimateOrigin(originRect, width, height) : undefined,
+            transformOrigin: loaded ? getAnimateOrigin(originRect, 0, 0) : undefined,
           }}
         >
           <Photo
@@ -487,6 +482,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
             height={height*scale}
             loaded={loaded}
             broken={broken}
+            rotate={rotate}
             onMouseDown={isTouchDevice ? undefined : this.handleMouseDown}
             onTouchStart={isTouchDevice ? this.handleTouchStart : undefined}
             onWheel={this.handleWheel}

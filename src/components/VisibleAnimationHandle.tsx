@@ -32,10 +32,8 @@ export default function VisibleAnimationHandle({ visible, currentImage, children
   }
 
   React.useEffect(() => {
-    if (!currentImage) {
-      return;
-    }
-    const originRef = currentImage.originRef;
+    const originRef = (currentImage || {}).originRef;
+    
     if (originRef && originRef.nodeType === 1) {
       // 获取触发时节点位置
       const { top, left, width, height } = originRef.getBoundingClientRect();

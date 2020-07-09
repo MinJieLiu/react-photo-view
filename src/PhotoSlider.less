@@ -17,6 +17,12 @@
     }
   }
 
+  &-PhotoSlider__willClose {
+    .PhotoView-PhotoSlider__BannerWrap:hover {
+      opacity: 0;
+    }
+  }
+
   &-PhotoSlider__Backdrop {
     position: absolute;
     top: 0;
@@ -63,10 +69,12 @@
   }
 
   &-PhotoSlider__BannerRight {
+    display: flex;
+    align-items: center;
     height: 100%;
   }
 
-  &-PhotoSlider__Close {
+  &-PhotoSlider__toolbarIcon {
     box-sizing: border-box;
     padding: 10px;
     opacity: 0.75;

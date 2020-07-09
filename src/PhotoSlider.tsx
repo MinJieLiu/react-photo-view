@@ -1,14 +1,13 @@
 import React from 'react';
 import classNames from 'classnames';
-import debounce from 'lodash.debounce';
 import PhotoView from './PhotoView';
 import SlideWrap from './components/SlideWrap';
 import VisibleAnimationHandle from './components/VisibleAnimationHandle';
-import CloseSVG from './components/CloseSVG';
+import Close from './components/Close';
 import ArrowLeft from './components/ArrowLeft';
 import ArrowRight from './components/ArrowRight';
 import isTouchDevice from './utils/isTouchDevice';
-import { dataType, IPhotoProviderBase, ReachTypeEnum, ShowAnimateEnum } from './types';
+import { dataType, IPhotoProviderBase, overlayRenderProps, ReachTypeEnum, ShowAnimateEnum } from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
 import './PhotoSlider.less';
 
@@ -47,6 +46,8 @@ type PhotoSliderState = {
   overlayVisible: boolean;
   // 可下拉关闭
   canPullClose: boolean;
+  // 旋转集合
+  rotatingMap: Map<number, number>;
 };
 
 export default class PhotoSlider extends React.Component<IPhotoSliderProps, PhotoSliderState> {
@@ -84,8 +85,9 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
       lastBackdropOpacity: defaultOpacity,
       overlayVisible: true,
       canPullClose: true,
+
+      rotatingMap: new Map<number, number>(),
     };
-    this.handleResize = debounce(this.handleResize, 32);
   }
 
   componentDidMount() {
@@ -101,10 +103,10 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
     window.removeEventListener('keydown', this.handleKeyDown);
   }
 
-  handleClose = () => {
+  handleClose = (evt?: React.MouseEvent | React.TouchEvent) => {
     const { onClose } = this.props;
     const { backdropOpacity } = this.state;
-    onClose();
+    onClose(evt);
     this.setState({
       overlayVisible: true,
       // 记录当前关闭时的透明度
@@ -137,7 +139,16 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
         translateX: -(innerWidth + horizontalOffset) * photoIndex,
         lastClientX: undefined,
         lastClientY: undefined,
+        shouldTransition: false,
       };
+    });
+  };
+
+  handleRotate = (rotating: number) => {
+    const { photoIndex, rotatingMap } = this.state;
+    rotatingMap.set(photoIndex, rotating);
+    this.setState({
+      rotatingMap,
     });
   };
 
@@ -169,7 +180,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
         };
       }
       const offsetClientY = Math.abs(clientY - lastClientY);
-      const opacity = Math.max(Math.min(defaultOpacity, defaultOpacity - offsetClientY / 100 / 2), 0);
+      const opacity = Math.max(Math.min(defaultOpacity, defaultOpacity - offsetClientY / 100 / 4), 0);
       return {
         touched: true,
         lastClientY,
@@ -299,6 +310,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
       bannerVisible,
       introVisible,
       overlayRender,
+      toolbarRender,
       loadingElement,
       brokenElement,
     } = this.props;
@@ -309,6 +321,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
       backdropOpacity,
       lastBackdropOpacity,
       overlayVisible,
+      rotatingMap,
       shouldTransition,
     } = this.state;
     const imageLength = images.length;
@@ -325,10 +338,29 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
             const currentOverlayVisible = overlayVisible && showAnimateType === ShowAnimateEnum.None;
             // 关闭过程中使用下拉保存的透明度
             const currentOpacity = visible ? backdropOpacity : lastBackdropOpacity;
-
+            // 覆盖物参数
+            const overlayParams: overlayRenderProps = {
+              images,
+              index: photoIndex,
+              visible,
+              onClose: this.handleClose,
+              onIndexChange: this.handleIndexChange,
+              overlayVisible: currentOverlayVisible,
+              onRotate: this.handleRotate,
+              rotate: rotatingMap.get(photoIndex) || 0,
+            };
             return (
               <SlideWrap
-                className={classNames({ 'PhotoView-PhotoSlider__clean': !currentOverlayVisible }, className)}
+                className={classNames(
+                  {
+                    'PhotoView-PhotoSlider__clean': !currentOverlayVisible,
+                    'PhotoView-PhotoSlider__willClose': !visible,
+                  },
+                  className,
+                )}
+                role="dialog"
+                id="PhotoView_Slider"
+                onClick={e => e.stopPropagation()}
               >
                 <div
                   className={classNames('PhotoView-PhotoSlider__Backdrop', maskClassName, {
@@ -346,11 +378,8 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
                       {photoIndex + 1} / {imageLength}
                     </div>
                     <div className="PhotoView-PhotoSlider__BannerRight">
-                      <CloseSVG
-                        className="PhotoView-PhotoSlider__Close"
-                        onTouchEnd={isTouchDevice ? this.handleClose : undefined}
-                        onClick={isTouchDevice ? undefined : this.handleClose}
-                      />
+                      {toolbarRender && toolbarRender(overlayParams)}
+                      <Close className="PhotoView-PhotoSlider__toolbarIcon" onClick={this.handleClose} />
                     </div>
                   </div>
                 )}
@@ -388,6 +417,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
                         isActive={photoIndex === realIndex}
                         showAnimateType={showAnimateType}
                         originRect={originRect}
+                        rotate={rotatingMap.get(realIndex) || 0}
                       />
                     );
                   })}
@@ -408,15 +438,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
                 {Boolean(introVisible && overlayIntro) && (
                   <div className="PhotoView-PhotoSlider__FooterWrap">{overlayIntro}</div>
                 )}
-                {overlayRender &&
-                  overlayRender({
-                    images,
-                    index: photoIndex,
-                    visible,
-                    onClose: this.handleClose,
-                    onIndexChange: this.handleIndexChange,
-                    overlayVisible: currentOverlayVisible,
-                  })}
+                {overlayRender && overlayRender(overlayParams)}
               </SlideWrap>
             );
           }
