@@ -457,7 +457,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
     } = this.props;
     const { width, height, loaded, x, y, scale, touched, broken } = this.state;
 
-    const transform = `translate3d(${x}px, ${y}px, 0) scale(${scale}) rotate(${rotate}deg)`;
+    const transform = `translate3d(${x}px, ${y}px, 0) scale(1) rotate(${rotate}deg)`;
 
     return (
       <div className={classNames('PhotoView__PhotoWrap', viewClassName)} style={style}>
@@ -478,8 +478,8 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
           <Photo
             className={className}
             src={src}
-            width={width}
-            height={height}
+            width={width*scale}
+            height={height*scale}
             loaded={loaded}
             broken={broken}
             rotate={rotate}
