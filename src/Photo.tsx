@@ -4,9 +4,11 @@ import Spinner from './components/Spinner';
 import getSuitableImageSize from './utils/getSuitableImageSize';
 import useMountedState from './utils/useMountedState';
 import './Photo.less';
+import { brokenElementDataType } from './types';
 
 export interface IPhotoProps extends React.HTMLAttributes<any> {
   src: string;
+  intro?: React.ReactNode;
   loaded: boolean;
   broken: boolean;
   width: number;
@@ -15,22 +17,25 @@ export interface IPhotoProps extends React.HTMLAttributes<any> {
   className?: string;
   onImageLoad: (PhotoParams, callback?: Function) => void;
   loadingElement?: JSX.Element;
-  brokenElement?: JSX.Element;
+  brokenElement?: JSX.Element | ((photoProps: brokenElementDataType)=>JSX.Element);
 }
 
-const Photo: React.FC<IPhotoProps> = ({
-  src,
-  loaded,
-  broken,
-  width,
-  height,
-  rotate,
-  className,
-  onImageLoad,
-  loadingElement,
-  brokenElement,
-  ...restProps
-}) => {
+const Photo: React.FC<IPhotoProps> = (props) => {
+  const {
+    src,
+    intro,
+    loaded,
+    broken,
+    width,
+    height,
+    rotate,
+    className,
+    onImageLoad,
+    loadingElement,
+    brokenElement,
+    ...restProps
+  } = props;
+
   const isMounted = useMountedState();
 
   function handleImageLoaded(e) {
@@ -75,7 +80,16 @@ const Photo: React.FC<IPhotoProps> = ({
     }
     return loadingElement || <Spinner />;
   }
-  return brokenElement || null;
+  if(brokenElement){
+    if(typeof brokenElement === 'function'){
+      return brokenElement({
+        src,
+        intro,
+      })
+    }
+    return brokenElement;
+  }
+  return null;
 };
 
 Photo.displayName = 'Photo';

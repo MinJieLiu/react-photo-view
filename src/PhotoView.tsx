@@ -18,6 +18,7 @@ import {
   TouchStartEnum,
   ShowAnimateEnum,
   OriginRectType,
+  brokenElementDataType,
 } from './types';
 import './PhotoView.less';
 import getSuitableImageSize from './utils/getSuitableImageSize';
@@ -26,6 +27,8 @@ import correctSuitablePosition from './utils/correctSuitablePosition';
 export interface IPhotoViewProps {
   // 图片地址
   src: string;
+  // 介绍
+  intro?: React.ReactNode;
   // 容器类名
   viewClassName?: string;
   // 图片类名
@@ -35,7 +38,7 @@ export interface IPhotoViewProps {
   // 自定义 loading
   loadingElement?: JSX.Element;
   // 加载失败 Element
-  brokenElement?: JSX.Element;
+  brokenElement?: JSX.Element | ((photoProps: brokenElementDataType)=>JSX.Element);
   // 旋转状态
   rotate: number;
 
@@ -445,6 +448,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   render() {
     const {
       src,
+      intro,
       viewClassName,
       className,
       style,
@@ -478,6 +482,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
           <Photo
             className={className}
             src={src}
+            intro={intro}
             width={width}
             height={height}
             loaded={loaded}

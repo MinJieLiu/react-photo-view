@@ -396,6 +396,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
                       <PhotoView
                         key={item.key || realIndex}
                         src={item.src}
+                        intro={item.intro}
                         onReachMove={this.handleReachMove}
                         onReachUp={this.handleReachUp}
                         onPhotoTap={this.handlePhotoTap}
