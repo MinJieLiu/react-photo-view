@@ -83,7 +83,7 @@ function ImageView() {
 | viewClassName  | string                            | 否   | 图片容器 className         |
 | imageClassName | string                            | 否   | 图片 className             |
 | loadingElement | JSX.Element                       | 否   | 自定义 loading             |
-| brokenElement  | JSX.Element                       | 否   | 加载失败 Element           |
+| brokenElement  | JSX.Element &#124; ((photoProps: brokenElementDataType) => JSX.Element)                       | 否   | 加载失败 Element           |
 
 #### PhotoConsumer
 

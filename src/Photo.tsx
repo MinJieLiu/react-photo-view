@@ -17,10 +17,10 @@ export interface IPhotoProps extends React.HTMLAttributes<any> {
   className?: string;
   onImageLoad: (PhotoParams, callback?: Function) => void;
   loadingElement?: JSX.Element;
-  brokenElement?: JSX.Element | ((photoProps: brokenElementDataType)=>JSX.Element);
+  brokenElement?: JSX.Element | ((photoProps: brokenElementDataType) => JSX.Element);
 }
 
-const Photo: React.FC<IPhotoProps> = (props) => {
+const Photo: React.FC<IPhotoProps> = props => {
   const {
     src,
     intro,
@@ -80,12 +80,12 @@ const Photo: React.FC<IPhotoProps> = (props) => {
     }
     return loadingElement || <Spinner />;
   }
-  if(brokenElement){
-    if(typeof brokenElement === 'function'){
+  if (brokenElement) {
+    if (typeof brokenElement === 'function') {
       return brokenElement({
         src,
         intro,
-      })
+      });
     }
     return brokenElement;
   }

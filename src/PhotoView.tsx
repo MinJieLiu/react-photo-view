@@ -38,7 +38,7 @@ export interface IPhotoViewProps {
   // 自定义 loading
   loadingElement?: JSX.Element;
   // 加载失败 Element
-  brokenElement?: JSX.Element | ((photoProps: brokenElementDataType)=>JSX.Element);
+  brokenElement?: JSX.Element | ((photoProps: brokenElementDataType) => JSX.Element);
   // 旋转状态
   rotate: number;
 
