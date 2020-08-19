@@ -14,6 +14,11 @@ export type dataType = {
   intro?: React.ReactNode;
 };
 
+/**
+ * brokenElement函数使用参数
+ */
+export type brokenElementDataType = Pick<dataType, 'src' | 'intro'>;
+
 export type overlayRenderProps = {
   // 图片列表
   images: dataType[];
@@ -57,7 +62,7 @@ export interface IPhotoProviderBase {
   // 自定义 loading
   loadingElement?: JSX.Element;
   // 加载失败 Element
-  brokenElement?: JSX.Element;
+  brokenElement?: JSX.Element | ((photoProps: brokenElementDataType) => JSX.Element);
 }
 
 export type ReachMoveFunction = (reachState: ReachTypeEnum, clientX: number, clientY: number, scale?: number) => void;
