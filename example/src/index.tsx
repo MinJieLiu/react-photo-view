@@ -121,9 +121,11 @@ export const WithToolbar = () => {
   }
   return (
     <PhotoProvider
-      toolbarRender={({ rotate, onRotate }) => {
+      toolbarRender={({ rotate, onRotate, onScale, scale }) => {
         return (
           <>
+            {/* <div onClick={() => onScale(scale + 0.1)}>放大</div>
+            <div onClick={() => onScale(scale - 0.1)}>缩小</div> */}
             <svg
               className="PhotoView-PhotoSlider__toolbarIcon"
               onClick={() => onRotate(rotate + 90)}
@@ -152,8 +154,8 @@ export const WithToolbar = () => {
   );
 };
 
-export function IPhotoProviderForwardProps(props: IPhotoProvider) {}
+export function IPhotoProviderForwardProps(props: IPhotoProvider) { }
 
-export function IPhotoConsumerForwardProps(props: IPhotoConsumer) {}
+export function IPhotoConsumerForwardProps(props: IPhotoConsumer) { }
 
-export function IPhotoSliderForwardProps(props: IPhotoSliderProps) {}
+export function IPhotoSliderForwardProps(props: IPhotoSliderProps) { }

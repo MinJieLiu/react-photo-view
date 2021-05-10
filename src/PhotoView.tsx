@@ -41,6 +41,8 @@ export interface IPhotoViewProps {
   brokenElement?: JSX.Element | ((photoProps: brokenElementDataType) => JSX.Element);
   // 旋转状态
   rotate: number;
+  // 放大缩小
+  scale: number;
 
   // Photo 点击事件
   onPhotoTap: PhotoTapFunction;
@@ -52,6 +54,8 @@ export interface IPhotoViewProps {
   onReachUp: ReachFunction;
   // Resize 事件
   onPhotoResize?: () => void;
+  // 滚轮事件
+  onWheel?: (scale: number) => void;
   // 是否在当前操作中
   isActive: boolean;
 
@@ -135,6 +139,14 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
       window.addEventListener('mouseup', this.handleMouseUp);
     }
     window.addEventListener('resize', this.handleResize);
+  }
+
+  static getDerivedStateFromProps(nextProps: IPhotoViewProps, prevState: typeof initialState) {
+    let newState = {};
+    if ('scale' in nextProps && nextProps.scale !== prevState.scale) {
+      newState = { scale: nextProps.scale }
+    }
+    return newState;
   }
 
   componentDidUpdate(prevProps: Readonly<IPhotoViewProps>) {
@@ -223,8 +235,8 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
         this.initialTouchState = !isStillX
           ? TouchStartEnum.X
           : newClientY > clientY
-          ? TouchStartEnum.YPull
-          : TouchStartEnum.YPush;
+            ? TouchStartEnum.YPull
+            : TouchStartEnum.YPush;
       }
 
       let offsetX = newClientX - lastMoveClientX;
@@ -307,6 +319,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
 
   handleWheel = e => {
     const { clientX, clientY, deltaY } = e;
+    const { onWheel } = this.props;
     const { width, naturalWidth, reachState } = this.state;
     if (reachState !== ReachTypeEnum.Normal) {
       return;
@@ -315,7 +328,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
       const endScale = scale - deltaY / 100 / 2;
       // 限制最大倍数和最小倍数
       const toScale = Math.max(Math.min(endScale, Math.max(maxScale, naturalWidth / width)), minScale);
-
+      onWheel?.(toScale);
       const position = getPositionOnMoveOrScale({
         x,
         y,
@@ -403,20 +416,20 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
           reachState: ReachTypeEnum.Normal, // 重置触发状态
           ...(hasMove
             ? slideToPosition({
-                x,
-                y,
-                lastX,
-                lastY,
-                width,
-                height,
-                scale,
-                rotate,
-                touchedTime,
-              })
+              x,
+              y,
+              lastX,
+              lastY,
+              width,
+              height,
+              scale,
+              rotate,
+              touchedTime,
+            })
             : {
-                x,
-                y,
-              }),
+              x,
+              y,
+            }),
         },
         () => {
           if (onReachUp) {
