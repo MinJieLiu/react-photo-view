@@ -28,11 +28,11 @@
     "prepare": "npm run build"
   },
   "dependencies": {
+    "classnames": "^2.2.0",
     "lodash.debounce": "^4.0.8",
     "lodash.uniqueid": "^4.0.1"
   },
   "peerDependencies": {
-    "classnames": "^2.2.0",
     "react": "^16.8.0",
     "react-dom": "^16.8.0"
   },
