@@ -8,7 +8,7 @@ import ArrowLeft from './components/ArrowLeft';
 import ArrowRight from './components/ArrowRight';
 import isTouchDevice from './utils/isTouchDevice';
 import { dataType, IPhotoProviderBase, overlayRenderProps, ReachTypeEnum, ShowAnimateEnum } from './types';
-import { defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
+import { defaultOpacity, horizontalOffset, maxMoveOffset, maxScale, minScale } from './variables';
 import './PhotoSlider.less';
 
 export interface IPhotoSliderProps extends IPhotoProviderBase {
@@ -48,6 +48,8 @@ type PhotoSliderState = {
   canPullClose: boolean;
   // 旋转集合
   rotatingMap: Map<number, number>;
+  // 放大缩小集合
+  scaleMap: Map<number, number>;
 };
 
 export default class PhotoSlider extends React.Component<IPhotoSliderProps, PhotoSliderState> {
@@ -87,6 +89,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
       canPullClose: true,
 
       rotatingMap: new Map<number, number>(),
+      scaleMap: new Map<number, number>(),
     };
   }
 
@@ -151,6 +154,22 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
       rotatingMap,
     });
   };
+
+  handleScale = (scale: number) => {
+    const { photoIndex, scaleMap } = this.state;
+    scaleMap.set(photoIndex, Math.max(minScale, Math.min(maxScale, scale)));
+    this.setState({
+      scaleMap,
+    });
+  };
+
+  onWheel = (scale: number) => {
+    const { photoIndex, scaleMap } = this.state;
+    scaleMap.set(photoIndex, scale);
+    this.setState({
+      scaleMap,
+    });
+  }
 
   handleKeyDown = (evt: KeyboardEvent) => {
     const { visible } = this.props;
@@ -322,6 +341,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
       lastBackdropOpacity,
       overlayVisible,
       rotatingMap,
+      scaleMap,
       shouldTransition,
     } = this.state;
     const imageLength = images.length;
@@ -347,6 +367,8 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
               onIndexChange: this.handleIndexChange,
               overlayVisible: currentOverlayVisible,
               onRotate: this.handleRotate,
+              onScale: this.handleScale,
+              scale: scaleMap.get(photoIndex) || 1,
               rotate: rotatingMap.get(photoIndex) || 0,
             };
             return (
@@ -419,6 +441,8 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
                         showAnimateType={showAnimateType}
                         originRect={originRect}
                         rotate={rotatingMap.get(realIndex) || 0}
+                        scale={scaleMap.get(realIndex) || 1}
+                        onWheel={this.onWheel}
                       />
                     );
                   })}

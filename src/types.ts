@@ -36,6 +36,10 @@ export type overlayRenderProps = {
   rotate: number;
   // 旋转事件
   onRotate: (rotate: number) => void;
+  // 放大缩小
+  scale: number;
+  // 放大缩小事件
+  onScale: (scale: number) => void;
 };
 
 export interface IPhotoProviderBase {
