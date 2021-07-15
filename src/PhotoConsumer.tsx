@@ -6,7 +6,7 @@ import PhotoContext, { PhotoContextType } from './photo-context';
 export interface IPhotoConsumer {
   src: string;
   intro?: React.ReactNode;
-  children?: React.ReactElement<any>;
+  children?: React.ReactElement;
 }
 
 const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {

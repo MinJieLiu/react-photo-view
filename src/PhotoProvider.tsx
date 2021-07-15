@@ -30,15 +30,15 @@ export default class PhotoProvider extends React.Component<IPhotoProvider, Photo
     };
   }
 
-  handleAddItem: addItemType = imageItem => {
-    this.setState(prev => ({
+  handleAddItem: addItemType = (imageItem) => {
+    this.setState((prev) => ({
       images: prev.images.concat(imageItem),
     }));
   };
 
   handleRemoveItem = (key: string) => {
     this.setState(({ images, index }) => {
-      const nextImages = images.filter(item => item.key !== key);
+      const nextImages = images.filter((item) => item.key !== key);
       const nextEndIndex = nextImages.length - 1;
       return {
         images: nextImages,
@@ -51,7 +51,7 @@ export default class PhotoProvider extends React.Component<IPhotoProvider, Photo
     const { images } = this.state;
     this.setState({
       visible: true,
-      index: images.findIndex(item => item.key === key),
+      index: images.findIndex((item) => item.key === key),
     });
   };
 

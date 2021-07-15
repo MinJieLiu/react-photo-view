@@ -144,7 +144,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   static getDerivedStateFromProps(nextProps: IPhotoViewProps, prevState: typeof initialState) {
     let newState = {};
     if ('scale' in nextProps && nextProps.scale !== prevState.scale) {
-      newState = { scale: nextProps.scale }
+      newState = { scale: nextProps.scale };
     }
     return newState;
   }
@@ -165,7 +165,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
     window.removeEventListener('resize', this.handleResize);
   }
 
-  handleImageLoad = imageParams => {
+  handleImageLoad = (imageParams) => {
     this.setState(imageParams);
   };
 
@@ -181,7 +181,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   };
 
   handleStart = (clientX: number, clientY: number, touchLength: number = 0) => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       touched: true,
       clientX,
       clientY,
@@ -235,8 +235,8 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
         this.initialTouchState = !isStillX
           ? TouchStartEnum.X
           : newClientY > clientY
-            ? TouchStartEnum.YPull
-            : TouchStartEnum.YPush;
+          ? TouchStartEnum.YPull
+          : TouchStartEnum.YPush;
       }
 
       let offsetX = newClientX - lastMoveClientX;
@@ -317,7 +317,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
     });
   };
 
-  handleWheel = e => {
+  handleWheel = (e) => {
     const { clientX, clientY, deltaY } = e;
     const { onWheel } = this.props;
     const { width, naturalWidth, reachState } = this.state;
@@ -347,7 +347,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   };
 
   handleMaskStart = (clientX: number, clientY: number) => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       maskTouched: true,
       clientX,
       clientY,
@@ -356,32 +356,32 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
     }));
   };
 
-  handleMaskMouseDown = e => {
+  handleMaskMouseDown = (e) => {
     this.handleMaskStart(e.clientX, e.clientY);
   };
 
-  handleMaskTouchStart = e => {
+  handleMaskTouchStart = (e) => {
     const { clientX, clientY } = e.touches[0];
     this.handleMaskStart(clientX, clientY);
   };
 
-  handleTouchStart = e => {
+  handleTouchStart = (e) => {
     const { clientX, clientY, touchLength } = getMultipleTouchPosition(e);
     this.handleStart(clientX, clientY, touchLength);
   };
 
-  handleMouseDown = e => {
+  handleMouseDown = (e) => {
     e.preventDefault();
     this.handleStart(e.clientX, e.clientY, 0);
   };
 
-  handleTouchMove = e => {
+  handleTouchMove = (e) => {
     e.preventDefault();
     const { clientX, clientY, touchLength } = getMultipleTouchPosition(e);
     this.onMove(clientX, clientY, touchLength);
   };
 
-  handleMouseMove = e => {
+  handleMouseMove = (e) => {
     e.preventDefault();
     this.onMove(e.clientX, e.clientY);
   };
@@ -416,20 +416,20 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
           reachState: ReachTypeEnum.Normal, // 重置触发状态
           ...(hasMove
             ? slideToPosition({
-              x,
-              y,
-              lastX,
-              lastY,
-              width,
-              height,
-              scale,
-              rotate,
-              touchedTime,
-            })
+                x,
+                y,
+                lastX,
+                lastY,
+                width,
+                height,
+                scale,
+                rotate,
+                touchedTime,
+              })
             : {
-              x,
-              y,
-            }),
+                x,
+                y,
+              }),
         },
         () => {
           if (onReachUp) {
@@ -448,12 +448,12 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
     }
   };
 
-  handleTouchEnd = e => {
+  handleTouchEnd = (e) => {
     const { clientX, clientY } = e.changedTouches[0];
     this.handleUp(clientX, clientY);
   };
 
-  handleMouseUp = e => {
+  handleMouseUp = (e) => {
     const { clientX, clientY } = e;
     this.handleUp(clientX, clientY);
   };

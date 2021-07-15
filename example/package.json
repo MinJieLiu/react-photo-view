@@ -9,7 +9,7 @@
     "styled-components": "^4.4.1"
   },
   "scripts": {
-    "start": "start-storybook -p 6006 -s public",
+    "dev": "start-storybook -p 6006 -s public",
     "build": "build-storybook -s public",
     "deploy": "storybook-to-ghpages -s public"
   },
@@ -29,13 +29,12 @@
     ]
   },
   "devDependencies": {
-    "@storybook/addon-actions": "^5.3.3",
-    "@storybook/addon-docs": "^5.3.3",
-    "@storybook/addon-links": "^5.3.3",
-    "@storybook/addons": "^5.3.3",
-    "@storybook/preset-create-react-app": "^1.5.1",
-    "@storybook/react": "^5.3.3",
-    "@storybook/storybook-deployer": "^2.8.1",
-    "typescript": "3.7.2"
+    "@storybook/addon-actions": "^6.3.4",
+    "@storybook/addon-docs": "^6.3.4",
+    "@storybook/addon-links": "^6.3.4",
+    "@storybook/addons": "^6.3.4",
+    "@storybook/preset-create-react-app": "^3.2.0",
+    "@storybook/react": "^6.3.4",
+    "@storybook/storybook-deployer": "^2.8.10"
   }
 }

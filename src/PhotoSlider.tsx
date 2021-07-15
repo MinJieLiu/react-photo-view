@@ -122,7 +122,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
     if (photoClosable) {
       this.handleClose();
     } else {
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         overlayVisible: !prevState.overlayVisible,
       }));
     }
@@ -169,7 +169,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
     this.setState({
       scaleMap,
     });
-  }
+  };
 
   handleKeyDown = (evt: KeyboardEvent) => {
     const { visible } = this.props;
@@ -209,7 +209,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
     });
   };
 
-  handleReachHorizontalMove = clientX => {
+  handleReachHorizontalMove = (clientX) => {
     const { innerWidth } = window;
     const { images } = this.props;
     this.setState(({ lastClientX, translateX, photoIndex }) => {
@@ -382,7 +382,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
                 )}
                 role="dialog"
                 id="PhotoView_Slider"
-                onClick={e => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
               >
                 <div
                   className={classNames('PhotoView-PhotoSlider__Backdrop', maskClassName, {

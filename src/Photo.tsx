@@ -20,7 +20,7 @@ export interface IPhotoProps extends React.HTMLAttributes<any> {
   brokenElement?: JSX.Element | ((photoProps: brokenElementDataType) => JSX.Element);
 }
 
-const Photo: React.FC<IPhotoProps> = props => {
+const Photo: React.FC<IPhotoProps> = (props) => {
   const {
     src,
     intro,
