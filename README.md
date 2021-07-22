@@ -84,6 +84,10 @@ function ImageView() {
 | imageClassName | string                            | 否   | 图片 className             |
 | loadingElement | JSX.Element                       | 否   | 自定义 loading             |
 | brokenElement  | JSX.Element &#124; ((photoProps: brokenElementDataType) => JSX.Element)                       | 否   | 加载失败 Element           |
+| afterIndexChange | (index, state) => void;         | 否   | 索引改变回调                |
+| afterShow | (index, state) => void;                | 否   | 滑块显示回调                |
+| afterClose | (index, state) => void;               | 否   | 滑块关闭回调                |
+
 
 #### PhotoConsumer
 
