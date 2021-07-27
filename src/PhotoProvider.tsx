@@ -5,9 +5,8 @@ import { dataType, IPhotoProviderBase } from './types';
 
 export interface IPhotoProvider extends IPhotoProviderBase {
   children: React.ReactNode;
-  afterIndexChange: (arg0: number, arg1: PhotoProviderState) => void;
-  afterShow: (arg0: number, arg1: PhotoProviderState) => void;
-  afterClose: (arg0: number, arg1: PhotoProviderState) => void;
+  onIndexChange?: (index: number, state: PhotoProviderState) => void;
+  onVisibleChange?: (visible: boolean, index: number, state: PhotoProviderState) => void;
 }
 
 type PhotoProviderState = {
@@ -57,8 +56,8 @@ export default class PhotoProvider extends React.Component<IPhotoProvider, Photo
       index: images.findIndex((item) => item.key === key),
     });
 
-    if (this.props.afterShow && typeof this.props.afterShow === 'function') {
-      this.props.afterShow(this.state.index, this.state);
+    if (this.props.onVisibleChange && typeof this.props.onVisibleChange === 'function') {
+      this.props.onVisibleChange(this.state.visible, this.state.index, this.state);
     }
   };
 
@@ -67,8 +66,8 @@ export default class PhotoProvider extends React.Component<IPhotoProvider, Photo
       visible: false,
     });
 
-    if (this.props.afterClose && typeof this.props.afterClose === 'function') {
-      this.props.afterClose(this.state.index, this.state);
+    if (this.props.onVisibleChange && typeof this.props.onVisibleChange === 'function') {
+      this.props.onVisibleChange(this.state.visible, this.state.index, this.state);
     }
   };
 
@@ -77,13 +76,13 @@ export default class PhotoProvider extends React.Component<IPhotoProvider, Photo
       index,
     });
 
-    if (this.props.afterIndexChange && typeof this.props.afterIndexChange === 'function') {
-      this.props.afterIndexChange(this.state.index, this.state);
+    if (this.props.onIndexChange && typeof this.props.onIndexChange === 'function') {
+      this.props.onIndexChange(this.state.index, this.state);
     }
   };
 
   render() {
-    const { children, ...restProps } = this.props;
+    const { children, onIndexChange, onVisibleChange, ...restProps } = this.props;
     const { images, visible, index } = this.state;
 
     return (
