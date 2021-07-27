@@ -54,7 +54,7 @@ function ImageView() {
     <div>
       <Button onClick={() => setVisible(true)}>打开</Button>
       <PhotoSlider
-        images={photoImages.map(item => ({ src: item }))}
+        images={photoImages.map((item) => ({ src: item }))}
         visible={visible}
         onClose={() => setVisible(false)}
         index={photoIndex}
@@ -69,21 +69,23 @@ function ImageView() {
 
 #### PhotoProvider
 
-| 名称           | 类型                              | 必选 | 描述                       |
-| :------------- | :-------------------------------- | :--- | :------------------------- |
-| children       | React.ReactNode                   | 是   |                            |
-| maskClosable   | boolean                           | 否   | 背景可点击关闭，默认 true  |
-| photoClosable  | boolean                           | 否   | 图片点击可关闭，默认 false |
-| bannerVisible  | boolean                           | 否   | 导航条 visible，默认 true  |
-| introVisible   | boolean                           | 否   | 简介 visible，默认 true    |
-| overlayRender  | (overlayProps) => React.ReactNode | 否   | 自定义渲染                 |
-| toolbarRender  | (overlayProps) => React.ReactNode | 否   | 工具栏渲染                 |
-| className      | string                            | 否   | className                  |
-| maskClassName  | string                            | 否   | 遮罩 className             |
-| viewClassName  | string                            | 否   | 图片容器 className         |
-| imageClassName | string                            | 否   | 图片 className             |
-| loadingElement | JSX.Element                       | 否   | 自定义 loading             |
-| brokenElement  | JSX.Element &#124; ((photoProps: brokenElementDataType) => JSX.Element)                       | 否   | 加载失败 Element           |
+| 名称            | 类型                                                                    | 必选 | 描述                       |
+| :-------------- | :---------------------------------------------------------------------- | :--- | :------------------------- |
+| children        | React.ReactNode                                                         | 是   |                            |
+| maskClosable    | boolean                                                                 | 否   | 背景可点击关闭，默认 true  |
+| photoClosable   | boolean                                                                 | 否   | 图片点击可关闭，默认 false |
+| bannerVisible   | boolean                                                                 | 否   | 导航条 visible，默认 true  |
+| introVisible    | boolean                                                                 | 否   | 简介 visible，默认 true    |
+| overlayRender   | (overlayProps) => React.ReactNode                                       | 否   | 自定义渲染                 |
+| toolbarRender   | (overlayProps) => React.ReactNode                                       | 否   | 工具栏渲染                 |
+| className       | string                                                                  | 否   | className                  |
+| maskClassName   | string                                                                  | 否   | 遮罩 className             |
+| viewClassName   | string                                                                  | 否   | 图片容器 className         |
+| imageClassName  | string                                                                  | 否   | 图片 className             |
+| loadingElement  | JSX.Element                                                             | 否   | 自定义 loading             |
+| brokenElement   | JSX.Element &#124; ((photoProps: brokenElementDataType) => JSX.Element) | 否   | 加载失败 Element           |
+| onIndexChange   | (index:number, state: PhotoProviderState) => void;                      | 否   | 索引改变回调               |
+| onVisibleChange | (visible: boolean, index: number, state: PhotoProviderState) => void;   | 否   | 可见性更改回调             |
 
 #### PhotoConsumer
 

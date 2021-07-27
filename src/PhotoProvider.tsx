@@ -5,6 +5,8 @@ import { dataType, IPhotoProviderBase } from './types';
 
 export interface IPhotoProvider extends IPhotoProviderBase {
   children: React.ReactNode;
+  onIndexChange?: (index: number, state: PhotoProviderState) => void;
+  onVisibleChange?: (visible: boolean, index: number, state: PhotoProviderState) => void;
 }
 
 type PhotoProviderState = {
@@ -53,22 +55,34 @@ export default class PhotoProvider extends React.Component<IPhotoProvider, Photo
       visible: true,
       index: images.findIndex((item) => item.key === key),
     });
+
+    if (this.props.onVisibleChange && typeof this.props.onVisibleChange === 'function') {
+      this.props.onVisibleChange(this.state.visible, this.state.index, this.state);
+    }
   };
 
   handleClose = () => {
     this.setState({
       visible: false,
     });
+
+    if (this.props.onVisibleChange && typeof this.props.onVisibleChange === 'function') {
+      this.props.onVisibleChange(this.state.visible, this.state.index, this.state);
+    }
   };
 
   handleIndexChange = (index: number) => {
     this.setState({
       index,
     });
+
+    if (this.props.onIndexChange && typeof this.props.onIndexChange === 'function') {
+      this.props.onIndexChange(this.state.index, this.state);
+    }
   };
 
   render() {
-    const { children, ...restProps } = this.props;
+    const { children, onIndexChange, onVisibleChange, ...restProps } = this.props;
     const { images, visible, index } = this.state;
 
     return (
