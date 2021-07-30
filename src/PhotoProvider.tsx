@@ -57,7 +57,7 @@ export default class PhotoProvider extends React.Component<IPhotoProvider, Photo
     });
 
     if (this.props.onVisibleChange && typeof this.props.onVisibleChange === 'function') {
-      this.props.onVisibleChange(this.state.visible, this.state.index, this.state);
+      this.props.onVisibleChange(true, this.state.index, this.state);
     }
   };
 
@@ -67,7 +67,7 @@ export default class PhotoProvider extends React.Component<IPhotoProvider, Photo
     });
 
     if (this.props.onVisibleChange && typeof this.props.onVisibleChange === 'function') {
-      this.props.onVisibleChange(this.state.visible, this.state.index, this.state);
+      this.props.onVisibleChange(false, this.state.index, this.state);
     }
   };
 
@@ -77,7 +77,7 @@ export default class PhotoProvider extends React.Component<IPhotoProvider, Photo
     });
 
     if (this.props.onIndexChange && typeof this.props.onIndexChange === 'function') {
-      this.props.onIndexChange(this.state.index, this.state);
+      this.props.onIndexChange(index, this.state);
     }
   };
 
