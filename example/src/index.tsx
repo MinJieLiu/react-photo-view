@@ -12,6 +12,7 @@ import photo5 from './5.jpg';
 import photo6 from './6.png';
 import photo7 from './7.jpg';
 import photo8 from './8.jpg';
+import dog from './dog.png';
 
 export const photoImages = [photo1, photo2, photo3, photo4, photo5, photo6, photo7, photo8];
 
@@ -109,6 +110,8 @@ const FullScreenIcon = (props: React.HTMLAttributes<any>) => {
 };
 
 export const WithToolbar = () => {
+  const [images, setImages] = React.useState(photoImages);
+
   function toggleFullScreen() {
     if (document.fullscreenElement) {
       document.exitFullscreen();
@@ -121,7 +124,8 @@ export const WithToolbar = () => {
   }
   return (
     <PhotoProvider
-      toolbarRender={({ rotate, onRotate, onScale, scale }) => {
+      pullClosable={false}
+      toolbarRender={({ rotate, onRotate, onScale, scale, index }) => {
         return (
           <>
             <svg
@@ -155,12 +159,28 @@ export const WithToolbar = () => {
               <path d="M565.5 202.5l75-75v225h-225l103.5-103.5c-34.5-34.5-82.5-57-135-57-106.5 0-192 85.5-192 192s85.5 192 192 192c84 0 156-52.5 181.5-127.5h66c-28.5 111-127.5 192-247.5 192-141 0-255-115.5-255-256.5s114-256.5 255-256.5c70.5 0 135 28.5 181.5 75z" />
             </svg>
             {document.fullscreenEnabled && <FullScreenIcon onClick={toggleFullScreen} />}
+            <svg
+              className="PhotoView-PhotoSlider__toolbarIcon"
+              onClick={() => {
+                setImages((prev) => {
+                  prev.splice(index, 1, dog);
+                  return [...prev];
+                });
+              }}
+              xmlns="http://www.w3.org/2000/svg"
+              width="44"
+              height="44"
+              fill="white"
+              viewBox="0 0 768 768"
+            >
+              <path d="M384 559.5c-75 0-138-45-163.5-111h327c-25.5 66-88.5 111-163.5 111zM271.5 352.5c-27 0-48-21-48-48s21-48 48-48 48 21 48 48-21 48-48 48zM496.5 352.5c-27 0-48-21-48-48s21-48 48-48 48 21 48 48-21 48-48 48zM384 640.5c141 0 256.5-115.5 256.5-256.5s-115.5-256.5-256.5-256.5-256.5 115.5-256.5 256.5 115.5 256.5 256.5 256.5zM384 64.5c177 0 319.5 142.5 319.5 319.5s-142.5 319.5-319.5 319.5-319.5-142.5-319.5-319.5 142.5-319.5 319.5-319.5z" />
+            </svg>
           </>
         );
       }}
     >
       <ImageList>
-        {photoImages.map((item, index) => (
+        {images.map((item, index) => (
           <PhotoConsumer key={index} src={item} intro={item}>
             <ViewBox viewImage={item} />
           </PhotoConsumer>

@@ -142,9 +142,9 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   }
 
   static getDerivedStateFromProps(nextProps: IPhotoViewProps, prevState: typeof initialState) {
-    let newState = {};
+    let newState = {} as Partial<typeof initialState>;
     if ('scale' in nextProps && nextProps.scale !== prevState.scale) {
-      newState = { scale: nextProps.scale };
+      newState.scale = nextProps.scale;
     }
     return newState;
   }
@@ -195,7 +195,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   };
 
   onMove = (newClientX: number, newClientY: number, touchLength: number = 0) => {
-    const { onReachMove, isActive, rotate } = this.props;
+    const { onReachMove, isActive, rotate, onWheel } = this.props;
     const {
       naturalWidth,
       x,
@@ -270,6 +270,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
         const endScale = scale + ((touchLength - lastTouchLength) / 100 / 2) * scale;
         // 限制最大倍数和最小倍数
         const toScale = Math.max(Math.min(endScale, Math.max(maxScale, naturalWidth / width)), minScale - scaleBuffer);
+        onWheel?.(toScale);
         this.setState({
           lastTouchLength: touchLength,
           reachState: currentReachState,
@@ -296,19 +297,22 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   };
 
   onDoubleTap: TapFuncType<number> = (clientX, clientY) => {
+    const { onWheel } = this.props;
     const { width, naturalWidth, x, y, scale, reachState } = this.state;
     if (reachState !== ReachTypeEnum.Normal) {
       return;
     }
+    // 若图片足够大，则放大适应的倍数
+    const toScale = scale !== 1 ? 1 : Math.max(2, naturalWidth / width);
     const position = getPositionOnMoveOrScale({
       x,
       y,
       clientX,
       clientY,
       fromScale: scale,
-      // 若图片足够大，则放大适应的倍数
-      toScale: scale !== 1 ? 1 : Math.max(2, naturalWidth / width),
+      toScale,
     });
+    onWheel?.(toScale);
     this.setState({
       clientX,
       clientY,
@@ -328,7 +332,6 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
       const endScale = scale - deltaY / 100 / 2;
       // 限制最大倍数和最小倍数
       const toScale = Math.max(Math.min(endScale, Math.max(maxScale, naturalWidth / width)), minScale);
-      onWheel?.(toScale);
       const position = getPositionOnMoveOrScale({
         x,
         y,
@@ -337,6 +340,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
         fromScale: scale,
         toScale,
       });
+      onWheel?.(toScale);
       return {
         clientX,
         clientY,

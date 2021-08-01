@@ -22,16 +22,19 @@ const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
   const photoTriggerRef = React.useRef<HTMLElement | null>(null);
 
   React.useEffect(() => {
-    photoContext.addItem({
+    return () => {
+      photoContext.removeItem(key);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    photoContext.updateItem({
       key,
       src,
       originRef: photoTriggerRef.current,
       intro,
     });
-    return () => {
-      photoContext.removeItem(key);
-    };
-  }, []);
+  }, [src, intro])
 
   function handleTouchStart(e) {
     const { clientX, clientY } = e.touches[0];

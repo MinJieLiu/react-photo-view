@@ -43,10 +43,12 @@ export type overlayRenderProps = {
 };
 
 export interface IPhotoProviderBase {
-  // 背景可点击关闭，默认 true
-  maskClosable?: boolean;
   // 图片点击可关闭，默认 false
   photoClosable?: boolean;
+  // 背景可点击关闭，默认 true
+  maskClosable?: boolean;
+  // 下拉是否可关闭，默认 true
+  pullClosable?: boolean;
   // 导航条 visible，默认 true
   bannerVisible?: boolean;
   // 简介 visible，默认 true

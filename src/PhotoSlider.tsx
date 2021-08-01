@@ -56,8 +56,9 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
   static displayName = 'PhotoSlider';
 
   static defaultProps = {
-    maskClosable: true,
     photoClosable: false,
+    maskClosable: true,
+    pullClosable: true,
     bannerVisible: true,
     introVisible: true,
   };
@@ -281,7 +282,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
   };
 
   handleReachUp = (clientX: number, clientY: number) => {
-    const { images } = this.props;
+    const { images, pullClosable } = this.props;
     const { lastClientX = clientX, lastClientY = clientY, photoIndex, overlayVisible, canPullClose } = this.state;
 
     const offsetClientX = clientX - lastClientX;
@@ -303,7 +304,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
     let currentTranslateX = -singlePageWidth * photoIndex;
     let currentPhotoIndex = photoIndex;
 
-    if (Math.abs(offsetClientY) > window.innerHeight * 0.14 && canPullClose) {
+    if (Math.abs(offsetClientY) > window.innerHeight * 0.14 && canPullClose && pullClosable) {
       willClose = true;
       this.handleClose();
     }
@@ -416,7 +417,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
                     const realIndex = photoIndex === 0 ? photoIndex + index : photoIndex - 1 + index;
                     return (
                       <PhotoView
-                        key={item.key || realIndex}
+                        key={item.key ? item.key + item.src : realIndex}
                         src={item.src}
                         intro={item.intro}
                         onReachMove={this.handleReachMove}

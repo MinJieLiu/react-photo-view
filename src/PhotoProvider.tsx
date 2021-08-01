@@ -1,5 +1,5 @@
 import React from 'react';
-import PhotoContext, { onShowType, addItemType, removeItemType } from './photo-context';
+import PhotoContext, { onShowType, updateItemType, removeItemType } from './photo-context';
 import PhotoSlider from './PhotoSlider';
 import { dataType, IPhotoProviderBase } from './types';
 
@@ -14,7 +14,7 @@ type PhotoProviderState = {
   visible: boolean;
   index: number;
   onShow: onShowType;
-  addItem: addItemType;
+  updateItem: updateItemType;
   removeItem: removeItemType;
 };
 
@@ -26,16 +26,26 @@ export default class PhotoProvider extends React.Component<IPhotoProvider, Photo
       images: [],
       visible: false,
       index: 0,
-      addItem: this.handleAddItem,
+      updateItem: this.handleUpdateItem,
       removeItem: this.handleRemoveItem,
       onShow: this.handleShow,
     };
   }
 
-  handleAddItem: addItemType = (imageItem) => {
-    this.setState((prev) => ({
-      images: prev.images.concat(imageItem),
-    }));
+  handleUpdateItem: updateItemType = (imageItem) => {
+    this.setState((prev) => {
+      const { images } = prev;
+      const index = images.findIndex((n) => n.key === imageItem.key);
+      if (index > -1) {
+        images.splice(index, 1, imageItem);
+        return {
+          images: [...images],
+        };
+      }
+      return {
+        images: images.concat(imageItem),
+      };
+    });
   };
 
   handleRemoveItem = (key: string) => {
