@@ -163,8 +163,9 @@ export const WithToolbar = () => {
               className="PhotoView-PhotoSlider__toolbarIcon"
               onClick={() => {
                 setImages((prev) => {
-                  prev.splice(index, 1, dog);
-                  return [...prev];
+                  const result = [...prev];
+                  result.splice(index, 1, dog);
+                  return result;
                 });
               }}
               xmlns="http://www.w3.org/2000/svg"

@@ -11,8 +11,8 @@ export interface IPhotoProps extends React.HTMLAttributes<any> {
   intro?: React.ReactNode;
   loaded: boolean;
   broken: boolean;
-  width: number;
-  height: number;
+  naturalWidth: number;
+  naturalHeight: number;
   rotate: number;
   className?: string;
   onImageLoad: (PhotoParams, callback?: Function) => void;
@@ -26,8 +26,8 @@ const Photo: React.FC<IPhotoProps> = (props) => {
     intro,
     loaded,
     broken,
-    width,
-    height,
+    naturalWidth,
+    naturalHeight,
     rotate,
     className,
     onImageLoad,
@@ -71,8 +71,8 @@ const Photo: React.FC<IPhotoProps> = (props) => {
         <img
           className={classNames('PhotoView__Photo', className)}
           src={src}
-          width={width}
-          height={height}
+          width={naturalWidth}
+          height={naturalHeight}
           alt=""
           {...restProps}
         />

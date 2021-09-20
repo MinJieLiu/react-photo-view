@@ -393,7 +393,7 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
   handleUp = (newClientX: number, newClientY: number) => {
     // 重置响应状态
     this.initialTouchState = TouchStartEnum.Normal;
-    const { onReachUp, onPhotoTap, onMaskTap, isActive, rotate } = this.props;
+    const { onReachUp, onPhotoTap, onMaskTap, isActive, rotate, onWheel } = this.props;
     const {
       width,
       height,
@@ -411,12 +411,16 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
     } = this.state;
     if ((touched || maskTouched) && isActive) {
       const hasMove = clientX !== newClientX || clientY !== newClientY;
+      const targetScale = Math.max(Math.min(scale, Math.max(maxScale, naturalWidth / width)), minScale);
+      if (targetScale !== scale) {
+        onWheel?.(targetScale);
+      }
       this.setState(
         {
           touched: false,
           maskTouched: false,
           // 限制缩放
-          scale: Math.max(Math.min(scale, Math.max(maxScale, naturalWidth / width)), minScale),
+          scale: targetScale,
           reachState: ReachTypeEnum.Normal, // 重置触发状态
           ...(hasMove
             ? slideToPosition({
@@ -476,9 +480,9 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
       showAnimateType,
       originRect,
     } = this.props;
-    const { width, height, loaded, x, y, scale, touched, broken } = this.state;
+    const { width, height, naturalWidth, naturalHeight, loaded, x, y, scale, touched, broken } = this.state;
 
-    const transform = `translate3d(${x}px, ${y}px, 0) scale(${scale}) rotate(${rotate}deg)`;
+    const transform = `translate3d(${x}px, ${y}px, 0) scale(${(width / naturalWidth) * scale}) rotate(${rotate}deg)`;
 
     return (
       <div className={classNames('PhotoView__PhotoWrap', viewClassName)} style={style}>
@@ -493,15 +497,17 @@ export default class PhotoView extends React.Component<IPhotoViewProps, typeof i
             PhotoView__animateOut: loaded && showAnimateType === ShowAnimateEnum.Out,
           })}
           style={{
-            transformOrigin: loaded ? getAnimateOrigin(originRect, 0, 0) : undefined,
+            transformOrigin: loaded ? getAnimateOrigin(originRect, width, height) : undefined,
+            width,
+            height,
           }}
         >
           <Photo
             className={className}
             src={src}
             intro={intro}
-            width={width}
-            height={height}
+            naturalWidth={naturalWidth}
+            naturalHeight={naturalHeight}
             loaded={loaded}
             broken={broken}
             rotate={rotate}

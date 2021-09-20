@@ -60,34 +60,38 @@ export default class PhotoProvider extends React.Component<IPhotoProvider, Photo
   };
 
   handleShow = (key: string) => {
+    const { onVisibleChange } = this.props;
     const { images } = this.state;
+    const index = images.findIndex((item) => item.key === key);
     this.setState({
       visible: true,
-      index: images.findIndex((item) => item.key === key),
+      index,
     });
 
-    if (this.props.onVisibleChange && typeof this.props.onVisibleChange === 'function') {
-      this.props.onVisibleChange(true, this.state.index, this.state);
+    if (typeof onVisibleChange === 'function') {
+      onVisibleChange(true, index, this.state);
     }
   };
 
   handleClose = () => {
+    const { onVisibleChange } = this.props;
     this.setState({
       visible: false,
     });
 
-    if (this.props.onVisibleChange && typeof this.props.onVisibleChange === 'function') {
-      this.props.onVisibleChange(false, this.state.index, this.state);
+    if (typeof onVisibleChange === 'function') {
+      onVisibleChange(false, this.state.index, this.state);
     }
   };
 
   handleIndexChange = (index: number) => {
+    const { onIndexChange } = this.props;
     this.setState({
       index,
     });
 
-    if (this.props.onIndexChange && typeof this.props.onIndexChange === 'function') {
-      this.props.onIndexChange(index, this.state);
+    if (typeof onIndexChange === 'function') {
+      onIndexChange(index, this.state);
     }
   };
 

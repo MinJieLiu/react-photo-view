@@ -304,7 +304,7 @@ export default class PhotoSlider extends React.Component<IPhotoSliderProps, Phot
     let currentTranslateX = -singlePageWidth * photoIndex;
     let currentPhotoIndex = photoIndex;
 
-    if (Math.abs(offsetClientY) > window.innerHeight * 0.14 && canPullClose && pullClosable) {
+    if (Math.abs(offsetClientY) > window.innerHeight * 0.35 && canPullClose && pullClosable) {
       willClose = true;
       this.handleClose();
     }
