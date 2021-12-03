@@ -118,8 +118,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 0;
-  height: 0;
 }
 .PhotoView__PhotoMask {
   position: absolute;
@@ -278,4 +276,4 @@
 }
 
 
-/*# sourceMappingURL=main.bff48912.chunk.css.map*/
+/*# sourceMappingURL=main.7da0ec1e.chunk.css.map*/
