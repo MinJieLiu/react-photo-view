@@ -1,64 +1,61 @@
-import React from 'react';
-import classNames from 'classnames';
+import React, { useEffect } from 'react';
 import Spinner from './components/Spinner';
-import getSuitableImageSize from './utils/getSuitableImageSize';
-import useMountedState from './utils/useMountedState';
+import useMountedRef from './hooks/useMountedRef';
+import type { BrokenElementParams } from './types';
 import './Photo.less';
-import { brokenElementDataType } from './types';
 
-export interface IPhotoProps extends React.HTMLAttributes<any> {
-  src: string;
-  intro?: React.ReactNode;
-  loaded: boolean;
-  broken: boolean;
-  naturalWidth: number;
-  naturalHeight: number;
-  rotate: number;
-  className?: string;
-  onImageLoad: (PhotoParams, callback?: Function) => void;
-  loadingElement?: JSX.Element;
-  brokenElement?: JSX.Element | ((photoProps: brokenElementDataType) => JSX.Element);
+export interface IPhotoLoadedParams {
+  loaded?: boolean;
+  naturalWidth?: number;
+  naturalHeight?: number;
+  broken?: boolean;
 }
 
-const Photo: React.FC<IPhotoProps> = (props) => {
-  const {
-    src,
-    intro,
-    loaded,
-    broken,
-    naturalWidth,
-    naturalHeight,
-    rotate,
-    className,
-    onImageLoad,
-    loadingElement,
-    brokenElement,
-    ...restProps
-  } = props;
+export interface IPhotoProps extends React.HTMLAttributes<HTMLElement> {
+  src: string;
+  loaded: boolean;
+  broken: boolean;
+  width: number;
+  height: number;
+  onPhotoLoad: (params: IPhotoLoadedParams) => void;
+  loadingElement?: JSX.Element;
+  brokenElement?: JSX.Element | ((photoProps: BrokenElementParams) => JSX.Element);
+}
 
-  const isMounted = useMountedState();
+export default function Photo({
+  src,
+  loaded,
+  broken,
+  width,
+  height,
+  className,
+  onPhotoLoad,
+  loadingElement,
+  brokenElement,
+  ...restProps
+}: IPhotoProps) {
+  const mountedRef = useMountedRef();
 
-  function handleImageLoaded(e) {
-    const { naturalWidth, naturalHeight } = e.target;
-    if (isMounted()) {
-      onImageLoad({
+  function handleImageLoaded(e: Event) {
+    const { naturalWidth, naturalHeight } = e.target as HTMLImageElement;
+    if (mountedRef.current) {
+      onPhotoLoad({
         loaded: true,
         naturalWidth,
         naturalHeight,
-        ...getSuitableImageSize(naturalWidth, naturalHeight, rotate),
       });
     }
   }
 
   function handleImageBroken() {
-    if (isMounted()) {
-      onImageLoad({
+    if (mountedRef.current) {
+      onPhotoLoad({
         broken: true,
       });
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     const currPhoto = new Image();
     currPhoto.onload = handleImageLoaded;
     currPhoto.onerror = handleImageBroken;
@@ -66,32 +63,27 @@ const Photo: React.FC<IPhotoProps> = (props) => {
   }, []);
 
   if (src && !broken) {
-    if (loaded) {
-      return (
-        <img
-          className={classNames('PhotoView__Photo', className)}
-          src={src}
-          width={naturalWidth}
-          height={naturalHeight}
-          alt=""
-          {...restProps}
-        />
-      );
-    }
-    return loadingElement || <Spinner />;
+    return loaded ? (
+      <img
+        className={`PhotoView__Photo${className && ` ${className}`}`}
+        src={src}
+        width={width}
+        height={height}
+        alt=""
+        {...restProps}
+      />
+    ) : (
+      loadingElement || <Spinner />
+    );
   }
+
   if (brokenElement) {
-    if (typeof brokenElement === 'function') {
-      return brokenElement({
-        src,
-        intro,
-      });
-    }
-    return brokenElement;
+    return typeof brokenElement === 'function'
+      ? brokenElement({
+          src,
+        })
+      : brokenElement;
   }
+
   return null;
-};
-
-Photo.displayName = 'Photo';
-
-export default Photo;
+}

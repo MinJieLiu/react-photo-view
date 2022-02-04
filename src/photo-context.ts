@@ -1,20 +1,13 @@
 import React from 'react';
-import { dataType } from './types';
+import type { DataType } from './types';
 
-export type onShowType = (key?: string) => void;
-
-export type updateItemType = ({ key, src, originRef, intro }: dataType) => void;
-
-export type removeItemType = (key?: string) => void;
+export type UpdateItemType = ({ key, src, originRef, intro }: DataType) => void;
 
 export interface PhotoContextType {
-  onShow: onShowType;
-  updateItem: updateItemType;
-  removeItem: removeItemType;
+  onShow: (key: number) => void;
+  updateItem: UpdateItemType;
+  removeItem: (key: number) => void;
+  uniqueId: () => number;
 }
 
-export default React.createContext<PhotoContextType>({
-  onShow() {},
-  updateItem() {},
-  removeItem() {},
-});
+export default React.createContext<PhotoContextType>(undefined as unknown as PhotoContextType);

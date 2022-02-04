@@ -27,25 +27,25 @@ export function getClosedEdge(position: number, scale: number, size: number, inn
  * @param initialTouchState
  * @param horizontalCloseEdge
  * @param verticalCloseEdge
- * @param reachState
+ * @param reachPosition
  */
 export function getReachType({
   initialTouchState,
   horizontalCloseEdge,
   verticalCloseEdge,
-  reachState,
+  reachPosition,
 }: {
   initialTouchState: TouchStartEnum;
   horizontalCloseEdge: CloseEdgeEnum;
   verticalCloseEdge: CloseEdgeEnum;
-  reachState: ReachTypeEnum;
+  reachPosition: ReachTypeEnum;
 }): ReachTypeEnum {
-  if ((horizontalCloseEdge > 0 && initialTouchState === TouchStartEnum.X) || reachState === ReachTypeEnum.XReach) {
+  if ((horizontalCloseEdge > 0 && initialTouchState === TouchStartEnum.X) || reachPosition === ReachTypeEnum.XReach) {
     return ReachTypeEnum.XReach;
   } else if (
     (verticalCloseEdge > 0 &&
       (initialTouchState === TouchStartEnum.YPull || initialTouchState === TouchStartEnum.YPush)) ||
-    reachState === ReachTypeEnum.YReach
+    reachPosition === ReachTypeEnum.YReach
   ) {
     return ReachTypeEnum.YReach;
   }

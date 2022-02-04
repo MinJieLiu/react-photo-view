@@ -25,10 +25,7 @@ export default function slideToPosition({
   scale: number;
   rotate: number;
   touchedTime: number;
-}): {
-  x: number;
-  y: number;
-} {
+}) {
   const moveTime = Date.now() - touchedTime;
 
   // 初始速度
@@ -40,12 +37,15 @@ export default function slideToPosition({
   const slideTimeY = Math.abs(speedY / slideAcceleration);
 
   // 计划滑动位置
-  let planX = Math.floor(x + speedX * slideTimeX);
-  let planY = Math.floor(y + speedY * slideTimeY);
+  const planX = Math.floor(x + speedX * slideTimeX);
+  const planY = Math.floor(y + speedY * slideTimeY);
+
+  let currentWidth = width;
+  let currentHeight = height;
 
   // 若图片不是水平则调换属性
   if (rotate % 180 !== 0) {
-    [width, height] = [height, width];
+    [currentWidth, currentHeight] = [height, width];
   }
 
   let currentX = planX;
@@ -53,11 +53,11 @@ export default function slideToPosition({
 
   const { innerWidth, innerHeight } = window;
   // 图片超出的长度
-  const outOffsetX = (width * scale - innerWidth) / 2;
-  const outOffsetY = (height * scale - innerHeight) / 2;
+  const outOffsetX = (currentWidth * scale - innerWidth) / 2;
+  const outOffsetY = (currentHeight * scale - innerHeight) / 2;
 
-  const horizontalCloseEdge = getClosedEdge(planX, scale, width, innerWidth);
-  const verticalCloseEdge = getClosedEdge(planY, scale, height, innerHeight);
+  const horizontalCloseEdge = getClosedEdge(planX, scale, currentWidth, innerWidth);
+  const verticalCloseEdge = getClosedEdge(planY, scale, currentHeight, innerHeight);
 
   // x
   if (horizontalCloseEdge === CloseEdgeEnum.Small) {

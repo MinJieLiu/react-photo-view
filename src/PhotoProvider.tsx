@@ -1,7 +1,8 @@
 import React from 'react';
-import PhotoContext, { onShowType, updateItemType, removeItemType } from './photo-context';
+import type { UpdateItemType } from './photo-context';
+import PhotoContext from './photo-context';
 import PhotoSlider from './PhotoSlider';
-import { dataType, IPhotoProviderBase } from './types';
+import type { DataType, IPhotoProviderBase } from './types';
 
 export interface IPhotoProvider extends IPhotoProviderBase {
   children: React.ReactNode;
@@ -10,16 +11,17 @@ export interface IPhotoProvider extends IPhotoProviderBase {
 }
 
 type PhotoProviderState = {
-  images: dataType[];
+  images: DataType[];
   visible: boolean;
   index: number;
-  onShow: onShowType;
-  updateItem: updateItemType;
-  removeItem: removeItemType;
+  onShow: (index: number) => void;
+  updateItem: UpdateItemType;
+  removeItem: (index: number) => void;
+  uniqueId: () => number;
 };
 
 export default class PhotoProvider extends React.Component<IPhotoProvider, PhotoProviderState> {
-  constructor(props) {
+  constructor(props: IPhotoProvider) {
     super(props);
 
     this.state = {
@@ -29,10 +31,17 @@ export default class PhotoProvider extends React.Component<IPhotoProvider, Photo
       updateItem: this.handleUpdateItem,
       removeItem: this.handleRemoveItem,
       onShow: this.handleShow,
+      uniqueId: this.handleUniqueId,
     };
   }
 
-  handleUpdateItem: updateItemType = (imageItem) => {
+  uniqueId = 0;
+
+  handleUniqueId = () => {
+    return (this.uniqueId += 1);
+  };
+
+  handleUpdateItem: UpdateItemType = (imageItem) => {
     this.setState((prev) => {
       const { images } = prev;
       const index = images.findIndex((n) => n.key === imageItem.key);
@@ -48,7 +57,7 @@ export default class PhotoProvider extends React.Component<IPhotoProvider, Photo
     });
   };
 
-  handleRemoveItem = (key: string) => {
+  handleRemoveItem = (key: number) => {
     this.setState(({ images, index }) => {
       const nextImages = images.filter((item) => item.key !== key);
       const nextEndIndex = nextImages.length - 1;
@@ -59,7 +68,7 @@ export default class PhotoProvider extends React.Component<IPhotoProvider, Photo
     });
   };
 
-  handleShow = (key: string) => {
+  handleShow = (key: number) => {
     const { onVisibleChange } = this.props;
     const { images } = this.state;
     const index = images.findIndex((item) => item.key === key);

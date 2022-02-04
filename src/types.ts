@@ -1,27 +1,29 @@
-import React from 'react';
+import type React from 'react';
 
 /**
- * 图片 item 类型
+ * 图片数据类型
  */
-export type dataType = {
+export interface DataType {
   // 唯一标识
-  key?: string;
+  key: number;
   // 图片地址
   src: string;
   // 原触发 ref
   originRef?: HTMLElement | null;
   // 图片介绍
   intro?: React.ReactNode;
-};
+}
 
 /**
- * brokenElement函数使用参数
+ * brokenElement 函数参数
  */
-export type brokenElementDataType = Pick<dataType, 'src' | 'intro'>;
+export interface BrokenElementParams {
+  src: string;
+}
 
-export type overlayRenderProps = {
+export type OverlayRenderProps = {
   // 图片列表
-  images: dataType[];
+  images: DataType[];
   // 图片当前索引
   index: number;
   // 可见
@@ -54,9 +56,9 @@ export interface IPhotoProviderBase {
   // 简介 visible，默认 true
   introVisible?: boolean;
   // 自定义渲染
-  overlayRender?: (overlayProps: overlayRenderProps) => React.ReactNode;
+  overlayRender?: (overlayProps: OverlayRenderProps) => React.ReactNode;
   // 工具栏渲染
-  toolbarRender?: (overlayProps: overlayRenderProps) => React.ReactNode;
+  toolbarRender?: (overlayProps: OverlayRenderProps) => React.ReactNode;
   // className
   className?: string;
   // 遮罩 className
@@ -68,10 +70,10 @@ export interface IPhotoProviderBase {
   // 自定义 loading
   loadingElement?: JSX.Element;
   // 加载失败 Element
-  brokenElement?: JSX.Element | ((photoProps: brokenElementDataType) => JSX.Element);
+  brokenElement?: JSX.Element | ((photoProps: BrokenElementParams) => JSX.Element);
 }
 
-export type ReachMoveFunction = (reachState: ReachTypeEnum, clientX: number, clientY: number, scale?: number) => void;
+export type ReachMoveFunction = (reachPosition: ReachTypeEnum, clientX: number, clientY: number, scale?: number) => void;
 
 export type ReachFunction = (clientX: number, clientY: number) => void;
 

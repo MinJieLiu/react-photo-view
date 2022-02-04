@@ -1,34 +1,24 @@
-import React from 'react';
-import classNames from 'classnames';
+import React, { useEffect, useRef, useState } from 'react';
+import type { IPhotoLoadedParams } from './Photo';
 import Photo from './Photo';
-import throttle from './utils/throttle';
 import isTouchDevice from './utils/isTouchDevice';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import slideToPosition from './utils/slideToPosition';
 import { getReachType, getClosedEdge } from './utils/getCloseEdge';
-import withContinuousTap, { TapFuncType } from './utils/withContinuousTap';
 import getAnimateOrigin from './utils/getAnimateOrigin';
 import { maxScale, minStartTouchOffset, minScale, scaleBuffer } from './variables';
-import {
-  ReachMoveFunction,
-  ReachFunction,
-  PhotoTapFunction,
-  ReachTypeEnum,
-  TouchStartEnum,
-  ShowAnimateEnum,
-  OriginRectType,
-  brokenElementDataType,
-} from './types';
-import './PhotoView.less';
+import type { ReachMoveFunction, ReachFunction, PhotoTapFunction, OriginRectType, BrokenElementParams } from './types';
+import { ReachTypeEnum, TouchStartEnum, ShowAnimateEnum } from './types';
 import getSuitableImageSize from './utils/getSuitableImageSize';
-import correctSuitablePosition from './utils/correctSuitablePosition';
+import useDebounceCallback from './hooks/useDebounceCallback';
+import useEventListener from './hooks/useEventListener';
+import useContinuousTap from './hooks/useContinuousTap';
+import './PhotoView.less';
 
-export interface IPhotoViewProps {
+export interface PhotoViewProps {
   // 图片地址
   src: string;
-  // 介绍
-  intro?: React.ReactNode;
   // 容器类名
   viewClassName?: string;
   // 图片类名
@@ -38,7 +28,7 @@ export interface IPhotoViewProps {
   // 自定义 loading
   loadingElement?: JSX.Element;
   // 加载失败 Element
-  brokenElement?: JSX.Element | ((photoProps: brokenElementDataType) => JSX.Element);
+  brokenElement?: JSX.Element | ((photoProps: BrokenElementParams) => JSX.Element);
   // 旋转状态
   rotate: number;
   // 放大缩小
@@ -55,7 +45,7 @@ export interface IPhotoViewProps {
   // Resize 事件
   onPhotoResize?: () => void;
   // 滚轮事件
-  onWheel?: (scale: number) => void;
+  onWheel: (scale: number) => void;
   // 是否在当前操作中
   isActive: boolean;
 
@@ -83,8 +73,6 @@ const initialState = {
   x: 0,
   // 图片 y 偏移量
   y: 0,
-  // 图片缩放程度
-  scale: 1,
   // 图片处于触摸的状态
   touched: false,
   // 背景处于触摸状态
@@ -110,421 +98,385 @@ const initialState = {
   lastTouchLength: 0,
 
   // 当前边缘触发状态
-  reachState: ReachTypeEnum.Normal,
+  reachPosition: ReachTypeEnum.Normal,
 };
 
-export default class PhotoView extends React.Component<IPhotoViewProps, typeof initialState> {
-  static displayName = 'PhotoView';
+type PhotoViewState = typeof initialState;
 
-  readonly state = initialState;
-  // 初始响应状态
-  private initialTouchState = TouchStartEnum.Normal;
+export default function PhotoView({
+  src,
+  viewClassName,
+  className,
+  style,
+  loadingElement,
+  brokenElement,
+  rotate,
+  scale,
 
-  private readonly handlePhotoTap: TapFuncType<number>;
+  onPhotoTap,
+  onMaskTap,
+  onReachMove,
+  onReachUp,
+  onPhotoResize,
+  onWheel,
+  isActive,
 
-  constructor(props: IPhotoViewProps) {
-    super(props);
-    this.onMove = throttle(this.onMove, 8);
-    this.handleResize = throttle(this.handleResize, 8);
-    // 单击与双击事件处理
-    this.handlePhotoTap = withContinuousTap(this.onPhotoTap, this.onDoubleTap);
+  showAnimateType,
+  originRect,
+}: PhotoViewProps) {
+  const [state, updateState] = useState(initialState);
+  const initialTouchRef = useRef(TouchStartEnum.Normal);
+
+  function mergeState(next: Partial<PhotoViewState>) {
+    updateState({ ...state, ...next });
   }
 
-  componentDidMount() {
-    if (isTouchDevice) {
-      window.addEventListener('touchmove', this.handleTouchMove, { passive: false });
-      window.addEventListener('touchend', this.handleTouchEnd, { passive: false });
-    } else {
-      window.addEventListener('mousemove', this.handleMouseMove);
-      window.addEventListener('mouseup', this.handleMouseUp);
-    }
-    window.addEventListener('resize', this.handleResize);
-  }
+  const {
+    naturalWidth,
+    naturalHeight,
+    width,
+    height,
+    loaded,
+    broken,
 
-  static getDerivedStateFromProps(nextProps: IPhotoViewProps, prevState: typeof initialState) {
-    let newState = {} as Partial<typeof initialState>;
-    if ('scale' in nextProps && nextProps.scale !== prevState.scale) {
-      newState.scale = nextProps.scale;
-    }
-    return newState;
-  }
+    x,
+    y,
+    touched,
+    maskTouched,
 
-  componentDidUpdate(prevProps: Readonly<IPhotoViewProps>) {
-    const { rotate } = this.props;
-    if (rotate !== prevProps.rotate) {
-      const { naturalWidth, naturalHeight } = this.state;
-      this.setState(getSuitableImageSize(naturalWidth, naturalHeight, rotate));
-    }
-  }
+    clientX,
+    clientY,
 
-  componentWillUnmount() {
-    window.removeEventListener('touchmove', this.handleTouchMove);
-    window.removeEventListener('touchend', this.handleTouchEnd);
-    window.removeEventListener('mousemove', this.handleMouseMove);
-    window.removeEventListener('mouseup', this.handleMouseUp);
-    window.removeEventListener('resize', this.handleResize);
-  }
+    lastX,
+    lastY,
+    lastMoveClientX,
+    lastMoveClientY,
 
-  handleImageLoad = (imageParams) => {
-    this.setState(imageParams);
-  };
+    touchedTime,
+    lastTouchLength,
 
-  handleResize = () => {
-    const { onPhotoResize, rotate } = this.props;
-    const { loaded, naturalWidth, naturalHeight } = this.state;
-    if (loaded) {
-      this.setState(getSuitableImageSize(naturalWidth, naturalHeight, rotate));
-      if (onPhotoResize) {
-        onPhotoResize();
-      }
-    }
-  };
+    reachPosition,
+  } = state;
 
-  handleStart = (clientX: number, clientY: number, touchLength: number = 0) => {
-    this.setState((prevState) => ({
-      touched: true,
-      clientX,
-      clientY,
-      lastMoveClientX: clientX,
-      lastMoveClientY: clientY,
-      lastX: prevState.x,
-      lastY: prevState.y,
-      lastTouchLength: touchLength,
-      touchedTime: Date.now(),
-    }));
-  };
+  const handleMove = useDebounceCallback(
+    (nextClientX: number, nextClientY: number, touchLength: number = 0) => {
+      if ((touched || maskTouched) && isActive) {
+        let currentWidth = width;
+        let currentHeight = height;
+        // 若图片不是水平则调换属性
+        if (rotate % 180 !== 0) {
+          [currentWidth, currentHeight] = [height, width];
+        }
+        // 单指最小缩放下，以初始移动距离来判断意图
+        if (touchLength === 0 && initialTouchRef.current === TouchStartEnum.Normal) {
+          const isStillX = Math.abs(nextClientX - clientX) <= minStartTouchOffset;
+          const isStillY = Math.abs(nextClientY - clientY) <= minStartTouchOffset;
+          // 初始移动距离不足
+          if (isStillX && isStillY) {
+            // 方向记录上次移动距离，以便平滑过渡
+            mergeState({
+              lastMoveClientX: nextClientX,
+              lastMoveClientY: nextClientY,
+            });
+            return;
+          }
+          // 设置响应状态
+          initialTouchRef.current = !isStillX
+            ? TouchStartEnum.X
+            : nextClientY > clientY
+            ? TouchStartEnum.YPull
+            : TouchStartEnum.YPush;
+        }
 
-  onMove = (newClientX: number, newClientY: number, touchLength: number = 0) => {
-    const { onReachMove, isActive, rotate, onWheel } = this.props;
-    const {
-      naturalWidth,
-      x,
-      y,
-      clientX,
-      clientY,
-      lastMoveClientX,
-      lastMoveClientY,
-      lastX,
-      lastY,
-      scale,
-      lastTouchLength,
-      reachState,
-      touched,
-      maskTouched,
-    } = this.state;
-    if ((touched || maskTouched) && isActive) {
-      let { width, height } = this.state;
-      // 若图片不是水平则调换属性
-      if (rotate % 180 !== 0) {
-        [width, height] = [height, width];
-      }
-      // 单指最小缩放下，以初始移动距离来判断意图
-      if (touchLength === 0 && this.initialTouchState === TouchStartEnum.Normal) {
-        const isStillX = Math.abs(newClientX - clientX) <= minStartTouchOffset;
-        const isStillY = Math.abs(newClientY - clientY) <= minStartTouchOffset;
-        // 初始移动距离不足
-        if (isStillX && isStillY) {
-          // 方向记录上次移动距离，以便平滑过渡
-          this.setState({
-            lastMoveClientX: newClientX,
-            lastMoveClientY: newClientY,
+        const offsetX = nextClientX - lastMoveClientX;
+        const offsetY = nextClientY - lastMoveClientY;
+        // 边缘触发状态
+        let currentReachState = ReachTypeEnum.Normal;
+        if (touchLength === 0) {
+          // 边缘超出状态
+          const horizontalCloseEdge = getClosedEdge(offsetX + lastX, scale, currentWidth, window.innerWidth);
+          const verticalCloseEdge = getClosedEdge(offsetY + lastY, scale, currentHeight, window.innerHeight);
+          // 边缘触发检测
+          currentReachState = getReachType({
+            initialTouchState: initialTouchRef.current,
+            horizontalCloseEdge,
+            verticalCloseEdge,
+            reachPosition,
           });
-          return;
+
+          // 接触边缘
+          if (currentReachState != ReachTypeEnum.Normal) {
+            onReachMove(currentReachState, nextClientX, nextClientY, scale);
+          }
         }
-        // 设置响应状态
-        this.initialTouchState = !isStillX
-          ? TouchStartEnum.X
-          : newClientY > clientY
-          ? TouchStartEnum.YPull
-          : TouchStartEnum.YPush;
-      }
-
-      let offsetX = newClientX - lastMoveClientX;
-      let offsetY = newClientY - lastMoveClientY;
-      // 边缘触发状态
-      let currentReachState = ReachTypeEnum.Normal;
-      if (touchLength === 0) {
-        // 边缘超出状态
-        const horizontalCloseEdge = getClosedEdge(offsetX + lastX, scale, width, window.innerWidth);
-        const verticalCloseEdge = getClosedEdge(offsetY + lastY, scale, height, window.innerHeight);
-        // 边缘触发检测
-        currentReachState = getReachType({
-          initialTouchState: this.initialTouchState,
-          horizontalCloseEdge,
-          verticalCloseEdge,
-          reachState,
-        });
-
-        // 接触边缘
-        if (currentReachState != ReachTypeEnum.Normal) {
-          onReachMove(currentReachState, newClientX, newClientY, scale);
+        // 横向边缘触发、背景触发禁用当前滑动
+        if (currentReachState === ReachTypeEnum.XReach || maskTouched) {
+          mergeState({
+            reachPosition: ReachTypeEnum.XReach,
+          });
+        } else {
+          // 目标倍数
+          const endScale = scale + ((touchLength - lastTouchLength) / 100 / 2) * scale;
+          // 限制最大倍数和最小倍数
+          const toScale = Math.max(
+            Math.min(endScale, Math.max(maxScale, naturalWidth / width)),
+            minScale - scaleBuffer,
+          );
+          onWheel(toScale);
+          mergeState({
+            lastTouchLength: touchLength,
+            reachPosition: currentReachState,
+            ...getPositionOnMoveOrScale({
+              x,
+              y,
+              clientX: nextClientX,
+              clientY: nextClientY,
+              offsetX,
+              offsetY,
+              offsetScale: toScale / scale,
+            }),
+          });
         }
       }
-      // 横向边缘触发、背景触发禁用当前滑动
-      if (currentReachState === ReachTypeEnum.XReach || maskTouched) {
-        this.setState({
-          reachState: ReachTypeEnum.XReach,
-        });
-      } else {
-        // 目标倍数
-        const endScale = scale + ((touchLength - lastTouchLength) / 100 / 2) * scale;
-        // 限制最大倍数和最小倍数
-        const toScale = Math.max(Math.min(endScale, Math.max(maxScale, naturalWidth / width)), minScale - scaleBuffer);
-        onWheel?.(toScale);
-        this.setState({
-          lastTouchLength: touchLength,
-          reachState: currentReachState,
-          ...getPositionOnMoveOrScale({
-            x,
-            y,
-            clientX: newClientX,
-            clientY: newClientY,
-            offsetX,
-            offsetY,
-            fromScale: scale,
-            toScale,
-          }),
-        });
+    },
+    {
+      maxWait: 8,
+    },
+  );
+
+  const handlePhotoTap = useContinuousTap(
+    (currentClientX: number, currentClientY: number) => {
+      onPhotoTap?.(currentClientX, currentClientY);
+    },
+    (currentClientX: number, currentClientY: number) => {
+      if (reachPosition !== ReachTypeEnum.Normal) {
+        return;
       }
-    }
-  };
-
-  onPhotoTap = (clientX: number, clientY: number) => {
-    const { onPhotoTap } = this.props;
-    if (onPhotoTap) {
-      onPhotoTap(clientX, clientY);
-    }
-  };
-
-  onDoubleTap: TapFuncType<number> = (clientX, clientY) => {
-    const { onWheel } = this.props;
-    const { width, naturalWidth, x, y, scale, reachState } = this.state;
-    if (reachState !== ReachTypeEnum.Normal) {
-      return;
-    }
-    // 若图片足够大，则放大适应的倍数
-    const toScale = scale !== 1 ? 1 : Math.max(2, naturalWidth / width);
-    const position = getPositionOnMoveOrScale({
-      x,
-      y,
-      clientX,
-      clientY,
-      fromScale: scale,
-      toScale,
-    });
-    onWheel?.(toScale);
-    this.setState({
-      clientX,
-      clientY,
-      ...position,
-      ...correctSuitablePosition(position),
-    });
-  };
-
-  handleWheel = (e) => {
-    const { clientX, clientY, deltaY } = e;
-    const { onWheel } = this.props;
-    const { width, naturalWidth, reachState } = this.state;
-    if (reachState !== ReachTypeEnum.Normal) {
-      return;
-    }
-    this.setState(({ x, y, scale }) => {
-      const endScale = scale - deltaY / 100 / 2;
-      // 限制最大倍数和最小倍数
-      const toScale = Math.max(Math.min(endScale, Math.max(maxScale, naturalWidth / width)), minScale);
+      // 若图片足够大，则放大适应的倍数
+      const toScale = scale !== 1 ? 1 : Math.max(2, naturalWidth / width);
       const position = getPositionOnMoveOrScale({
         x,
         y,
-        clientX,
-        clientY,
-        fromScale: scale,
-        toScale,
+        clientX: currentClientX,
+        clientY: currentClientY,
+        offsetScale: toScale / scale,
       });
-      onWheel?.(toScale);
-      return {
+      onWheel(toScale);
+      mergeState({
         clientX,
         clientY,
         ...position,
-        ...correctSuitablePosition(position),
-      };
-    });
-  };
+        ...(scale <= 1 && { x: 0, y: 0 }),
+      });
+    },
+  );
 
-  handleMaskStart = (clientX: number, clientY: number) => {
-    this.setState((prevState) => ({
-      maskTouched: true,
-      clientX,
-      clientY,
-      lastX: prevState.x,
-      lastY: prevState.y,
-    }));
-  };
-
-  handleMaskMouseDown = (e) => {
-    this.handleMaskStart(e.clientX, e.clientY);
-  };
-
-  handleMaskTouchStart = (e) => {
-    const { clientX, clientY } = e.touches[0];
-    this.handleMaskStart(clientX, clientY);
-  };
-
-  handleTouchStart = (e) => {
-    const { clientX, clientY, touchLength } = getMultipleTouchPosition(e);
-    this.handleStart(clientX, clientY, touchLength);
-  };
-
-  handleMouseDown = (e) => {
-    e.preventDefault();
-    this.handleStart(e.clientX, e.clientY, 0);
-  };
-
-  handleTouchMove = (e) => {
-    e.preventDefault();
-    const { clientX, clientY, touchLength } = getMultipleTouchPosition(e);
-    this.onMove(clientX, clientY, touchLength);
-  };
-
-  handleMouseMove = (e) => {
-    e.preventDefault();
-    this.onMove(e.clientX, e.clientY);
-  };
-
-  handleUp = (newClientX: number, newClientY: number) => {
+  function handleUp(nextClientX: number, nextClientY: number) {
     // 重置响应状态
-    this.initialTouchState = TouchStartEnum.Normal;
-    const { onReachUp, onPhotoTap, onMaskTap, isActive, rotate, onWheel } = this.props;
-    const {
-      width,
-      height,
-      naturalWidth,
-      x,
-      y,
-      lastX,
-      lastY,
-      scale,
-      touchedTime,
-      clientX,
-      clientY,
-      touched,
-      maskTouched,
-    } = this.state;
+    initialTouchRef.current = TouchStartEnum.Normal;
     if ((touched || maskTouched) && isActive) {
-      const hasMove = clientX !== newClientX || clientY !== newClientY;
+      const hasMove = clientX !== nextClientX || clientY !== nextClientY;
       const targetScale = Math.max(Math.min(scale, Math.max(maxScale, naturalWidth / width)), minScale);
       if (targetScale !== scale) {
-        onWheel?.(targetScale);
+        onWheel(targetScale);
       }
-      this.setState(
-        {
-          touched: false,
-          maskTouched: false,
-          // 限制缩放
-          scale: targetScale,
-          reachState: ReachTypeEnum.Normal, // 重置触发状态
-          ...(hasMove
-            ? slideToPosition({
-                x,
-                y,
-                lastX,
-                lastY,
-                width,
-                height,
-                scale,
-                rotate,
-                touchedTime,
-              })
-            : {
-                x,
-                y,
-              }),
-        },
-        () => {
-          if (onReachUp) {
-            onReachUp(newClientX, newClientY);
-          }
-          // 触发 Tap 事件
-          if (!hasMove) {
-            if (touched && onPhotoTap) {
-              this.handlePhotoTap(newClientX, newClientY);
-            } else if (maskTouched && onMaskTap) {
-              onMaskTap(newClientX, newClientY);
-            }
-          }
-        },
-      );
+      mergeState({
+        touched: false,
+        maskTouched: false,
+        // 重置触发状态
+        reachPosition: ReachTypeEnum.Normal,
+        ...(hasMove
+          ? slideToPosition({
+              x,
+              y,
+              lastX,
+              lastY,
+              width,
+              height,
+              scale,
+              rotate,
+              touchedTime,
+            })
+          : {
+              x,
+              y,
+            }),
+      });
+
+      onReachUp?.(nextClientX, nextClientY);
+      // 触发 Tap 事件
+      if (!hasMove) {
+        if (touched && onPhotoTap) {
+          handlePhotoTap(nextClientX, nextClientY);
+        } else if (maskTouched && onMaskTap) {
+          onMaskTap(nextClientX, nextClientY);
+        }
+      }
     }
-  };
-
-  handleTouchEnd = (e) => {
-    const { clientX, clientY } = e.changedTouches[0];
-    this.handleUp(clientX, clientY);
-  };
-
-  handleMouseUp = (e) => {
-    const { clientX, clientY } = e;
-    this.handleUp(clientX, clientY);
-  };
-
-  render() {
-    const {
-      src,
-      intro,
-      viewClassName,
-      className,
-      style,
-      rotate,
-      loadingElement,
-      brokenElement,
-      isActive,
-      showAnimateType,
-      originRect,
-    } = this.props;
-    const { width, height, naturalWidth, naturalHeight, loaded, x, y, scale, touched, broken } = this.state;
-
-    const transform = `translate3d(${x}px, ${y}px, 0) scale(${(width / naturalWidth) * scale}) rotate(${rotate}deg)`;
-
-    return (
-      <div className={classNames('PhotoView__PhotoWrap', viewClassName)} style={style}>
-        <div
-          className="PhotoView__PhotoMask"
-          onMouseDown={!isTouchDevice && isActive ? this.handleMaskMouseDown : undefined}
-          onTouchStart={isTouchDevice && isActive ? this.handleMaskTouchStart : undefined}
-        />
-        <div
-          className={classNames('PhotoView__PhotoBox', {
-            PhotoView__animateIn: loaded && showAnimateType === ShowAnimateEnum.In,
-            PhotoView__animateOut: loaded && showAnimateType === ShowAnimateEnum.Out,
-          })}
-          style={{
-            transformOrigin: loaded ? getAnimateOrigin(originRect, width, height) : undefined,
-            width,
-            height,
-          }}
-        >
-          <Photo
-            className={className}
-            src={src}
-            intro={intro}
-            naturalWidth={naturalWidth}
-            naturalHeight={naturalHeight}
-            loaded={loaded}
-            broken={broken}
-            rotate={rotate}
-            onMouseDown={isTouchDevice ? undefined : this.handleMouseDown}
-            onTouchStart={isTouchDevice ? this.handleTouchStart : undefined}
-            onWheel={this.handleWheel}
-            style={{
-              WebkitTransform: transform,
-              transform,
-              transition: touched ? undefined : 'transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
-            }}
-            onImageLoad={this.handleImageLoad}
-            loadingElement={loadingElement}
-            brokenElement={brokenElement}
-          />
-        </div>
-      </div>
-    );
   }
+
+  useEventListener(isTouchDevice ? undefined : 'mousemove', (e) => {
+    e.preventDefault();
+    handleMove(e.clientX, e.clientY);
+  });
+  useEventListener(isTouchDevice ? undefined : 'mouseup', (e) => {
+    handleUp(e.clientX, e.clientY);
+  });
+  useEventListener(
+    isTouchDevice ? 'touchmove' : undefined,
+    (e) => {
+      e.preventDefault();
+      const position = getMultipleTouchPosition(e);
+      handleMove(position.clientX, position.clientY, position.touchLength);
+    },
+    { passive: false },
+  );
+  useEventListener(
+    isTouchDevice ? 'touchend' : undefined,
+    (e) => {
+      const touch = e.changedTouches[0];
+      handleUp(touch.clientX, touch.clientY);
+    },
+    { passive: false },
+  );
+  useEventListener(
+    'resize',
+    useDebounceCallback(
+      () => {
+        if (loaded) {
+          mergeState(getSuitableImageSize(naturalWidth, naturalHeight, rotate));
+          if (onPhotoResize) {
+            onPhotoResize();
+          }
+        }
+      },
+      { maxWait: 8 },
+    ),
+  );
+
+  useEffect(() => {
+    mergeState(getSuitableImageSize(naturalWidth, naturalHeight, rotate));
+  }, [rotate]);
+
+  function handlePhotoLoad(params: IPhotoLoadedParams) {
+    mergeState({
+      ...params,
+      ...(params.loaded && getSuitableImageSize(params.naturalWidth || 0, params.naturalHeight || 0, rotate)),
+    });
+  }
+
+  function handleStart(currentClientX: number, currentClientY: number, touchLength: number = 0) {
+    mergeState({
+      touched: true,
+      clientX: currentClientX,
+      clientY: currentClientY,
+      lastMoveClientX: currentClientX,
+      lastMoveClientY: currentClientY,
+      lastX: x,
+      lastY: y,
+      lastTouchLength: touchLength,
+      touchedTime: Date.now(),
+    });
+  }
+
+  function handleWheel(e: React.WheelEvent) {
+    if (reachPosition !== ReachTypeEnum.Normal) {
+      return;
+    }
+    const endScale = scale - e.deltaY / 100 / 2;
+    // 限制最大倍数和最小倍数
+    const toScale = Math.max(Math.min(endScale, Math.max(maxScale, naturalWidth / width)), minScale);
+    const position = getPositionOnMoveOrScale({
+      x,
+      y,
+      clientX: e.clientX,
+      clientY: e.clientY,
+      offsetScale: toScale / scale,
+    });
+    onWheel(toScale);
+
+    mergeState({
+      clientX: e.clientX,
+      clientY: e.clientY,
+      ...position,
+      ...(scale <= 1 && { x: 0, y: 0 }),
+    });
+  }
+
+  function handleMaskStart(currentClientX: number, currentClientY: number) {
+    mergeState({
+      maskTouched: true,
+      clientX: currentClientX,
+      clientY: currentClientY,
+      lastX: x,
+      lastY: y,
+    });
+  }
+
+  function handleMaskMouseDown(e: React.MouseEvent) {
+    handleMaskStart(e.clientX, e.clientY);
+  }
+
+  function handleMaskTouchStart(e: React.TouchEvent) {
+    const touch = e.touches[0];
+    handleMaskStart(touch.clientX, touch.clientY);
+  }
+
+  function handleTouchStart(e: React.TouchEvent) {
+    const position = getMultipleTouchPosition(e);
+    handleStart(position.clientX, position.clientY, position.touchLength);
+  }
+
+  function handleMouseDown(e: React.MouseEvent) {
+    e.preventDefault();
+    handleStart(e.clientX, e.clientY, 0);
+  }
+
+  const transform = `translate3d(${x}px, ${y}px, 0) scale(${(width / naturalWidth) * scale}) rotate(${rotate}deg)`;
+
+  return (
+    <div className={`PhotoView__PhotoWrap${viewClassName && ` ${viewClassName}`}`} style={style}>
+      <div
+        className="PhotoView__PhotoMask"
+        onMouseDown={!isTouchDevice && isActive ? handleMaskMouseDown : undefined}
+        onTouchStart={isTouchDevice && isActive ? handleMaskTouchStart : undefined}
+      />
+      <div
+        className={`PhotoView__PhotoBox${
+          loaded
+            ? showAnimateType === ShowAnimateEnum.In
+              ? ' PhotoView__animateIn'
+              : showAnimateType === ShowAnimateEnum.Out
+              ? ' PhotoView__animateOut'
+              : ''
+            : ''
+        }`}
+        style={{
+          transformOrigin: loaded ? getAnimateOrigin(originRect, width, height) : undefined,
+          width,
+          height,
+        }}
+      >
+        <Photo
+          className={className}
+          src={src}
+          width={naturalWidth}
+          height={naturalHeight}
+          loaded={loaded}
+          broken={broken}
+          onMouseDown={isTouchDevice ? undefined : handleMouseDown}
+          onTouchStart={isTouchDevice ? handleTouchStart : undefined}
+          onWheel={handleWheel}
+          style={{
+            WebkitTransform: transform,
+            transform,
+            transition: touched ? undefined : 'transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
+          }}
+          onPhotoLoad={handlePhotoLoad}
+          loadingElement={loadingElement}
+          brokenElement={brokenElement}
+        />
+      </div>
+    </div>
+  );
 }

@@ -5,13 +5,7 @@ export default function getSuitableImageSize(
   naturalWidth: number,
   naturalHeight: number,
   rotate: number,
-): {
-  width: number;
-  height: number;
-  x: number;
-  y: number;
-  scale: number;
-} {
+) {
   let width;
   let height;
   let y = 0;

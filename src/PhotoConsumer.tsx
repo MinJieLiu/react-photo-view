@@ -1,7 +1,7 @@
 import React from 'react';
-import uniqueId from 'lodash.uniqueid';
 import isTouchDevice from './utils/isTouchDevice';
-import PhotoContext, { PhotoContextType } from './photo-context';
+import type { PhotoContextType } from './photo-context';
+import PhotoContext from './photo-context';
 
 export interface IPhotoConsumer {
   src: string;
@@ -11,7 +11,7 @@ export interface IPhotoConsumer {
 
 const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
   const photoContext = React.useContext<PhotoContextType>(PhotoContext);
-  const key = React.useMemo<string>(() => uniqueId(), []);
+  const key = React.useMemo(() => photoContext.uniqueId(), []);
   const [position, updatePosition] = React.useState<{
     clientX: number | undefined;
     clientY: number | undefined;
@@ -36,7 +36,7 @@ const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
     });
   }, [src, intro])
 
-  function handleTouchStart(e) {
+  function handleTouchStart(e: React.TouchEvent) {
     const { clientX, clientY } = e.touches[0];
     updatePosition({
       clientX,
@@ -50,7 +50,7 @@ const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
     }
   }
 
-  function handleTouchEnd(e) {
+  function handleTouchEnd(e: React.TouchEvent) {
     const { clientX, clientY } = e.changedTouches[0];
     if (position.clientX === clientX && position.clientY === clientY) {
       photoContext.onShow(key);
@@ -63,7 +63,7 @@ const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
     }
   }
 
-  function handleClick(e) {
+  function handleClick(e: React.MouseEvent) {
     photoContext.onShow(key);
     if (children) {
       const { onClick } = children.props;

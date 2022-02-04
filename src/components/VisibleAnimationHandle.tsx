@@ -1,9 +1,9 @@
 import React from 'react';
-import { dataType, OriginRectType, ShowAnimateEnum } from '../types';
+import { DataType, OriginRectType, ShowAnimateEnum } from '../types';
 
 interface VisibleHandleProps {
   visible: boolean;
-  currentImage?: dataType;
+  currentImage?: DataType;
   children: ({
     photoVisible,
     showAnimateType,

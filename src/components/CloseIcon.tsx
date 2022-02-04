@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Close(props) {
+function CloseIcon(props: React.HTMLAttributes<SVGElement>) {
   return (
     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 768 768" {...props}>
       <path
@@ -11,4 +11,4 @@ function Close(props) {
   );
 }
 
-export default Close;
+export default CloseIcon;
