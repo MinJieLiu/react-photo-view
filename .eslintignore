@@ -1,0 +1,8 @@
+build
+dist
+node_modules
+.snapshots/
+*.js
+.eslintrc.js
+*.d.ts
+example

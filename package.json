@@ -7,7 +7,7 @@
   "repository": "https://github.com/MinJieLiu/react-photo-view.git",
   "type": "module",
   "source": "src/index.ts",
-  "main": "./dist/react-photo-view.cjs",
+  "main": "./dist/react-photo-view.umd.js",
   "module": "./dist/react-photo-view.module.js",
   "types": "./dist/index.d.ts",
   "keywords": [
@@ -20,7 +20,7 @@
     "gallery"
   ],
   "scripts": {
-    "build": "microbundle --jsx React.createElement --external react,react-dom --format esm,cjs",
+    "build": "microbundle --jsx React.createElement --external react,react-dom",
     "prepublishOnly": "npm run build",
     "prepare": "husky install",
     "lint": "npm run lint:js && npm run lint:prettier",
@@ -43,7 +43,6 @@
     ]
   },
   "peerDependencies": {
-    "classnames": "^2.2.0",
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
   },
@@ -51,7 +50,6 @@
     "@types/react": "^17.0.19",
     "@types/react-dom": "^17.0.9",
     "@umijs/fabric": "^2.10.1",
-    "classnames": "^2.3.1",
     "husky": "^7.0.4",
     "less": "^4.1.2",
     "lint-staged": "^12.3.3",

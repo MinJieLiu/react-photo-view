@@ -19,7 +19,7 @@ const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
     clientX: undefined,
     clientY: undefined,
   });
-  const photoTriggerRef = React.useRef<HTMLElement | null>(null);
+  const originRef = React.useRef<HTMLElement>(null);
 
   React.useEffect(() => {
     return () => {
@@ -31,7 +31,7 @@ const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
     photoContext.updateItem({
       key,
       src,
-      originRef: photoTriggerRef.current,
+      originRef,
       intro,
     });
   }, [src, intro])
@@ -81,9 +81,9 @@ const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
           ? {
               onTouchStart: handleTouchStart,
               onTouchEnd: handleTouchEnd,
-              ref: photoTriggerRef,
+              ref: originRef,
             }
-          : { onClick: handleClick, ref: photoTriggerRef },
+          : { onClick: handleClick, ref: originRef },
       ),
     );
   }

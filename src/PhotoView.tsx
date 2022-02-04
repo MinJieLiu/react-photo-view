@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { IPhotoLoadedParams } from './Photo';
 import Photo from './Photo';
 import isTouchDevice from './utils/isTouchDevice';
@@ -9,7 +9,8 @@ import { getReachType, getClosedEdge } from './utils/getCloseEdge';
 import getAnimateOrigin from './utils/getAnimateOrigin';
 import { maxScale, minStartTouchOffset, minScale, scaleBuffer } from './variables';
 import type { ReachMoveFunction, ReachFunction, PhotoTapFunction, OriginRectType, BrokenElementParams } from './types';
-import { ReachTypeEnum, TouchStartEnum, ShowAnimateEnum } from './types';
+import type { ReachType, TouchStartType } from './types';
+import useSetState from './hooks/useSetState';
 import getSuitableImageSize from './utils/getSuitableImageSize';
 import useDebounceCallback from './hooks/useDebounceCallback';
 import useEventListener from './hooks/useEventListener';
@@ -30,9 +31,9 @@ export interface PhotoViewProps {
   // 加载失败 Element
   brokenElement?: JSX.Element | ((photoProps: BrokenElementParams) => JSX.Element);
   // 旋转状态
-  rotate: number;
+  rotate?: number;
   // 放大缩小
-  scale: number;
+  scale?: number;
 
   // Photo 点击事件
   onPhotoTap: PhotoTapFunction;
@@ -50,7 +51,7 @@ export interface PhotoViewProps {
   isActive: boolean;
 
   // 动画类型
-  showAnimateType?: ShowAnimateEnum;
+  activeAnimation?: 'enter' | 'leave';
   // 动画源位置
   originRect?: OriginRectType;
 }
@@ -98,10 +99,8 @@ const initialState = {
   lastTouchLength: 0,
 
   // 当前边缘触发状态
-  reachPosition: ReachTypeEnum.Normal,
+  reachPosition: undefined as ReachType,
 };
-
-type PhotoViewState = typeof initialState;
 
 export default function PhotoView({
   src,
@@ -110,8 +109,8 @@ export default function PhotoView({
   style,
   loadingElement,
   brokenElement,
-  rotate,
-  scale,
+  rotate = 0,
+  scale = 1,
 
   onPhotoTap,
   onMaskTap,
@@ -121,15 +120,11 @@ export default function PhotoView({
   onWheel,
   isActive,
 
-  showAnimateType,
+  activeAnimation,
   originRect,
 }: PhotoViewProps) {
-  const [state, updateState] = useState(initialState);
-  const initialTouchRef = useRef(TouchStartEnum.Normal);
-
-  function mergeState(next: Partial<PhotoViewState>) {
-    updateState({ ...state, ...next });
-  }
+  const [state, updateState] = useSetState(initialState);
+  const initialTouchRef = useRef<TouchStartType>();
 
   const {
     naturalWidth,
@@ -168,30 +163,26 @@ export default function PhotoView({
           [currentWidth, currentHeight] = [height, width];
         }
         // 单指最小缩放下，以初始移动距离来判断意图
-        if (touchLength === 0 && initialTouchRef.current === TouchStartEnum.Normal) {
+        if (touchLength === 0 && initialTouchRef.current === undefined) {
           const isStillX = Math.abs(nextClientX - clientX) <= minStartTouchOffset;
           const isStillY = Math.abs(nextClientY - clientY) <= minStartTouchOffset;
           // 初始移动距离不足
           if (isStillX && isStillY) {
             // 方向记录上次移动距离，以便平滑过渡
-            mergeState({
+            updateState({
               lastMoveClientX: nextClientX,
               lastMoveClientY: nextClientY,
             });
             return;
           }
           // 设置响应状态
-          initialTouchRef.current = !isStillX
-            ? TouchStartEnum.X
-            : nextClientY > clientY
-            ? TouchStartEnum.YPull
-            : TouchStartEnum.YPush;
+          initialTouchRef.current = !isStillX ? 'x' : nextClientY > clientY ? 'pull' : 'push';
         }
 
         const offsetX = nextClientX - lastMoveClientX;
         const offsetY = nextClientY - lastMoveClientY;
         // 边缘触发状态
-        let currentReachState = ReachTypeEnum.Normal;
+        let currentReachState = undefined;
         if (touchLength === 0) {
           // 边缘超出状态
           const horizontalCloseEdge = getClosedEdge(offsetX + lastX, scale, currentWidth, window.innerWidth);
@@ -205,14 +196,14 @@ export default function PhotoView({
           });
 
           // 接触边缘
-          if (currentReachState != ReachTypeEnum.Normal) {
+          if (currentReachState !== undefined) {
             onReachMove(currentReachState, nextClientX, nextClientY, scale);
           }
         }
         // 横向边缘触发、背景触发禁用当前滑动
-        if (currentReachState === ReachTypeEnum.XReach || maskTouched) {
-          mergeState({
-            reachPosition: ReachTypeEnum.XReach,
+        if (currentReachState === 'x' || maskTouched) {
+          updateState({
+            reachPosition: 'x',
           });
         } else {
           // 目标倍数
@@ -223,7 +214,7 @@ export default function PhotoView({
             minScale - scaleBuffer,
           );
           onWheel(toScale);
-          mergeState({
+          updateState({
             lastTouchLength: touchLength,
             reachPosition: currentReachState,
             ...getPositionOnMoveOrScale({
@@ -249,7 +240,7 @@ export default function PhotoView({
       onPhotoTap?.(currentClientX, currentClientY);
     },
     (currentClientX: number, currentClientY: number) => {
-      if (reachPosition !== ReachTypeEnum.Normal) {
+      if (reachPosition !== undefined) {
         return;
       }
       // 若图片足够大，则放大适应的倍数
@@ -262,7 +253,7 @@ export default function PhotoView({
         offsetScale: toScale / scale,
       });
       onWheel(toScale);
-      mergeState({
+      updateState({
         clientX,
         clientY,
         ...position,
@@ -273,18 +264,18 @@ export default function PhotoView({
 
   function handleUp(nextClientX: number, nextClientY: number) {
     // 重置响应状态
-    initialTouchRef.current = TouchStartEnum.Normal;
+    initialTouchRef.current = undefined;
     if ((touched || maskTouched) && isActive) {
       const hasMove = clientX !== nextClientX || clientY !== nextClientY;
       const targetScale = Math.max(Math.min(scale, Math.max(maxScale, naturalWidth / width)), minScale);
       if (targetScale !== scale) {
         onWheel(targetScale);
       }
-      mergeState({
+      updateState({
         touched: false,
         maskTouched: false,
         // 重置触发状态
-        reachPosition: ReachTypeEnum.Normal,
+        reachPosition: undefined,
         ...(hasMove
           ? slideToPosition({
               x,
@@ -344,7 +335,7 @@ export default function PhotoView({
     useDebounceCallback(
       () => {
         if (loaded) {
-          mergeState(getSuitableImageSize(naturalWidth, naturalHeight, rotate));
+          updateState(getSuitableImageSize(naturalWidth, naturalHeight, rotate));
           if (onPhotoResize) {
             onPhotoResize();
           }
@@ -355,18 +346,18 @@ export default function PhotoView({
   );
 
   useEffect(() => {
-    mergeState(getSuitableImageSize(naturalWidth, naturalHeight, rotate));
+    updateState(getSuitableImageSize(naturalWidth, naturalHeight, rotate));
   }, [rotate]);
 
   function handlePhotoLoad(params: IPhotoLoadedParams) {
-    mergeState({
+    updateState({
       ...params,
       ...(params.loaded && getSuitableImageSize(params.naturalWidth || 0, params.naturalHeight || 0, rotate)),
     });
   }
 
   function handleStart(currentClientX: number, currentClientY: number, touchLength: number = 0) {
-    mergeState({
+    updateState({
       touched: true,
       clientX: currentClientX,
       clientY: currentClientY,
@@ -380,7 +371,7 @@ export default function PhotoView({
   }
 
   function handleWheel(e: React.WheelEvent) {
-    if (reachPosition !== ReachTypeEnum.Normal) {
+    if (reachPosition !== undefined) {
       return;
     }
     const endScale = scale - e.deltaY / 100 / 2;
@@ -395,7 +386,7 @@ export default function PhotoView({
     });
     onWheel(toScale);
 
-    mergeState({
+    updateState({
       clientX: e.clientX,
       clientY: e.clientY,
       ...position,
@@ -404,7 +395,7 @@ export default function PhotoView({
   }
 
   function handleMaskStart(currentClientX: number, currentClientY: number) {
-    mergeState({
+    updateState({
       maskTouched: true,
       clientX: currentClientX,
       clientY: currentClientY,
@@ -435,7 +426,7 @@ export default function PhotoView({
   const transform = `translate3d(${x}px, ${y}px, 0) scale(${(width / naturalWidth) * scale}) rotate(${rotate}deg)`;
 
   return (
-    <div className={`PhotoView__PhotoWrap${viewClassName && ` ${viewClassName}`}`} style={style}>
+    <div className={`PhotoView__PhotoWrap${viewClassName ? ` ${viewClassName}` : ''}`} style={style}>
       <div
         className="PhotoView__PhotoMask"
         onMouseDown={!isTouchDevice && isActive ? handleMaskMouseDown : undefined}
@@ -444,9 +435,9 @@ export default function PhotoView({
       <div
         className={`PhotoView__PhotoBox${
           loaded
-            ? showAnimateType === ShowAnimateEnum.In
+            ? activeAnimation === 'enter'
               ? ' PhotoView__animateIn'
-              : showAnimateType === ShowAnimateEnum.Out
+              : activeAnimation === 'leave'
               ? ' PhotoView__animateOut'
               : ''
             : ''
@@ -468,7 +459,6 @@ export default function PhotoView({
           onTouchStart={isTouchDevice ? handleTouchStart : undefined}
           onWheel={handleWheel}
           style={{
-            WebkitTransform: transform,
             transform,
             transition: touched ? undefined : 'transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
           }}

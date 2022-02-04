@@ -5,11 +5,11 @@ import type React from 'react';
  */
 export interface DataType {
   // 唯一标识
-  key: number;
+  key: number | string;
   // 图片地址
   src: string;
   // 原触发 ref
-  originRef?: HTMLElement | null;
+  originRef?: React.MutableRefObject<HTMLElement | null>;
   // 图片介绍
   intro?: React.ReactNode;
 }
@@ -73,7 +73,7 @@ export interface IPhotoProviderBase {
   brokenElement?: JSX.Element | ((photoProps: BrokenElementParams) => JSX.Element);
 }
 
-export type ReachMoveFunction = (reachPosition: ReachTypeEnum, clientX: number, clientY: number, scale?: number) => void;
+export type ReachMoveFunction = (reachPosition: ReachType, clientX: number, clientY: number, scale?: number) => void;
 
 export type ReachFunction = (clientX: number, clientY: number) => void;
 
@@ -82,40 +82,29 @@ export type PhotoTapFunction = (clientX: number, clientY: number) => void;
 /**
  * 边缘超出状态
  */
-export enum CloseEdgeEnum {
-  Normal, // 正常滑动
-  Small, // 小于屏幕宽度
-  Before, // 抵触左边/上边
-  After, // 抵触右边/下边
-}
+export type CloseEdgeType =
+  | 'normal' // 正常滑动
+  | 'small' // 小于屏幕宽度
+  | 'before' // 抵触左边/上边
+  | 'after' // 抵触右边/下边
+  | undefined; // 正常滑动
 
 /**
  * 边缘触发状态
  */
-export enum ReachTypeEnum {
-  Normal, // 未触发
-  XReach, // x 轴
-  YReach, // y 轴
-}
+export type ReachType =
+  | 'x' // x 轴
+  | 'y' // y 轴
+  | undefined; // 未触发
 
 /**
  * 初始响应状态
  */
-export enum TouchStartEnum {
-  Normal, // 未触发
-  X, // X 轴优先
-  YPush, // Y 轴往上
-  YPull, // Y 轴往下
-}
-
-/**
- * 动画类型
- */
-export enum ShowAnimateEnum {
-  None, // 无
-  In, // 进入
-  Out, // 离开
-}
+export type TouchStartType =
+  | 'x' // X 轴优先
+  | 'push' // Y 轴往上
+  | 'pull' // Y 轴往下
+  | undefined; // 未触发
 
 /**
  * 触发源位置

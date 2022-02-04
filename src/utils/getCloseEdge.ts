@@ -1,4 +1,5 @@
-import { CloseEdgeEnum, ReachTypeEnum, TouchStartEnum } from '../types';
+import type { CloseEdgeType } from '../types';
+import type { ReachType, TouchStartType } from '../types';
 
 /**
  * 接触左边/上边 或 右边/下边边缘
@@ -6,28 +7,24 @@ import { CloseEdgeEnum, ReachTypeEnum, TouchStartEnum } from '../types';
  * @param scale
  * @param size - width/height
  * @param innerSize - innerWidth/innerHeight
- * @return CloseEdgeEnum
+ * @return CloseEdgeType
  */
-export function getClosedEdge(position: number, scale: number, size: number, innerSize: number): CloseEdgeEnum {
+export function getClosedEdge(position: number, scale: number, size: number, innerSize: number): CloseEdgeType {
   const currentWidth = size * scale;
   // 图片超出的宽度
   const outOffsetX = (currentWidth - innerSize) / 2;
   if (currentWidth <= innerSize) {
-    return CloseEdgeEnum.Small;
+    return 'small';
   } else if (position > 0 && outOffsetX - position <= 0) {
-    return CloseEdgeEnum.Before;
+    return 'before';
   } else if (position < 0 && outOffsetX + position <= 0) {
-    return CloseEdgeEnum.After;
+    return 'after';
   }
-  return CloseEdgeEnum.Normal;
+  return 'normal';
 }
 
 /**
  * 获取接触边缘类型
- * @param initialTouchState
- * @param horizontalCloseEdge
- * @param verticalCloseEdge
- * @param reachPosition
  */
 export function getReachType({
   initialTouchState,
@@ -35,19 +32,18 @@ export function getReachType({
   verticalCloseEdge,
   reachPosition,
 }: {
-  initialTouchState: TouchStartEnum;
-  horizontalCloseEdge: CloseEdgeEnum;
-  verticalCloseEdge: CloseEdgeEnum;
-  reachPosition: ReachTypeEnum;
-}): ReachTypeEnum {
-  if ((horizontalCloseEdge > 0 && initialTouchState === TouchStartEnum.X) || reachPosition === ReachTypeEnum.XReach) {
-    return ReachTypeEnum.XReach;
+  initialTouchState: TouchStartType;
+  horizontalCloseEdge: CloseEdgeType;
+  verticalCloseEdge: CloseEdgeType;
+  reachPosition: ReachType;
+}): ReachType {
+  if ((horizontalCloseEdge && initialTouchState === 'x') || reachPosition === 'x') {
+    return 'x';
   } else if (
-    (verticalCloseEdge > 0 &&
-      (initialTouchState === TouchStartEnum.YPull || initialTouchState === TouchStartEnum.YPush)) ||
-    reachPosition === ReachTypeEnum.YReach
+    (verticalCloseEdge && (initialTouchState === 'pull' || initialTouchState === 'push')) ||
+    reachPosition === 'y'
   ) {
-    return ReachTypeEnum.YReach;
+    return 'y';
   }
-  return ReachTypeEnum.Normal;
+  return undefined;
 }

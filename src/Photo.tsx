@@ -65,7 +65,7 @@ export default function Photo({
   if (src && !broken) {
     return loaded ? (
       <img
-        className={`PhotoView__Photo${className && ` ${className}`}`}
+        className={`PhotoView__Photo${className ? ` ${className}` : ''}`}
         src={src}
         width={width}
         height={height}
