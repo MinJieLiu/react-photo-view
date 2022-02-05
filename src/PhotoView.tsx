@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import isTouchDevice from './utils/isTouchDevice';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
-import slideToPosition from './utils/slideToPosition';
 import { getReachType, getClosedEdge } from './utils/getCloseEdge';
 import getAnimateOrigin from './utils/getAnimateOrigin';
 import { maxScale, minStartTouchOffset, minScale, scaleBuffer } from './variables';
@@ -14,6 +13,7 @@ import useDebounceCallback from './hooks/useDebounceCallback';
 import useEventListener from './hooks/useEventListener';
 import useContinuousTap from './hooks/useContinuousTap';
 import useTargetScale from './hooks/useTargetScale';
+import useScrollPosition from './hooks/useScrollPosition';
 import type { IPhotoLoadedParams } from './Photo';
 import Photo from './Photo';
 import './PhotoView.less';
@@ -98,6 +98,8 @@ const initialState = {
   touchedTime: 0,
   // 多指触控间距
   lastTouchLength: 0,
+  // 是否渐变
+  transition: true,
 
   // 当前边缘触发状态
   reachPosition: undefined as ReachType,
@@ -148,6 +150,7 @@ export default function PhotoView({
     lastMoveClientY,
     touchedTime,
     lastTouchLength,
+    transition,
 
     reachPosition,
   } = state;
@@ -236,6 +239,17 @@ export default function PhotoView({
     },
   );
 
+  const slideToPosition = useScrollPosition(
+    (nextX, should) => {
+      updateState({ x: nextX, transition: should });
+      return !touched;
+    },
+    (nextY, should) => {
+      updateState({ y: nextY, transition: should });
+      return !touched;
+    },
+  );
+
   const handlePhotoTap = useContinuousTap(
     (currentClientX: number, currentClientY: number) => {
       onPhotoTap?.(currentClientX, currentClientY);
@@ -257,6 +271,7 @@ export default function PhotoView({
       updateState({
         clientX,
         clientY,
+        transition: true,
         ...position,
         ...(toScale <= 1 && { x: 0, y: 0 }),
       });
@@ -272,25 +287,29 @@ export default function PhotoView({
       if (targetScale !== scale) {
         onWheel(targetScale);
       }
+      const shouldMove = hasMove && !multiple;
+
       updateState({
         touched: false,
         maskTouched: false,
+        transition: !shouldMove,
         // 重置触发状态
         reachPosition: undefined,
-        ...(hasMove &&
-          !multiple &&
-          slideToPosition({
-            x,
-            y,
-            lastX,
-            lastY,
-            width,
-            height,
-            scale,
-            rotate,
-            touchedTime,
-          })),
       });
+      // Go
+      if (shouldMove) {
+        slideToPosition({
+          x,
+          y,
+          lastX,
+          lastY,
+          width,
+          height,
+          scale,
+          rotate,
+          touchedTime,
+        });
+      }
 
       onReachUp?.(nextClientX, nextClientY);
       // 触发 Tap 事件
@@ -387,6 +406,7 @@ export default function PhotoView({
     updateState({
       clientX: e.clientX,
       clientY: e.clientY,
+      transition: true,
       ...position,
       ...(toScale <= 1 && { x: 0, y: 0 }),
     });
@@ -422,7 +442,9 @@ export default function PhotoView({
     handleStart(e.clientX, e.clientY, 0);
   }
   // 延迟更新 width/height
-  const [currentWidth, currentHeight, currentScale, disableTransition] = useTargetScale(width, height, scale);
+  const [currentWidth, currentHeight, currentScale] = useTargetScale(width, height, scale, (should) =>
+    updateState({ transition: should }),
+  );
 
   const transform = `translate3d(${x}px, ${y}px, 0) scale(${currentScale}) rotate(${rotate}deg)`;
 
@@ -461,7 +483,7 @@ export default function PhotoView({
           onWheel={handleWheel}
           style={{
             transform,
-            transition: touched || disableTransition ? undefined : 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
+            transition: touched || !transition ? undefined : 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
             willChange: isActive ? 'transform' : undefined,
           }}
           onPhotoLoad={handlePhotoLoad}
