@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import PhotoView from './PhotoView';
-import SlidePortal from './components/SlidePortal';
-import CloseIcon from './components/CloseIcon';
-import ArrowLeft from './components/ArrowLeft';
-import ArrowRight from './components/ArrowRight';
-import isTouchDevice from './utils/isTouchDevice';
+import React, { useLayoutEffect, useState } from 'react';
 import type { DataType, IPhotoProviderBase, OverlayRenderProps } from './types';
 import type { ReachType } from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset, maxScale, minScale } from './variables';
+import isTouchDevice from './utils/isTouchDevice';
 import useSetState from './hooks/useSetState';
 import useEventListener from './hooks/useEventListener';
 import useAnimationVisible from './hooks/useAnimationVisible';
 import useAnimationOrigin from './hooks/useAnimationOrigin';
+import SlidePortal from './components/SlidePortal';
+import CloseIcon from './components/CloseIcon';
+import ArrowLeft from './components/ArrowLeft';
+import ArrowRight from './components/ArrowRight';
+import PhotoView from './PhotoView';
 import './PhotoSlider.less';
 
 export interface IPhotoSliderProps extends IPhotoProviderBase {
@@ -84,8 +84,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     toolbarRender,
     className,
     maskClassName,
-    viewClassName,
-    imageClassName,
+    photoClassName,
+    photoWrapClassName,
     loadingElement,
     brokenElement,
     images,
@@ -123,11 +123,23 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   const imageLength = images.length;
   const currentImage = images[index];
 
-  useEffect(() => {
-    updateState({
-      translateX: index * -(window.innerWidth + horizontalOffset),
-    });
-  }, [index]);
+  // 显示动画处理
+  const { realVisible, activeAnimation, onAnimationEnd } = useAnimationVisible(visible);
+  // 动画位置计算
+  const originRect = useAnimationOrigin(visible, currentImage?.originRef);
+
+  useLayoutEffect(() => {
+    // 显示弹出层，修正正确的指向
+    if (realVisible) {
+      updateState({
+        shouldTransition: false,
+        translateX: index * -(window.innerWidth + horizontalOffset),
+      });
+      return;
+    }
+    // 关闭后清空状态
+    updateState(initialState);
+  }, [realVisible]);
 
   useEventListener('keydown', (evt: KeyboardEvent) => {
     if (visible) {
@@ -301,7 +313,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     // 当前偏移
     const currentTranslateX = -singlePageWidth * index;
 
-    if (Math.abs(offsetClientY) > window.innerHeight * 0.35 && canPullClose && pullClosable) {
+    if (Math.abs(offsetClientY) > 100 && canPullClose && pullClosable) {
       willClose = true;
       handleClose();
     }
@@ -318,11 +330,6 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   const transform = `translate3d(${translateX}px, 0px, 0)`;
   // Overlay
   const overlayIntro = currentImage && currentImage.intro;
-
-  // 显示动画处理
-  const { realVisible, activeAnimation, onAnimationEnd } = useAnimationVisible(visible);
-  // 动画位置计算
-  const originRect = useAnimationOrigin(visible, currentImage?.originRef);
 
   if (!realVisible) {
     return null;
@@ -394,8 +401,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
               onReachUp={handleReachUp}
               onPhotoTap={handlePhotoTap}
               onMaskTap={handlePhotoMaskTap}
-              viewClassName={viewClassName}
-              className={imageClassName}
+              wrapClassName={photoWrapClassName}
+              className={photoClassName}
               style={{
                 left: `${(innerWidth + horizontalOffset) * realIndex}px`,
                 transform,

@@ -20,7 +20,7 @@ export function getClosedEdge(position: number, scale: number, size: number, inn
   } else if (position < 0 && outOffsetX + position <= 0) {
     return 'after';
   }
-  return 'normal';
+  return undefined;
 }
 
 /**

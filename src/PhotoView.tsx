@@ -1,6 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import type { IPhotoLoadedParams } from './Photo';
-import Photo from './Photo';
 import isTouchDevice from './utils/isTouchDevice';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
@@ -15,13 +13,16 @@ import getSuitableImageSize from './utils/getSuitableImageSize';
 import useDebounceCallback from './hooks/useDebounceCallback';
 import useEventListener from './hooks/useEventListener';
 import useContinuousTap from './hooks/useContinuousTap';
+import useTargetScale from './hooks/useTargetScale';
+import type { IPhotoLoadedParams } from './Photo';
+import Photo from './Photo';
 import './PhotoView.less';
 
 export interface PhotoViewProps {
   // 图片地址
   src: string;
   // 容器类名
-  viewClassName?: string;
+  wrapClassName?: string;
   // 图片类名
   className?: string;
   // style
@@ -104,7 +105,7 @@ const initialState = {
 
 export default function PhotoView({
   src,
-  viewClassName,
+  wrapClassName,
   className,
   style,
   loadingElement,
@@ -141,12 +142,10 @@ export default function PhotoView({
 
     clientX,
     clientY,
-
     lastX,
     lastY,
     lastMoveClientX,
     lastMoveClientY,
-
     touchedTime,
     lastTouchLength,
 
@@ -182,13 +181,13 @@ export default function PhotoView({
         const offsetX = nextClientX - lastMoveClientX;
         const offsetY = nextClientY - lastMoveClientY;
         // 边缘触发状态
-        let currentReachState = undefined;
+        let currentReach: ReachType = undefined;
         if (touchLength === 0) {
           // 边缘超出状态
           const horizontalCloseEdge = getClosedEdge(offsetX + lastX, scale, currentWidth, window.innerWidth);
           const verticalCloseEdge = getClosedEdge(offsetY + lastY, scale, currentHeight, window.innerHeight);
           // 边缘触发检测
-          currentReachState = getReachType({
+          currentReach = getReachType({
             initialTouchState: initialTouchRef.current,
             horizontalCloseEdge,
             verticalCloseEdge,
@@ -196,12 +195,12 @@ export default function PhotoView({
           });
 
           // 接触边缘
-          if (currentReachState !== undefined) {
-            onReachMove(currentReachState, nextClientX, nextClientY, scale);
+          if (currentReach !== undefined) {
+            onReachMove(currentReach, nextClientX, nextClientY, scale);
           }
         }
         // 横向边缘触发、背景触发禁用当前滑动
-        if (currentReachState === 'x' || maskTouched) {
+        if (currentReach === 'x' || maskTouched) {
           updateState({
             reachPosition: 'x',
           });
@@ -213,10 +212,12 @@ export default function PhotoView({
             Math.min(endScale, Math.max(maxScale, naturalWidth / width)),
             minScale - scaleBuffer,
           );
-          onWheel(toScale);
+          if (scale !== toScale) {
+            onWheel(toScale);
+          }
           updateState({
             lastTouchLength: touchLength,
-            reachPosition: currentReachState,
+            reachPosition: currentReach,
             ...getPositionOnMoveOrScale({
               x,
               y,
@@ -257,12 +258,12 @@ export default function PhotoView({
         clientX,
         clientY,
         ...position,
-        ...(scale <= 1 && { x: 0, y: 0 }),
+        ...(toScale <= 1 && { x: 0, y: 0 }),
       });
     },
   );
 
-  function handleUp(nextClientX: number, nextClientY: number) {
+  function handleUp(nextClientX: number, nextClientY: number, multiple?: boolean) {
     // 重置响应状态
     initialTouchRef.current = undefined;
     if ((touched || maskTouched) && isActive) {
@@ -276,22 +277,19 @@ export default function PhotoView({
         maskTouched: false,
         // 重置触发状态
         reachPosition: undefined,
-        ...(hasMove
-          ? slideToPosition({
-              x,
-              y,
-              lastX,
-              lastY,
-              width,
-              height,
-              scale,
-              rotate,
-              touchedTime,
-            })
-          : {
-              x,
-              y,
-            }),
+        ...(hasMove &&
+          !multiple &&
+          slideToPosition({
+            x,
+            y,
+            lastX,
+            lastY,
+            width,
+            height,
+            scale,
+            rotate,
+            touchedTime,
+          })),
       });
 
       onReachUp?.(nextClientX, nextClientY);
@@ -324,9 +322,10 @@ export default function PhotoView({
   );
   useEventListener(
     isTouchDevice ? 'touchend' : undefined,
-    (e) => {
-      const touch = e.changedTouches[0];
-      handleUp(touch.clientX, touch.clientY);
+    ({ changedTouches }) => {
+      const touch = changedTouches[0];
+      const multiple = changedTouches.length > 1;
+      handleUp(touch.clientX, touch.clientY, multiple);
     },
     { passive: false },
   );
@@ -384,14 +383,14 @@ export default function PhotoView({
       clientY: e.clientY,
       offsetScale: toScale / scale,
     });
-    onWheel(toScale);
 
     updateState({
       clientX: e.clientX,
       clientY: e.clientY,
       ...position,
-      ...(scale <= 1 && { x: 0, y: 0 }),
+      ...(toScale <= 1 && { x: 0, y: 0 }),
     });
+    onWheel(toScale);
   }
 
   function handleMaskStart(currentClientX: number, currentClientY: number) {
@@ -422,11 +421,13 @@ export default function PhotoView({
     e.preventDefault();
     handleStart(e.clientX, e.clientY, 0);
   }
+  // 延迟更新 width/height
+  const [currentWidth, currentHeight, currentScale, disableTransition] = useTargetScale(width, height, scale);
 
-  const transform = `translate3d(${x}px, ${y}px, 0) scale(${(width / naturalWidth) * scale}) rotate(${rotate}deg)`;
+  const transform = `translate3d(${x}px, ${y}px, 0) scale(${currentScale}) rotate(${rotate}deg)`;
 
   return (
-    <div className={`PhotoView__PhotoWrap${viewClassName ? ` ${viewClassName}` : ''}`} style={style}>
+    <div className={`PhotoView__PhotoWrap${wrapClassName ? ` ${wrapClassName}` : ''}`} style={style}>
       <div
         className="PhotoView__PhotoMask"
         onMouseDown={!isTouchDevice && isActive ? handleMaskMouseDown : undefined}
@@ -451,8 +452,8 @@ export default function PhotoView({
         <Photo
           className={className}
           src={src}
-          width={naturalWidth}
-          height={naturalHeight}
+          width={currentWidth}
+          height={currentHeight}
           loaded={loaded}
           broken={broken}
           onMouseDown={isTouchDevice ? undefined : handleMouseDown}
@@ -460,7 +461,8 @@ export default function PhotoView({
           onWheel={handleWheel}
           style={{
             transform,
-            transition: touched ? undefined : 'transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
+            transition: touched || disableTransition ? undefined : 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
+            willChange: isActive ? 'transform' : undefined,
           }}
           onPhotoLoad={handlePhotoLoad}
           loadingElement={loadingElement}

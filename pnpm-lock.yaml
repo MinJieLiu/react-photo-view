@@ -4,7 +4,6 @@ specifiers:
   '@types/react': ^17.0.19
   '@types/react-dom': ^17.0.9
   '@umijs/fabric': ^2.10.1
-  classnames: ^2.3.1
   husky: ^7.0.4
   less: ^4.1.2
   lint-staged: ^12.3.3
@@ -18,7 +17,6 @@ devDependencies:
   '@types/react': 17.0.38
   '@types/react-dom': 17.0.11
   '@umijs/fabric': 2.10.1
-  classnames: 2.3.1
   husky: 7.0.4
   less: 4.1.2
   lint-staged: 12.3.3
@@ -2235,10 +2233,6 @@ packages:
 
   /ci-info/2.0.0:
     resolution: {integrity: sha512-5tK7EtrZ0N+OLFMthtqOj4fI2Jeb88C4CAZPu25LDVUgXJ0A3Js4PMGqrn0JU1W0Mh1/Z8wZzYPxqUrXeBboCQ==}
-    dev: true
-
-  /classnames/2.3.1:
-    resolution: {integrity: sha512-OlQdbZ7gLfGarSqxesMesDa5uz7KFbID8Kpq/SxIoNGDqY8lSYs0D+hhtBXhcdB3rcbXArFr7vlHheLk1voeNA==}
     dev: true
 
   /clean-regexp/1.0.0:

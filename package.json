@@ -20,6 +20,7 @@
     "gallery"
   ],
   "scripts": {
+    "dev": "pnpm -C ./example dev",
     "build": "microbundle --jsx React.createElement --external react,react-dom",
     "prepublishOnly": "npm run build",
     "prepare": "husky install",

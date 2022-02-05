@@ -1,7 +1,8 @@
-import React from 'react';
-import isTouchDevice from './utils/isTouchDevice';
+import type React from 'react';
+import { Children, cloneElement, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { PhotoContextType } from './photo-context';
 import PhotoContext from './photo-context';
+import isTouchDevice from './utils/isTouchDevice';
 
 export interface IPhotoConsumer {
   src: string;
@@ -10,31 +11,31 @@ export interface IPhotoConsumer {
 }
 
 const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
-  const photoContext = React.useContext<PhotoContextType>(PhotoContext);
-  const key = React.useMemo(() => photoContext.uniqueId(), []);
-  const [position, updatePosition] = React.useState<{
+  const photoContext = useContext<PhotoContextType>(PhotoContext);
+  const key = useMemo(() => photoContext.uniqueId(), []);
+  const [position, updatePosition] = useState<{
     clientX: number | undefined;
     clientY: number | undefined;
   }>({
     clientX: undefined,
     clientY: undefined,
   });
-  const originRef = React.useRef<HTMLElement>(null);
+  const originRef = useRef<HTMLElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       photoContext.removeItem(key);
     };
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     photoContext.updateItem({
       key,
       src,
       originRef,
       intro,
     });
-  }, [src, intro])
+  }, [src, intro]);
 
   function handleTouchStart(e: React.TouchEvent) {
     const { clientX, clientY } = e.touches[0];
@@ -74,8 +75,8 @@ const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
   }
 
   if (children) {
-    return React.Children.only(
-      React.cloneElement(
+    return Children.only(
+      cloneElement(
         children,
         isTouchDevice
           ? {

@@ -13,7 +13,7 @@ import photo8 from '../images/8.jpg';
 export const photoImages = [photo1, photo2, photo3, photo4, photo5, photo6, photo7, photo8];
 
 export const ImageList = styled.div`
-  padding: 40px;
+  padding: 10px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;

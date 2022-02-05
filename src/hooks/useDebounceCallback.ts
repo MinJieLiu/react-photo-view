@@ -39,7 +39,6 @@ export default function useDebounceCallback<CallbackArguments extends any[]>(
       if (last === 0) {
         if (leading) {
           call();
-          return;
         }
         prev.current = now;
       }
