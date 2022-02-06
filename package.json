@@ -1,6 +1,6 @@
 {
   "name": "react-photo-view",
-  "version": "0.6.0-alpha-0.0.0",
+  "version": "0.6.0",
   "description": "一款精致的 React 的图片预览组件",
   "author": "MinJieLiu",
   "license": "MIT",
@@ -8,7 +8,7 @@
   "type": "module",
   "source": "src/index.ts",
   "main": "./dist/react-photo-view.umd.js",
-  "module": "src",
+  "module": "./dist/react-photo-view.module.js",
   "types": "./dist/index.d.ts",
   "keywords": [
     "react",

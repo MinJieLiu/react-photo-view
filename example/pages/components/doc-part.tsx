@@ -4,7 +4,7 @@ import { ImageList, photoImages, ViewBox } from './doc-components';
 
 export default function DocDemo() {
   return (
-    <PhotoProvider>
+    <PhotoProvider loop={false}>
       <ImageList>
         {photoImages.map((item, index) => (
           <PhotoConsumer key={index} src={item}>

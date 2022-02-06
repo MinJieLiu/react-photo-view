@@ -92,7 +92,7 @@ function scrollMove(initialSpeed: number, callback: (spatial: number) => boolean
   // 加速度
   const acceleration = -0.001;
   // 阻力
-  const resistance = 0.001;
+  const resistance = 0.0005;
 
   let v = initialSpeed;
   let s = 0;

@@ -4,7 +4,7 @@ import { Button, ImageList, photoImages } from './doc-components';
 
 export default function DocDemo() {
   return (
-    <PhotoProvider>
+    <PhotoProvider loop={false} maskOpacity={0.5}>
       <ImageList>
         <PhotoConsumer src={photoImages[3]}>
           <Button>打开预览</Button>

@@ -75,6 +75,11 @@ export type OverlayRenderProps = {
 
 export interface IPhotoProviderBase {
   /**
+   * 是否循环预览
+   * @defaultValue true
+   */
+  loop?: boolean;
+  /**
    * 图片点击是否可关闭
    */
   photoClosable?: boolean;
@@ -83,6 +88,11 @@ export interface IPhotoProviderBase {
    * @defaultValue true
    */
   maskClosable?: boolean;
+  /**
+   * 默认背景透明度
+   * @defaultValue 1
+   */
+  maskOpacity?: number;
   /**
    * 下拉是否可关闭
    * @defaultValue true

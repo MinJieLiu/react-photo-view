@@ -8,12 +8,21 @@ const SlidePortal: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className
 
   React.useEffect(() => {
     document.body.appendChild(dialogNode);
-    const { style } = document.body;
-    const stashed = style.overflow;
-    style.overflow = 'hidden';
+
+    function handleLock(el: HTMLElement) {
+      const { style } = el;
+      const lastOverflow = style.overflow;
+      style.overflow = 'hidden';
+
+      return function unlock() {
+        style.overflow = lastOverflow;
+      };
+    }
+
+    const unlockBody = handleLock(document.body);
 
     return () => {
-      style.overflow = stashed;
+      unlockBody();
       document.body.removeChild(dialogNode);
     };
   }, []);
