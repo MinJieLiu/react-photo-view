@@ -1,6 +1,6 @@
 import 'react-photo-view/dist/react-photo-view.css';
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import photo1 from '../images/1.jpg';
 import photo2 from '../images/2.jpg';
 import photo3 from '../images/3.jpg';
@@ -29,21 +29,34 @@ export const ViewBox = styled.div<{ viewImage: string }>`
   background-size: cover;
 `;
 
-export const Button = styled.button<{ colorType?: string }>`
-  padding: 6px 10px;
-  border: 1px solid #ccc;
+export const Button = styled.button<{ primary?: boolean }>`
+  margin: 4px;
+  padding: 4px 10px;
+  border: 1px solid #d9d9d9;
+  background: #fff;
   border-radius: 2px;
+  font-size: 14px;
+  transition: all 0.2s linear;
   cursor: pointer;
 
-  &:not(:last-child) {
-    margin-right: 12px;
+  &:hover {
+    color: #1890ff;
+    border-color: #1890ff;
   }
 
-  &[colorType='primary'] {
-    background: deepskyblue;
-    border-color: deepskyblue;
-    color: white;
-  }
+  ${({ primary }) =>
+    primary &&
+    css`
+      color: white;
+      border: 1px solid #1890ff;
+      background: #1890ff;
+
+      &:hover {
+        color: white;
+        background: #40a9ff;
+        border-color: #40a9ff;
+      }
+    `}
 `;
 
 export const DefaultImage = styled.img`

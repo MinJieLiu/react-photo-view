@@ -16,7 +16,7 @@ export default function DocDemo() {
     <ImageList>
       <Button onClick={() => setPhotoIndex(2)}>setPhotoIndex(2)</Button>
       <Button onClick={() => setPhotoIndex(4)}>setPhotoIndex(4)</Button>
-      <Button onClick={handleShowSlider} colorType="primary">
+      <Button onClick={handleShowSlider} primary>
         打开 PhotoSlider
       </Button>
 

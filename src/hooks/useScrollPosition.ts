@@ -4,41 +4,42 @@ import { maxTouchTime } from '../variables';
 import useMethods from './useMethods';
 
 const raf = requestAnimationFrame;
+const caf = cancelAnimationFrame;
 
 /**
  * 物理滚动到具体位置
  */
-export default function useScrollPosition<C extends (spatial: number) => boolean>(callbackX: C, callbackY: C) {
+export default function useScrollPosition<C extends (spatial: number, easing?: boolean) => boolean>(
+  callbackX: C,
+  callbackY: C,
+) {
   const callback = useMethods({
-    x(spatial: number) {
-      return callbackX(spatial);
+    x(spatial: number, easing?: boolean) {
+      return callbackX(spatial, easing);
     },
-    y(spatial: number) {
-      return callbackY(spatial);
+    y(spatial: number, easing?: boolean) {
+      return callbackY(spatial, easing);
     },
   });
 
-  return ({
-    x,
-    y,
-    lastX,
-    lastY,
-    width,
-    height,
-    scale,
-    rotate,
-    touchedTime,
-  }: {
-    x: number;
-    y: number;
-    lastX: number;
-    lastY: number;
-    width: number;
-    height: number;
-    scale: number;
-    rotate: number;
-    touchedTime: number;
-  }) => {
+  return (
+    x: number,
+    y: number,
+    lastX: number,
+    lastY: number,
+    width: number,
+    height: number,
+    scale: number,
+    rotate: number,
+    touchedTime: number,
+  ) => {
+    // 缩小的情况下不执行滚动逻辑
+    if (scale < 1) {
+      callback.x(0, true);
+      callback.y(0, true);
+      return;
+    }
+
     const moveTime = Date.now() - touchedTime;
     // 初始速度
     const speedX = (x - lastX) / moveTime;
@@ -114,13 +115,15 @@ function scrollMove(initialSpeed: number, callback: (spatial: number) => boolean
     lastTime = now;
 
     if (direction * v <= 0) {
-      cancelAnimationFrame(frameId);
+      caf(frameId);
       return;
     }
 
     if (callback(s)) {
       frameId = raf(calcMove);
+      return;
     }
+    caf(frameId);
   };
   frameId = raf(calcMove);
 }
@@ -144,12 +147,14 @@ function easeOutMove(start: number, end: number, callback: (spatial: number) => 
 
     if (result) {
       frameId = raf(calcMove);
+      return;
     }
+    caf(frameId);
   };
   frameId = raf(calcMove);
 
   setTimeout(() => {
-    cancelAnimationFrame(frameId);
+    caf(frameId);
     callback(end);
   }, totalTime);
 }

@@ -18,6 +18,7 @@ import useScrollPosition from './hooks/useScrollPosition';
 import type { IPhotoLoadedParams } from './Photo';
 import Photo from './Photo';
 import './PhotoView.less';
+import useMountedRef from './hooks/useMountedRef';
 
 export interface PhotoViewProps {
   // 图片地址
@@ -98,12 +99,12 @@ const initialState = {
   // 触摸开始时时间
   touchedTime: 0,
   // 多指触控间距
-  lastTouchLength: 0,
+  touchLength: 0,
   // 是否渐变
   easing: true,
 
   // 当前边缘触发状态
-  reachPosition: undefined as ReachType,
+  currReach: undefined as ReachType,
 };
 
 export default function PhotoView({
@@ -129,6 +130,7 @@ export default function PhotoView({
 }: PhotoViewProps) {
   const [state, updateState] = useSetState(initialState);
   const initialTouchRef = useRef<TouchStartType>();
+  const mounted = useMountedRef();
 
   const {
     naturalWidth,
@@ -150,19 +152,19 @@ export default function PhotoView({
     lastClientX,
     lastClientY,
     touchedTime,
-    lastTouchLength,
+    touchLength,
     easing,
 
-    reachPosition,
+    currReach,
   } = state;
 
   const handleMove = useDebounceCallback(
-    (nextClientX: number, nextClientY: number, touchLength: number = 0) => {
+    (nextClientX: number, nextClientY: number, currentTouchLength: number = 0) => {
       if ((touched || maskTouched) && isActive) {
         // 通过旋转调换宽高
         const [currentWidth, currentHeight] = getRotateSize(rotate, width, height);
         // 单指最小缩放下，以初始移动距离来判断意图
-        if (touchLength === 0 && initialTouchRef.current === undefined) {
+        if (currentTouchLength === 0 && initialTouchRef.current === undefined) {
           const isStillX = Math.abs(nextClientX - clientX) <= minStartTouchOffset;
           const isStillY = Math.abs(nextClientY - clientY) <= minStartTouchOffset;
           // 初始移动距离不足
@@ -182,12 +184,12 @@ export default function PhotoView({
         const offsetY = nextClientY - lastClientY;
         // 边缘触发状态
         let currentReach: ReachType = undefined;
-        if (touchLength === 0) {
+        if (currentTouchLength === 0) {
           // 边缘超出状态
           const horizontalCloseEdge = getClosedEdge(offsetX + lastX, scale, currentWidth, window.innerWidth);
           const verticalCloseEdge = getClosedEdge(offsetY + lastY, scale, currentHeight, window.innerHeight);
           // 边缘触发检测
-          currentReach = getReachType(initialTouchRef.current, horizontalCloseEdge, verticalCloseEdge, reachPosition);
+          currentReach = getReachType(initialTouchRef.current, horizontalCloseEdge, verticalCloseEdge, currReach);
 
           // 接触边缘
           if (currentReach !== undefined) {
@@ -197,11 +199,11 @@ export default function PhotoView({
         // 横向边缘触发、背景触发禁用当前滑动
         if (currentReach === 'x' || maskTouched) {
           updateState({
-            reachPosition: 'x',
+            currReach: 'x',
           });
         } else {
           // 目标倍数
-          const endScale = scale + ((touchLength - lastTouchLength) / 100 / 2) * scale;
+          const endScale = scale + ((currentTouchLength - touchLength) / 100 / 2) * scale;
           // 限制最大倍数和最小倍数
           const toScale = Math.max(
             Math.min(endScale, Math.max(maxScale, naturalWidth / width)),
@@ -210,10 +212,22 @@ export default function PhotoView({
           if (scale !== toScale) {
             onWheel(toScale);
           }
+          const position = getPositionOnMoveOrScale(
+            x,
+            y,
+            nextClientX,
+            nextClientY,
+            width,
+            height,
+            scale,
+            toScale,
+            offsetX,
+            offsetY,
+          );
           updateState({
-            lastTouchLength: touchLength,
-            reachPosition: currentReach,
-            ...getPositionOnMoveOrScale(x, y, nextClientX, nextClientY, toScale / scale, offsetX, offsetY),
+            touchLength: currentTouchLength,
+            currReach: currentReach,
+            ...position,
           });
         }
       }
@@ -224,13 +238,17 @@ export default function PhotoView({
   );
 
   const slideToPosition = useScrollPosition(
-    (nextX) => {
-      updateState({ x: nextX, easing: false });
-      return !touched;
+    (nextX, should) => {
+      if (mounted.current) {
+        updateState({ x: nextX, easing: should || false });
+      }
+      return !touched && mounted.current;
     },
-    (nextY) => {
-      updateState({ y: nextY, easing: false });
-      return !touched;
+    (nextY, should) => {
+      if (mounted.current) {
+        updateState({ y: nextY, easing: should || false });
+      }
+      return !touched && mounted.current;
     },
   );
 
@@ -239,12 +257,12 @@ export default function PhotoView({
       onPhotoTap?.(currentClientX, currentClientY);
     },
     (currentClientX: number, currentClientY: number) => {
-      if (reachPosition !== undefined) {
+      if (currReach !== undefined) {
         return;
       }
       // 若图片足够大，则放大适应的倍数
       const toScale = scale !== 1 ? 1 : Math.max(2, naturalWidth / width);
-      const position = getPositionOnMoveOrScale(x, y, currentClientX, currentClientY, toScale / scale);
+      const position = getPositionOnMoveOrScale(x, y, currentClientX, currentClientY, width, height, scale, toScale);
       onWheel(toScale);
       updateState({
         clientX,
@@ -270,21 +288,11 @@ export default function PhotoView({
         maskTouched: false,
         easing: true,
         // 重置触发状态
-        reachPosition: undefined,
+        currReach: undefined,
       });
       // Go
       if (hasMove) {
-        slideToPosition({
-          x,
-          y,
-          lastX,
-          lastY,
-          width,
-          height,
-          scale,
-          rotate,
-          touchedTime,
-        });
+        slideToPosition(x, y, lastX, lastY, width, height, scale, rotate, touchedTime);
       }
 
       onReachUp?.(nextClientX, nextClientY);
@@ -349,7 +357,7 @@ export default function PhotoView({
     });
   }
 
-  function handleStart(currentClientX: number, currentClientY: number, touchLength: number = 0) {
+  function handleStart(currentClientX: number, currentClientY: number, currentTouchLength: number = 0) {
     updateState({
       touched: true,
       clientX: currentClientX,
@@ -358,19 +366,19 @@ export default function PhotoView({
       lastClientY: currentClientY,
       lastX: x,
       lastY: y,
-      lastTouchLength: touchLength,
+      touchLength: currentTouchLength,
       touchedTime: Date.now(),
     });
   }
 
   function handleWheel(e: React.WheelEvent) {
-    if (reachPosition !== undefined) {
+    if (currReach !== undefined) {
       return;
     }
     const endScale = scale - e.deltaY / 100 / 2;
     // 限制最大倍数和最小倍数
     const toScale = Math.max(Math.min(endScale, Math.max(maxScale, naturalWidth / width)), minScale);
-    const position = getPositionOnMoveOrScale(x, y, e.clientX, e.clientY, toScale / scale);
+    const position = getPositionOnMoveOrScale(x, y, e.clientX, e.clientY, width, height, scale, toScale);
 
     updateState({
       clientX: e.clientX,
