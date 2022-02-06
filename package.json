@@ -8,7 +8,7 @@
   "type": "module",
   "source": "src/index.ts",
   "main": "./dist/react-photo-view.umd.js",
-  "module": "./dist/react-photo-view.module.js",
+  "module": "src",
   "types": "./dist/index.d.ts",
   "keywords": [
     "react",

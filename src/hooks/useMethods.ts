@@ -3,20 +3,20 @@ import { useRef } from 'react';
 /**
  * Hook of persistent methods
  */
-export default function useMethods<T extends Record<string, (...args: any[]) => any>>(methods: T) {
+export default function useMethods<T extends Record<string, (...args: any[]) => any>>(fn: T) {
   const { current } = useRef({
-    methods,
-    func: undefined as T | undefined,
+    fn,
+    curr: undefined as T | undefined,
   });
-  current.methods = methods;
+  current.fn = fn;
 
-  if (!current.func) {
-    const func = Object.create(null);
-    Object.keys(methods).forEach((key) => {
-      func[key] = (...args: unknown[]) => current.methods[key].call(current.methods, ...args);
+  if (!current.curr) {
+    const curr = Object.create(null);
+    Object.keys(fn).forEach((key) => {
+      curr[key] = (...args: unknown[]) => current.fn[key].call(current.fn, ...args);
     });
-    current.func = func;
+    current.curr = curr;
   }
 
-  return current.func as T;
+  return current.curr as T;
 }

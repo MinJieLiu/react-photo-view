@@ -1,23 +1,15 @@
 /**
  * 获取移动或缩放之后的中心点
  */
-export default function getPositionOnMoveOrScale({
-  x,
-  y,
-  clientX,
-  clientY,
-  offsetX = 0,
-  offsetY = 0,
-  offsetScale,
-}: {
-  x: number;
-  y: number;
-  clientX: number;
-  clientY: number;
-  offsetX?: number;
-  offsetY?: number;
-  offsetScale: number;
-}) {
+export default function getPositionOnMoveOrScale(
+  x: number,
+  y: number,
+  clientX: number,
+  clientY: number,
+  offsetScale: number,
+  offsetX: number = 0,
+  offsetY: number = 0,
+) {
   const { innerWidth, innerHeight } = window;
   const centerClientX = innerWidth / 2;
   const centerClientY = innerHeight / 2;
@@ -31,7 +23,7 @@ export default function getPositionOnMoveOrScale({
   return {
     x: originX + offsetX,
     y: originY + offsetY,
-    lastMoveClientX: clientX,
-    lastMoveClientY: clientY,
+    lastClientX: clientX,
+    lastClientY: clientY,
   };
 }

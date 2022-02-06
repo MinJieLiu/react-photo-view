@@ -2,8 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import isTouchDevice from './utils/isTouchDevice';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
-import { getReachType, getClosedEdge } from './utils/getCloseEdge';
+import { getReachType, getClosedEdge } from './utils/edgeHandle';
 import getAnimateOrigin from './utils/getAnimateOrigin';
+import getRotateSize from './utils/getRotateSize';
 import { maxScale, minStartTouchOffset, minScale, scaleBuffer } from './variables';
 import type { ReachMoveFunction, ReachFunction, PhotoTapFunction, OriginRectType, BrokenElementParams } from './types';
 import type { ReachType, TouchStartType } from './types';
@@ -90,16 +91,16 @@ const initialState = {
   // 触摸开始时图片 y 偏移量
   lastY: 0,
   // 上一个触摸状态 x 原始坐标
-  lastMoveClientX: 0,
+  lastClientX: 0,
   // 上一个触摸状态 y 原始坐标
-  lastMoveClientY: 0,
+  lastClientY: 0,
 
   // 触摸开始时时间
   touchedTime: 0,
   // 多指触控间距
   lastTouchLength: 0,
   // 是否渐变
-  transition: true,
+  easing: true,
 
   // 当前边缘触发状态
   reachPosition: undefined as ReachType,
@@ -146,11 +147,11 @@ export default function PhotoView({
     clientY,
     lastX,
     lastY,
-    lastMoveClientX,
-    lastMoveClientY,
+    lastClientX,
+    lastClientY,
     touchedTime,
     lastTouchLength,
-    transition,
+    easing,
 
     reachPosition,
   } = state;
@@ -158,12 +159,8 @@ export default function PhotoView({
   const handleMove = useDebounceCallback(
     (nextClientX: number, nextClientY: number, touchLength: number = 0) => {
       if ((touched || maskTouched) && isActive) {
-        let currentWidth = width;
-        let currentHeight = height;
-        // 若图片不是水平则调换属性
-        if (rotate % 180 !== 0) {
-          [currentWidth, currentHeight] = [height, width];
-        }
+        // 通过旋转调换宽高
+        const [currentWidth, currentHeight] = getRotateSize(rotate, width, height);
         // 单指最小缩放下，以初始移动距离来判断意图
         if (touchLength === 0 && initialTouchRef.current === undefined) {
           const isStillX = Math.abs(nextClientX - clientX) <= minStartTouchOffset;
@@ -172,8 +169,8 @@ export default function PhotoView({
           if (isStillX && isStillY) {
             // 方向记录上次移动距离，以便平滑过渡
             updateState({
-              lastMoveClientX: nextClientX,
-              lastMoveClientY: nextClientY,
+              lastClientX: nextClientX,
+              lastClientY: nextClientY,
             });
             return;
           }
@@ -181,8 +178,8 @@ export default function PhotoView({
           initialTouchRef.current = !isStillX ? 'x' : nextClientY > clientY ? 'pull' : 'push';
         }
 
-        const offsetX = nextClientX - lastMoveClientX;
-        const offsetY = nextClientY - lastMoveClientY;
+        const offsetX = nextClientX - lastClientX;
+        const offsetY = nextClientY - lastClientY;
         // 边缘触发状态
         let currentReach: ReachType = undefined;
         if (touchLength === 0) {
@@ -190,12 +187,7 @@ export default function PhotoView({
           const horizontalCloseEdge = getClosedEdge(offsetX + lastX, scale, currentWidth, window.innerWidth);
           const verticalCloseEdge = getClosedEdge(offsetY + lastY, scale, currentHeight, window.innerHeight);
           // 边缘触发检测
-          currentReach = getReachType({
-            initialTouchState: initialTouchRef.current,
-            horizontalCloseEdge,
-            verticalCloseEdge,
-            reachPosition,
-          });
+          currentReach = getReachType(initialTouchRef.current, horizontalCloseEdge, verticalCloseEdge, reachPosition);
 
           // 接触边缘
           if (currentReach !== undefined) {
@@ -221,15 +213,7 @@ export default function PhotoView({
           updateState({
             lastTouchLength: touchLength,
             reachPosition: currentReach,
-            ...getPositionOnMoveOrScale({
-              x,
-              y,
-              clientX: nextClientX,
-              clientY: nextClientY,
-              offsetX,
-              offsetY,
-              offsetScale: toScale / scale,
-            }),
+            ...getPositionOnMoveOrScale(x, y, nextClientX, nextClientY, toScale / scale, offsetX, offsetY),
           });
         }
       }
@@ -240,12 +224,12 @@ export default function PhotoView({
   );
 
   const slideToPosition = useScrollPosition(
-    (nextX, should) => {
-      updateState({ x: nextX, transition: should });
+    (nextX) => {
+      updateState({ x: nextX, easing: false });
       return !touched;
     },
-    (nextY, should) => {
-      updateState({ y: nextY, transition: should });
+    (nextY) => {
+      updateState({ y: nextY, easing: false });
       return !touched;
     },
   );
@@ -260,25 +244,19 @@ export default function PhotoView({
       }
       // 若图片足够大，则放大适应的倍数
       const toScale = scale !== 1 ? 1 : Math.max(2, naturalWidth / width);
-      const position = getPositionOnMoveOrScale({
-        x,
-        y,
-        clientX: currentClientX,
-        clientY: currentClientY,
-        offsetScale: toScale / scale,
-      });
+      const position = getPositionOnMoveOrScale(x, y, currentClientX, currentClientY, toScale / scale);
       onWheel(toScale);
       updateState({
         clientX,
         clientY,
-        transition: true,
+        easing: true,
         ...position,
         ...(toScale <= 1 && { x: 0, y: 0 }),
       });
     },
   );
 
-  function handleUp(nextClientX: number, nextClientY: number, multiple?: boolean) {
+  function handleUp(nextClientX: number, nextClientY: number) {
     // 重置响应状态
     initialTouchRef.current = undefined;
     if ((touched || maskTouched) && isActive) {
@@ -287,17 +265,15 @@ export default function PhotoView({
       if (targetScale !== scale) {
         onWheel(targetScale);
       }
-      const shouldMove = hasMove && !multiple;
-
       updateState({
         touched: false,
         maskTouched: false,
-        transition: !shouldMove,
+        easing: true,
         // 重置触发状态
         reachPosition: undefined,
       });
       // Go
-      if (shouldMove) {
+      if (hasMove) {
         slideToPosition({
           x,
           y,
@@ -335,7 +311,7 @@ export default function PhotoView({
     (e) => {
       e.preventDefault();
       const position = getMultipleTouchPosition(e);
-      handleMove(position.clientX, position.clientY, position.touchLength);
+      handleMove(...position);
     },
     { passive: false },
   );
@@ -343,8 +319,7 @@ export default function PhotoView({
     isTouchDevice ? 'touchend' : undefined,
     ({ changedTouches }) => {
       const touch = changedTouches[0];
-      const multiple = changedTouches.length > 1;
-      handleUp(touch.clientX, touch.clientY, multiple);
+      handleUp(touch.clientX, touch.clientY);
     },
     { passive: false },
   );
@@ -379,8 +354,8 @@ export default function PhotoView({
       touched: true,
       clientX: currentClientX,
       clientY: currentClientY,
-      lastMoveClientX: currentClientX,
-      lastMoveClientY: currentClientY,
+      lastClientX: currentClientX,
+      lastClientY: currentClientY,
       lastX: x,
       lastY: y,
       lastTouchLength: touchLength,
@@ -395,18 +370,12 @@ export default function PhotoView({
     const endScale = scale - e.deltaY / 100 / 2;
     // 限制最大倍数和最小倍数
     const toScale = Math.max(Math.min(endScale, Math.max(maxScale, naturalWidth / width)), minScale);
-    const position = getPositionOnMoveOrScale({
-      x,
-      y,
-      clientX: e.clientX,
-      clientY: e.clientY,
-      offsetScale: toScale / scale,
-    });
+    const position = getPositionOnMoveOrScale(x, y, e.clientX, e.clientY, toScale / scale);
 
     updateState({
       clientX: e.clientX,
       clientY: e.clientY,
-      transition: true,
+      easing: true,
       ...position,
       ...(toScale <= 1 && { x: 0, y: 0 }),
     });
@@ -433,8 +402,7 @@ export default function PhotoView({
   }
 
   function handleTouchStart(e: React.TouchEvent) {
-    const position = getMultipleTouchPosition(e);
-    handleStart(position.clientX, position.clientY, position.touchLength);
+    handleStart(...getMultipleTouchPosition(e));
   }
 
   function handleMouseDown(e: React.MouseEvent) {
@@ -443,7 +411,7 @@ export default function PhotoView({
   }
   // 延迟更新 width/height
   const [currentWidth, currentHeight, currentScale] = useTargetScale(width, height, scale, (should) =>
-    updateState({ transition: should }),
+    updateState({ easing: should }),
   );
 
   const transform = `translate3d(${x}px, ${y}px, 0) scale(${currentScale}) rotate(${rotate}deg)`;
@@ -483,7 +451,7 @@ export default function PhotoView({
           onWheel={handleWheel}
           style={{
             transform,
-            transition: touched || !transition ? undefined : 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
+            transition: touched || !easing ? undefined : 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
             willChange: isActive ? 'transform' : undefined,
           }}
           onPhotoLoad={handlePhotoLoad}

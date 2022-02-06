@@ -1,21 +1,13 @@
+import getRotateSize from './getRotateSize';
+
 /**
  * 获取图片合适的大小
  */
-export default function getSuitableImageSize(
-  naturalWidth: number,
-  naturalHeight: number,
-  rotate: number,
-) {
+export default function getSuitableImageSize(naturalWidth: number, naturalHeight: number, rotate: number) {
   let width;
   let height;
   let y = 0;
-  let { innerWidth, innerHeight } = window;
-  const isVertical = rotate % 180 !== 0;
-
-  // 若图片不是水平则调换宽高
-  if (isVertical) {
-    [innerHeight, innerWidth] = [innerWidth, innerHeight];
-  }
+  const [innerWidth, innerHeight, isVertical] = getRotateSize(rotate, window.innerWidth, window.innerHeight);
 
   const autoWidth = (naturalWidth / naturalHeight) * innerHeight;
   const autoHeight = (naturalHeight / naturalWidth) * innerWidth;

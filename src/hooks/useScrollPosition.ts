@@ -1,20 +1,20 @@
-import { getClosedEdge } from '../utils/getCloseEdge';
+import { computePositionEdge } from '../utils/edgeHandle';
+import getRotateSize from '../utils/getRotateSize';
 import { maxTouchTime } from '../variables';
 import useMethods from './useMethods';
+
+const raf = requestAnimationFrame;
 
 /**
  * 物理滚动到具体位置
  */
-export default function useScrollPosition<C extends (spatial: number, transition: boolean) => boolean>(
-  callbackX: C,
-  callbackY: C,
-) {
+export default function useScrollPosition<C extends (spatial: number) => boolean>(callbackX: C, callbackY: C) {
   const callback = useMethods({
-    x(spatial: number, transition: boolean) {
-      return callbackX(spatial, transition);
+    x(spatial: number) {
+      return callbackX(spatial);
     },
-    y(spatial: number, transition: boolean) {
-      return callbackY(spatial, transition);
+    y(spatial: number) {
+      return callbackY(spatial);
     },
   });
 
@@ -40,47 +40,59 @@ export default function useScrollPosition<C extends (spatial: number, transition
     touchedTime: number;
   }) => {
     const moveTime = Date.now() - touchedTime;
-
     // 初始速度
     const speedX = (x - lastX) / moveTime;
     const speedY = (y - lastY) / moveTime;
 
-    let currentWidth = width;
-    let currentHeight = height;
+    const [currentWidth, currentHeight] = getRotateSize(rotate, width, height);
 
-    // 若图片不是水平则调换属性
-    if (rotate % 180 !== 0) {
-      [currentWidth, currentHeight] = [height, width];
-    }
-
-    const { innerWidth, innerHeight } = window;
-
-    // 时间过长
-    if (moveTime >= maxTouchTime) {
-      computeEdge(x, scale, currentWidth, innerWidth, callback.x);
-      computeEdge(y, scale, currentHeight, innerHeight, callback.y);
-      return;
-    }
-
-    scrollMove(Math.abs(speedX), (spatial) => {
-      return computeEdge(x + spatial * Math.sign(speedX), scale, currentWidth, innerWidth, callback.x);
-    });
-
-    scrollMove(Math.abs(speedY), (spatial) => {
-      return computeEdge(y + spatial * Math.sign(speedY), scale, currentHeight, innerHeight, callback.y);
-    });
+    scrollMoveCallback(moveTime, speedX, x, scale, currentWidth, window.innerWidth, callback.x);
+    scrollMoveCallback(moveTime, speedY, y, scale, currentHeight, window.innerHeight, callback.y);
   };
 }
 
-// 加速度
-const acceleration = -0.001;
-// 阻力
-const resistance = 0.001;
+/**
+ * 滚动回调/边缘处理
+ */
+function scrollMoveCallback(
+  moveTime: number,
+  speed: number,
+  position: number,
+  scale: number,
+  currentSize: number,
+  innerSize: number,
+  callback: (spatial: number) => boolean,
+) {
+  // 时间过长
+  if (moveTime >= maxTouchTime) {
+    const [next, isEdge] = computePositionEdge(position, scale, currentSize, innerSize);
+    if (isEdge) {
+      easeOutMove(position, next, callback);
+    }
+    return;
+  }
+
+  scrollMove(speed, (spatial) => {
+    const [current, isCloseEdge] = computePositionEdge(position + spatial, scale, currentSize, innerSize);
+    // 接触边缘回弹
+    if (isCloseEdge) {
+      easeOutMove(position + spatial, current, callback);
+      return false;
+    }
+    const result = callback(current);
+    return !isCloseEdge && result;
+  });
+}
 
 /**
  * 通过速度滚动到停止
  */
 function scrollMove(initialSpeed: number, callback: (spatial: number) => boolean) {
+  // 加速度
+  const acceleration = -0.001;
+  // 阻力
+  const resistance = 0.001;
+
   let v = initialSpeed;
   let s = 0;
   let lastTime: number | undefined = undefined;
@@ -91,48 +103,57 @@ function scrollMove(initialSpeed: number, callback: (spatial: number) => boolean
       lastTime = now;
     }
     const dt = now - lastTime;
+    const direction = Math.sign(initialSpeed);
+    const a = direction * acceleration;
     const f = Math.sign(-v) * v ** 2 * resistance;
-    const ds = v * dt + ((acceleration + f) * dt ** 2) / 2;
-    v = v + (acceleration + f) * dt;
+    const ds = v * dt + ((a + f) * dt ** 2) / 2;
+    v = v + (a + f) * dt;
 
     s = s + ds;
     // move to s
     lastTime = now;
 
-    if (v <= 0) {
+    if (direction * v <= 0) {
       cancelAnimationFrame(frameId);
       return;
     }
 
     if (callback(s)) {
-      frameId = requestAnimationFrame(calcMove);
+      frameId = raf(calcMove);
     }
   };
-  frameId = requestAnimationFrame(calcMove);
+  frameId = raf(calcMove);
 }
 
-function computeEdge(
-  position: number,
-  scale: number,
-  currentSize: number,
-  innerSize: number,
-  callback: (current: number, transition: boolean) => boolean,
-) {
-  const closedEdge = getClosedEdge(position, scale, currentSize, innerSize);
-  // 图片超出的长度
-  const outOffset = (currentSize * scale - innerSize) / 2;
-
-  let current = position;
-  let transition = false;
-  if (closedEdge === 'small') {
-    current = 0;
-    transition = true;
-  } else if (closedEdge === 'before') {
-    current = outOffset;
-  } else if (closedEdge === 'after') {
-    current = -outOffset;
+/**
+ * 缓动回调
+ */
+function easeOutMove(start: number, end: number, callback: (spatial: number) => boolean) {
+  const distance = end - start;
+  const totalTime = 400;
+  if (distance === 0) {
+    return;
   }
-  const result = callback(current, transition);
 
-  return !closedEdge && result;
+  const startTime = Date.now();
+  let frameId = 0;
+
+  const calcMove = () => {
+    const time = Math.min(1, (Date.now() - startTime) / totalTime);
+    const result = callback(start + easeOutExpo(time) * distance);
+
+    if (result) {
+      frameId = raf(calcMove);
+    }
+  };
+  frameId = raf(calcMove);
+
+  setTimeout(() => {
+    cancelAnimationFrame(frameId);
+    callback(end);
+  }, totalTime);
+}
+
+function easeOutExpo(x: number): number {
+  return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
 }
