@@ -9,16 +9,20 @@ const caf = cancelAnimationFrame;
 /**
  * 物理滚动到具体位置
  */
-export default function useScrollPosition<C extends (spatial: number, easing?: boolean) => boolean>(
+export default function useScrollPosition<C extends (spatial: number) => boolean>(
   callbackX: C,
   callbackY: C,
+  callbackS: C,
 ) {
   const callback = useMethods({
-    x(spatial: number, easing?: boolean) {
-      return callbackX(spatial, easing);
+    X(spatial: number) {
+      return callbackX(spatial);
     },
-    y(spatial: number, easing?: boolean) {
-      return callbackY(spatial, easing);
+    Y(spatial: number) {
+      return callbackY(spatial);
+    },
+    S(spatial: number) {
+      return callbackS(spatial);
     },
   });
 
@@ -33,10 +37,11 @@ export default function useScrollPosition<C extends (spatial: number, easing?: b
     rotate: number,
     touchedTime: number,
   ) => {
-    // 缩小的情况下不执行滚动逻辑
+    // 缩小的情况下不执行滚动逻辑，恢复居中位置
     if (scale < 1) {
-      callback.x(0, true);
-      callback.y(0, true);
+      easeOutMove(x, 0, callback.X);
+      easeOutMove(y, 0, callback.Y);
+      easeOutMove(scale, 1, callback.S);
       return;
     }
 
@@ -47,8 +52,8 @@ export default function useScrollPosition<C extends (spatial: number, easing?: b
 
     const [currentWidth, currentHeight] = getRotateSize(rotate, width, height);
 
-    scrollMoveCallback(moveTime, speedX, x, scale, currentWidth, window.innerWidth, callback.x);
-    scrollMoveCallback(moveTime, speedY, y, scale, currentHeight, window.innerHeight, callback.y);
+    scrollMoveCallback(moveTime, speedX, x, scale, currentWidth, window.innerWidth, callback.X);
+    scrollMoveCallback(moveTime, speedY, y, scale, currentHeight, window.innerHeight, callback.Y);
   };
 }
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import type { DataType } from './types';
 
-export type UpdateItemType = ({ key, src, originRef, intro }: DataType) => void;
+export type UpdateItemType = (dataType: DataType) => void;
 
 export interface PhotoContextType {
   onShow: (key: number) => void;

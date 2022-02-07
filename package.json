@@ -28,8 +28,7 @@
     "lint:js": "eslint --cache --ext .js,.jsx,.ts,.tsx --format=pretty src/ --fix",
     "lint:prettier": "prettier --check \"**/*\" --end-of-line auto --write",
     "lint:style": "stylelint --fix \"**/*.less\" --syntax less",
-    "lint-staged": "lint-staged",
-    "lint-staged:js": "eslint --ext .js,.jsx,.ts,.tsx "
+    "lint-staged": "lint-staged"
   },
   "husky": {
     "hooks": {
@@ -38,7 +37,7 @@
   },
   "lint-staged": {
     "**/*.less": "stylelint --syntax less",
-    "**/*.{js,jsx,ts,tsx}": "npm run lint-staged:js",
+    "**/*.{js,jsx,ts,tsx}": "eslint --fix --ext .js,.jsx,.ts,.tsx",
     "**/*.{js,jsx,tsx,ts,less,md,json}": [
       "prettier --write"
     ]

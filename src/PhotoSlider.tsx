@@ -12,6 +12,7 @@ import SlidePortal from './components/SlidePortal';
 import CloseIcon from './components/CloseIcon';
 import ArrowLeft from './components/ArrowLeft';
 import ArrowRight from './components/ArrowRight';
+import PreventScroll from './components/PreventScroll';
 import PhotoView from './PhotoView';
 import './PhotoSlider.less';
 
@@ -370,8 +371,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
         !visible ? ' PhotoView-PhotoSlider__willClose' : ''
       }${className ? ` ${className}` : ''}`}
       onClick={(e) => e.stopPropagation()}
-      onPointerMove={(e) => e.preventDefault()}
     >
+      {visible && <PreventScroll />}
       <div
         className={`PhotoView-PhotoSlider__Backdrop${maskClassName ? ` ${maskClassName}` : ''}${
           activeAnimation === 'enter'

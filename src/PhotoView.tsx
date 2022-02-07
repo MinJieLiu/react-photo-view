@@ -238,15 +238,21 @@ export default function PhotoView({
   );
 
   const slideToPosition = useScrollPosition(
-    (nextX, should) => {
+    (nextX) => {
       if (mounted.current) {
-        updateState({ x: nextX, easing: should || false });
+        updateState({ x: nextX, easing: false });
       }
       return !touched && mounted.current;
     },
-    (nextY, should) => {
+    (nextY) => {
       if (mounted.current) {
-        updateState({ y: nextY, easing: should || false });
+        updateState({ y: nextY, easing: false });
+      }
+      return !touched && mounted.current;
+    },
+    (nextScale) => {
+      if (mounted.current) {
+        onWheel(nextScale);
       }
       return !touched && mounted.current;
     },
