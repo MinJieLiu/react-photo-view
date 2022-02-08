@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import type { DataType, PhotoProviderBase, OverlayRenderProps } from './types';
 import type { ReachType } from './types';
-import { defaultOpacity, horizontalOffset, maxMoveOffset, maxScale, minScale } from './variables';
+import { animationCSS, defaultOpacity, horizontalOffset, maxMoveOffset, maxScale, minScale } from './variables';
 import isTouchDevice from './utils/isTouchDevice';
 import useAdjacentImages from './hooks/useAdjacentImages';
 import useSetState from './hooks/useSetState';
@@ -367,7 +367,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   return (
     <SlidePortal
       className={`${!currentOverlayVisible ? 'PhotoView-PhotoSlider__clean' : ''}${
-        !visible ? ' PhotoBox-PhotoSlider__willClose' : ''
+        !visible ? ' PhotoView-PhotoSlider__willClose' : ''
       }${className ? ` ${className}` : ''}`}
       onClick={(e) => e.stopPropagation()}
     >
@@ -375,13 +375,14 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       <div
         className={`PhotoView-PhotoSlider__Backdrop${maskClassName ? ` ${maskClassName}` : ''}${
           activeAnimation === 'enter'
-            ? ' PhotoBox-PhotoSlider__fadeIn'
+            ? ' PhotoView-PhotoSlider__fadeIn'
             : activeAnimation === 'leave'
-            ? ' PhotoBox-PhotoSlider__fadeOut'
+            ? ' PhotoView-PhotoSlider__fadeOut'
             : ''
         }`}
         style={{
           background: `rgba(0, 0, 0, ${currentOpacity})`,
+          transition: touched ? undefined : `background-color 0.4s ${animationCSS}`,
         }}
         onAnimationEnd={onAnimationEnd}
       />

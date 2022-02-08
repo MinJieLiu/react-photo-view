@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from 'react';
 import useSetState from './useSetState';
 import useDebounceCallback from './useDebounceCallback';
+import { animationTime } from '../variables';
 
 /**
  * 目标缩放延迟处理
@@ -20,7 +21,7 @@ export default function useTargetScale(
       updateShouldTransition(false);
       updateState({ leading: false, scale: current });
     },
-    { wait: 400 },
+    { wait: animationTime },
   );
 
   useLayoutEffect(() => {
@@ -28,6 +29,7 @@ export default function useTargetScale(
       execRef.current = true;
       return;
     }
+    updateShouldTransition(true);
     updateState({ leading: true });
 
     moveScale(realScale);

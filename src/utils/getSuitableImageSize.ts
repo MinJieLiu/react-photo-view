@@ -41,6 +41,5 @@ export default function getSuitableImageSize(naturalWidth: number, naturalHeight
     x: 0,
     y,
     easing: true,
-    scale: 1,
   };
 }

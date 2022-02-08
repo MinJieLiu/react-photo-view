@@ -5,7 +5,7 @@ import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import { getReachType, getClosedEdge } from './utils/edgeHandle';
 import getAnimateOrigin from './utils/getAnimateOrigin';
 import getRotateSize from './utils/getRotateSize';
-import { maxScale, minStartTouchOffset, minScale, scaleBuffer } from './variables';
+import { maxScale, minStartTouchOffset, minScale, scaleBuffer, animationCSS } from './variables';
 import type { ReachMoveFunction, ReachFunction, PhotoTapFunction, OriginRectType, BrokenElementParams } from './types';
 import type { ReachType, TouchStartType } from './types';
 import useSetState from './hooks/useSetState';
@@ -273,7 +273,6 @@ export default function PhotoBox({
       updateState({
         clientX,
         clientY,
-        easing: true,
         ...position,
         ...(toScale <= 1 && { x: 0, y: 0 }),
       });
@@ -351,6 +350,7 @@ export default function PhotoBox({
   );
 
   useEffect(() => {
+    onWheel(1);
     updateState(getSuitableImageSize(naturalWidth, naturalHeight, rotate));
   }, [rotate]);
 
@@ -387,7 +387,6 @@ export default function PhotoBox({
     updateState({
       clientX: e.clientX,
       clientY: e.clientY,
-      easing: true,
       ...position,
       ...(toScale <= 1 && { x: 0, y: 0 }),
     });
@@ -463,7 +462,7 @@ export default function PhotoBox({
             width: currentWidth,
             height: currentHeight,
             transform,
-            transition: touched || !easing ? undefined : 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
+            transition: touched || !easing ? undefined : `transform 0.4s ${animationCSS}`,
             willChange: isActive ? 'transform' : undefined,
           }}
           onPhotoLoad={handlePhotoLoad}

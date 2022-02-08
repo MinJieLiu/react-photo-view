@@ -42,3 +42,8 @@ export const maxScale = 6;
  * 缩放弹性缓冲
  */
 export const scaleBuffer = 0.2;
+
+/**
+ * 动画属性
+ */
+export const animationCSS = 'cubic-bezier(0.25, 0.8, 0.25, 1)';
