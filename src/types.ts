@@ -16,10 +16,6 @@ export interface DataType {
    * 触发 ref
    */
   originRef?: React.MutableRefObject<HTMLElement | null>;
-  /**
-   * 介绍
-   */
-  intro?: React.ReactNode;
 }
 
 /**
@@ -103,11 +99,6 @@ export interface IPhotoProviderBase {
    * @defaultValue true
    */
   bannerVisible?: boolean;
-  /**
-   * 简介 visible
-   * @defaultValue true
-   */
-  introVisible?: boolean;
   /**
    * 自定义渲染覆盖物
    */

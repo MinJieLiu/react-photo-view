@@ -1,10 +1,7 @@
 import { computePositionEdge } from '../utils/edgeHandle';
 import getRotateSize from '../utils/getRotateSize';
-import { maxTouchTime } from '../variables';
+import { animationTime, maxTouchTime } from '../variables';
 import useMethods from './useMethods';
-
-const raf = requestAnimationFrame;
-const caf = cancelAnimationFrame;
 
 /**
  * 物理滚动到具体位置
@@ -46,48 +43,57 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
     }
 
     const moveTime = Date.now() - touchedTime;
+
+    const [currentWidth, currentHeight] = getRotateSize(rotate, width, height);
+    const { innerWidth, innerHeight } = window;
+
+    // 时间过长
+    if (moveTime >= maxTouchTime) {
+      const [nextX, isEdgeX] = computePositionEdge(x, scale, currentWidth, innerWidth);
+      if (isEdgeX) {
+        easeOutMove(x, nextX, callback.X);
+      }
+      const [nextY, isEdgeY] = computePositionEdge(y, scale, currentHeight, innerHeight);
+      if (isEdgeY) {
+        easeOutMove(y, nextY, callback.Y);
+      }
+      return;
+    }
+
     // 初始速度
     const speedX = (x - lastX) / moveTime;
     const speedY = (y - lastY) / moveTime;
+    const speedT = Math.sqrt(speedX ** 2 + speedY ** 2);
+    // 是否接触到边缘
+    let edgeX = false;
+    let edgeY = false;
 
-    const [currentWidth, currentHeight] = getRotateSize(rotate, width, height);
+    scrollMove(speedT, (spatial) => {
+      const nextX = x + spatial * (speedX / speedT);
+      const nextY = y + spatial * (speedY / speedT);
 
-    scrollMoveCallback(moveTime, speedX, x, scale, currentWidth, window.innerWidth, callback.X);
-    scrollMoveCallback(moveTime, speedY, y, scale, currentHeight, window.innerHeight, callback.Y);
+      const [currentX, isEdgeX] = computePositionEdge(nextX, scale, currentWidth, innerWidth);
+      const [currentY, isEdgeY] = computePositionEdge(nextY, scale, currentHeight, innerHeight);
+
+      if (isEdgeX && !edgeX) {
+        edgeX = true;
+        easeOutMove(nextX, currentX, callback.X);
+      }
+
+      if (isEdgeY && !edgeY) {
+        edgeY = true;
+        easeOutMove(nextY, currentY, callback.Y);
+      }
+      // 同时接触边缘的情况下停止滚动
+      if (edgeX && edgeY) {
+        return false;
+      }
+
+      const resultX = edgeX || callback.X(currentX);
+      const resultY = edgeY || callback.Y(currentY);
+      return resultX && resultY;
+    });
   };
-}
-
-/**
- * 滚动回调/边缘处理
- */
-function scrollMoveCallback(
-  moveTime: number,
-  speed: number,
-  position: number,
-  scale: number,
-  currentSize: number,
-  innerSize: number,
-  callback: (spatial: number) => boolean,
-) {
-  // 时间过长
-  if (moveTime >= maxTouchTime) {
-    const [next, isEdge] = computePositionEdge(position, scale, currentSize, innerSize);
-    if (isEdge) {
-      easeOutMove(position, next, callback);
-    }
-    return;
-  }
-
-  scrollMove(speed, (spatial) => {
-    const [current, isCloseEdge] = computePositionEdge(position + spatial, scale, currentSize, innerSize);
-    // 接触边缘回弹
-    if (isCloseEdge) {
-      easeOutMove(position + spatial, current, callback);
-      return false;
-    }
-    const result = callback(current);
-    return !isCloseEdge && result;
-  });
 }
 
 /**
@@ -95,9 +101,9 @@ function scrollMoveCallback(
  */
 function scrollMove(initialSpeed: number, callback: (spatial: number) => boolean) {
   // 加速度
-  const acceleration = -0.001;
+  const acceleration = -0.002;
   // 阻力
-  const resistance = 0.0005;
+  const resistance = 0.0002;
 
   let v = initialSpeed;
   let s = 0;
@@ -120,17 +126,24 @@ function scrollMove(initialSpeed: number, callback: (spatial: number) => boolean
     lastTime = now;
 
     if (direction * v <= 0) {
-      caf(frameId);
+      caf();
       return;
     }
 
     if (callback(s)) {
-      frameId = raf(calcMove);
+      raf();
       return;
     }
-    caf(frameId);
+    caf();
   };
-  frameId = raf(calcMove);
+  raf();
+
+  function raf() {
+    frameId = requestAnimationFrame(calcMove);
+  }
+  function caf() {
+    cancelAnimationFrame(frameId);
+  }
 }
 
 /**
@@ -138,7 +151,6 @@ function scrollMove(initialSpeed: number, callback: (spatial: number) => boolean
  */
 function easeOutMove(start: number, end: number, callback: (spatial: number) => boolean) {
   const distance = end - start;
-  const totalTime = 400;
   if (distance === 0) {
     return;
   }
@@ -147,23 +159,28 @@ function easeOutMove(start: number, end: number, callback: (spatial: number) => 
   let frameId = 0;
 
   const calcMove = () => {
-    const time = Math.min(1, (Date.now() - startTime) / totalTime);
+    const time = Math.min(1, (Date.now() - startTime) / animationTime);
     const result = callback(start + easeOutExpo(time) * distance);
 
-    if (result) {
-      frameId = raf(calcMove);
+    if (result && time < 1) {
+      raf();
       return;
     }
-    caf(frameId);
+    caf();
   };
-  frameId = raf(calcMove);
+  raf();
 
-  setTimeout(() => {
-    caf(frameId);
-    callback(end);
-  }, totalTime);
+  function raf() {
+    frameId = requestAnimationFrame(calcMove);
+  }
+  function caf() {
+    cancelAnimationFrame(frameId);
+  }
 }
 
+/**
+ * 缓动函数
+ */
 function easeOutExpo(x: number): number {
   return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
 }

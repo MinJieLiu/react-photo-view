@@ -15,8 +15,6 @@ export interface IPhotoProps extends React.HTMLAttributes<HTMLElement> {
   src: string;
   loaded: boolean;
   broken: boolean;
-  width: number;
-  height: number;
   onPhotoLoad: (params: IPhotoLoadedParams) => void;
   loadingElement?: JSX.Element;
   brokenElement?: JSX.Element | ((photoProps: BrokenElementParams) => JSX.Element);
@@ -26,8 +24,6 @@ export default function Photo({
   src,
   loaded,
   broken,
-  width,
-  height,
   className,
   onPhotoLoad,
   loadingElement,
@@ -67,8 +63,6 @@ export default function Photo({
       <img
         className={`PhotoView__Photo${className ? ` ${className}` : ''}`}
         src={src}
-        width={width}
-        height={height}
         alt=""
         {...restProps}
       />

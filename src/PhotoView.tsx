@@ -297,9 +297,7 @@ export default function PhotoView({
         currReach: undefined,
       });
       // Go
-      if (hasMove) {
-        slideToPosition(x, y, lastX, lastY, width, height, scale, rotate, touchedTime);
-      }
+      slideToPosition(x, y, lastX, lastY, width, height, scale, rotate, touchedTime);
 
       onReachUp?.(nextClientX, nextClientY);
       // 触发 Tap 事件
@@ -456,14 +454,14 @@ export default function PhotoView({
         <Photo
           className={className}
           src={src}
-          width={currentWidth}
-          height={currentHeight}
           loaded={loaded}
           broken={broken}
           onMouseDown={isTouchDevice ? undefined : handleMouseDown}
           onTouchStart={isTouchDevice ? handleTouchStart : undefined}
           onWheel={handleWheel}
           style={{
+            width: currentWidth,
+            height: currentHeight,
             transform,
             transition: touched || !easing ? undefined : 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
             willChange: isActive ? 'transform' : undefined,

@@ -101,7 +101,7 @@ export default function DocDemo() {
     >
       <ImageList>
         {images.map((item, index) => (
-          <PhotoConsumer key={index} src={item} intro={item}>
+          <PhotoConsumer key={index} src={item}>
             <ViewBox viewImage={item} />
           </PhotoConsumer>
         ))}

@@ -6,11 +6,10 @@ import isTouchDevice from './utils/isTouchDevice';
 
 export interface IPhotoConsumer {
   src: string;
-  intro?: React.ReactNode;
   children?: React.ReactElement;
 }
 
-const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
+const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, children }) => {
   const photoContext = useContext<PhotoContextType>(PhotoContext);
   const key = useMemo(() => photoContext.uniqueId(), []);
   const [position, updatePosition] = useState<{
@@ -33,9 +32,8 @@ const PhotoConsumer: React.FC<IPhotoConsumer> = ({ src, intro, children }) => {
       key,
       src,
       originRef,
-      intro,
     });
-  }, [src, intro]);
+  }, [src]);
 
   function handleTouchStart(e: React.TouchEvent) {
     const { clientX, clientY } = e.touches[0];

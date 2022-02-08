@@ -3,7 +3,7 @@ import type { DataType, IPhotoProviderBase, OverlayRenderProps } from './types';
 import type { ReachType } from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset, maxScale, minScale } from './variables';
 import isTouchDevice from './utils/isTouchDevice';
-import getAdjacentImages from './utils/getAdjacentImages';
+import useAdjacentImages from './hooks/useAdjacentImages';
 import useSetState from './hooks/useSetState';
 import useEventListener from './hooks/useEventListener';
 import useAnimationVisible from './hooks/useAnimationVisible';
@@ -15,6 +15,7 @@ import ArrowRight from './components/ArrowRight';
 import PreventScroll from './components/PreventScroll';
 import PhotoView from './PhotoView';
 import './PhotoSlider.less';
+import useMethods from './hooks/useMethods';
 
 export interface IPhotoSliderProps extends IPhotoProviderBase {
   // 图片列表
@@ -83,7 +84,6 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     maskOpacity = defaultOpacity,
     pullClosable = true,
     bannerVisible = true,
-    introVisible = true,
     overlayRender,
     toolbarRender,
     className,
@@ -148,59 +148,66 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     updateState(initialState);
   }, [realVisible]);
 
+  const { close, changeIndex, onRotate, onScale } = useMethods({
+    close(evt?: React.MouseEvent | React.TouchEvent) {
+      onClose(evt);
+      updateState({
+        overlayVisible: true,
+        // 记录当前关闭时的透明度
+        lastBackdropOpacity: backdropOpacity,
+      });
+    },
+    changeIndex(nextIndex: number, should: boolean = true) {
+      // 当前索引
+      const currentIndex = loop ? virtualIndexRef.current + (nextIndex - index) : nextIndex;
+      const max = imageLength - 1;
+      // 虚拟 index
+      // 非循环模式，限制区间
+      const limitIndex = Math.min(max, Math.max(currentIndex, 0));
+      const nextVirtualIndex = loop ? currentIndex : limitIndex;
+      // 单个屏幕宽度
+      const singlePageWidth = window.innerWidth + horizontalOffset;
+
+      updateState({
+        touched: false,
+        lastClientX: undefined,
+        lastClientY: undefined,
+        translateX: -singlePageWidth * nextVirtualIndex,
+        shouldTransition: should,
+      });
+
+      virtualIndexRef.current = nextVirtualIndex;
+      // 更新真实的 index
+      const realLoopIndex = nextIndex < 0 ? max : nextIndex > max ? 0 : nextIndex;
+      onIndexChange?.(loop ? realLoopIndex : limitIndex);
+    },
+    onRotate(rotate: number) {
+      handleMergePhotoMap({ rotate });
+    },
+    onScale(scale: number) {
+      handleMergePhotoMap({ scale: Math.max(minScale, Math.min(maxScale, scale)) });
+    },
+  });
+
   useEventListener('keydown', (evt: KeyboardEvent) => {
     if (visible) {
       switch (evt.key) {
         case 'ArrowLeft':
-          handleIndexChange(index - 1, false);
+          changeIndex(index - 1, false);
           break;
         case 'ArrowRight':
-          handleIndexChange(index + 1, false);
+          changeIndex(index + 1, false);
           break;
         case 'Escape':
-          handleClose();
+          close();
           break;
       }
     }
   });
 
-  function handleIndexChange(nextIndex: number, should: boolean = true) {
-    // 当前索引
-    const currentIndex = loop ? virtualIndexRef.current + (nextIndex - index) : nextIndex;
-    const max = imageLength - 1;
-    // 虚拟 index
-    // 非循环模式，限制区间
-    const limitIndex = Math.min(max, Math.max(currentIndex, 0));
-    const nextVirtualIndex = loop ? currentIndex : limitIndex;
-    // 单个屏幕宽度
-    const singlePageWidth = window.innerWidth + horizontalOffset;
-
-    updateState({
-      touched: false,
-      lastClientX: undefined,
-      lastClientY: undefined,
-      translateX: -singlePageWidth * nextVirtualIndex,
-      shouldTransition: should,
-    });
-
-    virtualIndexRef.current = nextVirtualIndex;
-    // 更新真实的 index
-    const realLoopIndex = nextIndex < 0 ? max : nextIndex > max ? 0 : nextIndex;
-    onIndexChange?.(loop ? realLoopIndex : limitIndex);
-  }
-
-  function handleClose(evt?: React.MouseEvent | React.TouchEvent) {
-    onClose(evt);
-    updateState({
-      overlayVisible: true,
-      // 记录当前关闭时的透明度
-      lastBackdropOpacity: backdropOpacity,
-    });
-  }
-
   function handlePhotoTap() {
     if (photoClosable) {
-      handleClose();
+      close();
     } else {
       updateState({
         overlayVisible: !overlayVisible,
@@ -210,7 +217,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
 
   function handlePhotoMaskTap() {
     if (maskClosable) {
-      handleClose();
+      close();
     }
   }
 
@@ -233,14 +240,6 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
         photoMap: nextMap.set(key, { ...nextMap.get(key)!, ...next }),
       });
     }
-  }
-
-  function handleRotate(rotate: number) {
-    handleMergePhotoMap({ rotate });
-  }
-
-  function handleScale(scale: number) {
-    handleMergePhotoMap({ scale: Math.max(minScale, Math.min(maxScale, scale)) });
   }
 
   function onWheel(scale: number) {
@@ -312,12 +311,12 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     let willClose = false;
     // 下一张
     if (offsetClientX < -maxMoveOffset) {
-      handleIndexChange(index + 1);
+      changeIndex(index + 1);
       return;
     }
     // 上一张
     if (offsetClientX > maxMoveOffset) {
-      handleIndexChange(index - 1);
+      changeIndex(index - 1);
       return;
     }
     const singlePageWidth = window.innerWidth + horizontalOffset;
@@ -327,7 +326,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
 
     if (Math.abs(offsetClientY) > 100 && canPullClose && pullClosable) {
       willClose = true;
-      handleClose();
+      close();
     }
     updateState({
       touched: false,
@@ -340,8 +339,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   }
 
   const transform = `translate3d(${translateX}px, 0px, 0)`;
-  // Overlay
-  const overlayIntro = currentImage && currentImage.intro;
+  // 截取相邻的图片
+  const adjacentImages = useAdjacentImages(images, index, loop);
 
   if (!realVisible) {
     return null;
@@ -357,11 +356,11 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     images,
     index,
     visible,
-    onClose: handleClose,
-    onIndexChange: handleIndexChange,
+    onClose: close,
+    onIndexChange: changeIndex,
     overlayVisible: currentOverlayVisible,
-    onRotate: handleRotate,
-    onScale: handleScale,
+    onRotate,
+    onScale,
     scale: photoItem?.scale || 1,
     rotate: photoItem?.rotate || 0,
   };
@@ -393,11 +392,11 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
           </div>
           <div className="PhotoView-PhotoSlider__BannerRight">
             {toolbarRender && toolbarRender(overlayParams)}
-            <CloseIcon className="PhotoView-PhotoSlider__toolbarIcon" onClick={handleClose} />
+            <CloseIcon className="PhotoView-PhotoSlider__toolbarIcon" onClick={close} />
           </div>
         </div>
       )}
-      {getAdjacentImages(images, index, loop).map((item: DataType, currentIndex) => {
+      {adjacentImages.map((item: DataType, currentIndex) => {
         // 截取之前的索引位置
         const nextIndex = !loop && index === 0 ? index + currentIndex : virtualIndexRef.current - 1 + currentIndex;
 
@@ -430,19 +429,18 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       {!isTouchDevice && bannerVisible && (
         <>
           {(loop || index !== 0) && (
-            <div className="PhotoView-PhotoSlider__ArrowLeft" onClick={() => handleIndexChange(index - 1, false)}>
+            <div className="PhotoView-PhotoSlider__ArrowLeft" onClick={() => changeIndex(index - 1, false)}>
               <ArrowLeft />
             </div>
           )}
           {(loop || index + 1 < imageLength) && (
-            <div className="PhotoView-PhotoSlider__ArrowRight" onClick={() => handleIndexChange(index + 1, false)}>
+            <div className="PhotoView-PhotoSlider__ArrowRight" onClick={() => changeIndex(index + 1, false)}>
               <ArrowRight />
             </div>
           )}
         </>
       )}
-      {Boolean(introVisible && overlayIntro) && <div className="PhotoView-PhotoSlider__FooterWrap">{overlayIntro}</div>}
-      {overlayRender && overlayRender(overlayParams)}
+      {overlayRender && <div className="PhotoView-PhotoSlider__Overlay">{overlayRender(overlayParams)}</div>}
     </SlidePortal>
   );
 }
