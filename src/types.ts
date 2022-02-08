@@ -18,58 +18,7 @@ export interface DataType {
   originRef?: React.MutableRefObject<HTMLElement | null>;
 }
 
-/**
- * brokenElement 函数参数
- */
-export interface BrokenElementParams {
-  src: string;
-}
-
-export type OverlayRenderProps = {
-  /**
-   * 图片列表
-   */
-  images: DataType[];
-  /**
-   * 当前索引
-   */
-  index: number;
-  /**
-   * 索引改变回调
-   */
-  onIndexChange: (index: number) => void;
-  /**
-   * 是否可见
-   */
-  visible: boolean;
-  /**
-   * 关闭事件回调
-   */
-  onClose: (evt?: React.MouseEvent | React.TouchEvent) => void;
-  /**
-   * 覆盖物是否可见
-   */
-  overlayVisible: boolean;
-  /**
-   * 当前旋转角度
-   */
-  rotate: number;
-  /**
-   * 旋转事件回调
-   */
-  onRotate: (rotate: number) => void;
-  /**
-   * 当前缩放
-   */
-  scale: number;
-  /**
-   * 缩放事件回调
-   * @param scale
-   */
-  onScale: (scale: number) => void;
-};
-
-export interface IPhotoProviderBase {
+export interface PhotoProviderBase {
   /**
    * 是否循环预览
    * @defaultValue true
@@ -119,6 +68,57 @@ export interface IPhotoProviderBase {
    * 自定义加载失败渲染
    */
   brokenElement?: JSX.Element | ((photoProps: BrokenElementParams) => JSX.Element);
+}
+
+/**
+ * brokenElement 函数参数
+ */
+export interface BrokenElementParams {
+  src: string;
+}
+
+export interface OverlayRenderProps {
+  /**
+   * 图片列表
+   */
+  images: DataType[];
+  /**
+   * 当前索引
+   */
+  index: number;
+  /**
+   * 索引改变回调
+   */
+  onIndexChange: (index: number) => void;
+  /**
+   * 是否可见
+   */
+  visible: boolean;
+  /**
+   * 关闭事件回调
+   */
+  onClose: (evt?: React.MouseEvent | React.TouchEvent) => void;
+  /**
+   * 覆盖物是否可见
+   */
+  overlayVisible: boolean;
+  /**
+   * 当前旋转角度
+   */
+  rotate: number;
+  /**
+   * 旋转事件回调
+   */
+  onRotate: (rotate: number) => void;
+  /**
+   * 当前缩放
+   */
+  scale: number;
+  /**
+   * 缩放事件回调
+   * @param scale
+   */
+  onScale: (scale: number) => void;
 }
 
 export type ReachMoveFunction = (reachPosition: ReachType, clientX: number, clientY: number, scale?: number) => void;

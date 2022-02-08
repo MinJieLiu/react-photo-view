@@ -27,16 +27,16 @@ Demo: [https://minjieliu.github.io/react-photo-view](https://minjieliu.github.io
 基本:
 
 ```js
-import { PhotoProvider, PhotoConsumer } from 'react-photo-view';
-import 'react-photo-view/dist/index.css';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
+import 'react-photo-view/dist/react-photo-view.css';
 
 function ImageView() {
   return (
     <PhotoProvider>
-      {photoImages.map((item, index) => (
-        <PhotoConsumer key={index} src={item} intro={item}>
+      {photoImages.map((item) => (
+        <PhotoView key={item} src={item}>
           <img src={item} alt="" />
-        </PhotoConsumer>
+        </PhotoView>
       ))}
     </PhotoProvider>
   );
@@ -54,7 +54,7 @@ function ImageView() {
     <div>
       <Button onClick={() => setVisible(true)}>打开</Button>
       <PhotoSlider
-        images={photoImages.map((item) => ({ src: item }))}
+        images={photoImages.map((item) => ({ src: item, key: item }))}
         visible={visible}
         onClose={() => setVisible(false)}
         index={photoIndex}
@@ -75,27 +75,25 @@ function ImageView() {
 | maskClosable    | boolean                                                                 | 否   | 背景可点击关闭，默认 true  |
 | photoClosable   | boolean                                                                 | 否   | 图片点击可关闭，默认 false |
 | bannerVisible   | boolean                                                                 | 否   | 导航条 visible，默认 true  |
-| introVisible    | boolean                                                                 | 否   | 简介 visible，默认 true    |
 | overlayRender   | (overlayProps) => React.ReactNode                                       | 否   | 自定义渲染                 |
 | toolbarRender   | (overlayProps) => React.ReactNode                                       | 否   | 工具栏渲染                 |
 | className       | string                                                                  | 否   | className                  |
 | maskClassName   | string                                                                  | 否   | 遮罩 className             |
-| viewClassName   | string                                                                  | 否   | 图片容器 className         |
-| imageClassName  | string                                                                  | 否   | 图片 className             |
+| photoWrapClassName   | string                                                                  | 否   | 图片容器 className         |
+| photoClassName  | string                                                                  | 否   | 图片 className             |
 | loadingElement  | JSX.Element                                                             | 否   | 自定义 loading             |
 | brokenElement   | JSX.Element &#124; ((photoProps: brokenElementDataType) => JSX.Element) | 否   | 加载失败 Element           |
 | onIndexChange   | (index:number, state: PhotoProviderState) => void;                      | 否   | 索引改变回调               |
 | onVisibleChange | (visible: boolean, index: number, state: PhotoProviderState) => void;   | 否   | 可见性更改回调             |
 
-#### PhotoConsumer
+#### PhotoView
 
 | 名称     | 类型               | 必选 | 描述     |
 | :------- | :----------------- | :--- | :------- |
 | src      | string             | 是   | 图片地址 |
-| intro    | React.ReactNode    | 否   | 图片介绍 |
 | children | React.ReactElement | 否   |          |
 
-注意：若 `PhotoConsumer` 的 `children` 为自定义组件
+注意：若 `PhotoView` 的 `children` 为自定义组件
 
 1. 需要向外部参数暴露 `React.HTMLAttributes`
 1. 展开/关闭动画精准位置则需要用 `React.forwardRef` 暴露内部 `React.ReactHTMLElement` 节点的 `Ref`

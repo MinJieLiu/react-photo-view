@@ -1,5 +1,5 @@
 import PhotoProvider from './PhotoProvider';
-import PhotoConsumer from './PhotoConsumer';
+import PhotoView from './PhotoView';
 import PhotoSlider from './PhotoSlider';
 
-export { PhotoProvider, PhotoConsumer, PhotoSlider };
+export { PhotoProvider, PhotoView, PhotoSlider };

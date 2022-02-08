@@ -1,5 +1,5 @@
 import React from 'react';
-import { PhotoProvider, PhotoConsumer } from 'react-photo-view';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
 import { ImageList, photoImages, ViewBox } from './doc-components';
 
 export default function DocDemo() {
@@ -7,9 +7,9 @@ export default function DocDemo() {
     <PhotoProvider>
       <ImageList>
         {photoImages.map((item, index) => (
-          <PhotoConsumer key={index} src={item}>
+          <PhotoView key={index} src={item}>
             <ViewBox viewImage={item} />
-          </PhotoConsumer>
+          </PhotoView>
         ))}
       </ImageList>
     </PhotoProvider>

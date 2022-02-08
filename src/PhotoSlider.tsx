@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
-import type { DataType, IPhotoProviderBase, OverlayRenderProps } from './types';
+import type { DataType, PhotoProviderBase, OverlayRenderProps } from './types';
 import type { ReachType } from './types';
 import { defaultOpacity, horizontalOffset, maxMoveOffset, maxScale, minScale } from './variables';
 import isTouchDevice from './utils/isTouchDevice';
@@ -8,16 +8,16 @@ import useSetState from './hooks/useSetState';
 import useEventListener from './hooks/useEventListener';
 import useAnimationVisible from './hooks/useAnimationVisible';
 import useAnimationOrigin from './hooks/useAnimationOrigin';
+import useMethods from './hooks/useMethods';
 import SlidePortal from './components/SlidePortal';
 import CloseIcon from './components/CloseIcon';
 import ArrowLeft from './components/ArrowLeft';
 import ArrowRight from './components/ArrowRight';
 import PreventScroll from './components/PreventScroll';
-import PhotoView from './PhotoView';
+import PhotoBox from './PhotoBox';
 import './PhotoSlider.less';
-import useMethods from './hooks/useMethods';
 
-export interface IPhotoSliderProps extends IPhotoProviderBase {
+export interface IPhotoSliderProps extends PhotoProviderBase {
   // 图片列表
   images: DataType[];
   // 图片当前索引
@@ -367,7 +367,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   return (
     <SlidePortal
       className={`${!currentOverlayVisible ? 'PhotoView-PhotoSlider__clean' : ''}${
-        !visible ? ' PhotoView-PhotoSlider__willClose' : ''
+        !visible ? ' PhotoBox-PhotoSlider__willClose' : ''
       }${className ? ` ${className}` : ''}`}
       onClick={(e) => e.stopPropagation()}
     >
@@ -375,9 +375,9 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       <div
         className={`PhotoView-PhotoSlider__Backdrop${maskClassName ? ` ${maskClassName}` : ''}${
           activeAnimation === 'enter'
-            ? ' PhotoView-PhotoSlider__fadeIn'
+            ? ' PhotoBox-PhotoSlider__fadeIn'
             : activeAnimation === 'leave'
-            ? ' PhotoView-PhotoSlider__fadeOut'
+            ? ' PhotoBox-PhotoSlider__fadeOut'
             : ''
         }`}
         style={{
@@ -401,8 +401,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
         const nextIndex = !loop && index === 0 ? index + currentIndex : virtualIndexRef.current - 1 + currentIndex;
 
         return (
-          <PhotoView
-            key={loop ? `${item.key}/${nextIndex}` : item.key + item.src}
+          <PhotoBox
+            key={loop ? `${item.key}/${item.src}/${nextIndex}` : item.key + item.src}
             src={item.src}
             onReachMove={handleReachMove}
             onReachUp={handleReachUp}

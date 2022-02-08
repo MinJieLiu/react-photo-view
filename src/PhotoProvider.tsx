@@ -1,11 +1,11 @@
 import React, { useMemo, useRef } from 'react';
-import type { DataType, IPhotoProviderBase } from './types';
+import type { DataType, PhotoProviderBase } from './types';
 import useMethods from './hooks/useMethods';
 import useSetState from './hooks/useSetState';
 import PhotoContext from './photo-context';
 import PhotoSlider from './PhotoSlider';
 
-export interface IPhotoProvider extends IPhotoProviderBase {
+export interface PhotoProviderProps extends PhotoProviderBase {
   children: React.ReactNode;
   onIndexChange?: (index: number, state: PhotoProviderState) => void;
   onVisibleChange?: (visible: boolean, index: number, state: PhotoProviderState) => void;
@@ -23,7 +23,7 @@ const initialState: PhotoProviderState = {
   index: 0,
 };
 
-export default function PhotoProvider({ children, onIndexChange, onVisibleChange, ...restProps }: IPhotoProvider) {
+export default function PhotoProvider({ children, onIndexChange, onVisibleChange, ...restProps }: PhotoProviderProps) {
   const [state, updateState] = useSetState(initialState);
   const uniqueIdRef = useRef(0);
   const { images, visible, index } = state;
@@ -35,7 +35,8 @@ export default function PhotoProvider({ children, onIndexChange, onVisibleChange
     updateItem(imageItem: DataType) {
       const currentIndex = images.findIndex((n) => n.key === imageItem.key);
       if (currentIndex > -1) {
-        const nextImages = [...images].splice(currentIndex, 1, imageItem);
+        const nextImages = images.slice();
+        nextImages.splice(currentIndex, 1, imageItem);
         updateState({
           images: nextImages,
         });
