@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import isTouchDevice from './utils/isTouchDevice';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
@@ -102,6 +102,8 @@ const initialState = {
   touchLength: 0,
   // 是否渐变
   easing: true,
+  // 停止 Raf
+  stopRaf: true,
 
   // 当前边缘触发状态
   currReach: undefined as ReachType,
@@ -143,6 +145,7 @@ export default function PhotoBox({
     x,
     y,
     touched,
+    stopRaf,
     maskTouched,
 
     clientX,
@@ -239,16 +242,22 @@ export default function PhotoBox({
 
   const slideToPosition = useScrollPosition(
     (nextX) => {
+      if (stopRaf || touched) {
+        return false;
+      }
       if (mounted.current) {
         updateState({ x: nextX, easing: false });
       }
-      return !touched && mounted.current;
+      return mounted.current;
     },
     (nextY) => {
+      if (stopRaf || touched) {
+        return false;
+      }
       if (mounted.current) {
         updateState({ y: nextY, easing: false });
       }
-      return !touched && mounted.current;
+      return mounted.current;
     },
     (nextScale) => {
       if (mounted.current) {
@@ -292,6 +301,7 @@ export default function PhotoBox({
         touched: false,
         maskTouched: false,
         easing: true,
+        stopRaf: false,
         // 重置触发状态
         currReach: undefined,
       });
@@ -349,8 +359,7 @@ export default function PhotoBox({
     ),
   );
 
-  useEffect(() => {
-    onWheel(1);
+  useLayoutEffect(() => {
     updateState(getSuitableImageSize(naturalWidth, naturalHeight, rotate));
   }, [rotate]);
 
@@ -387,6 +396,7 @@ export default function PhotoBox({
     updateState({
       clientX: e.clientX,
       clientY: e.clientY,
+      stopRaf: true,
       ...position,
       ...(toScale <= 1 && { x: 0, y: 0 }),
     });

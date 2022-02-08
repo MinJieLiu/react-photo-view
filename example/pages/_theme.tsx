@@ -8,6 +8,11 @@ export default createTheme({
     {
       label: '首页',
       path: '/',
+      activeIfMatch: {
+        // match all first-level paths
+        path: '/:foo',
+        exact: true,
+      },
     },
     { label: 'Github ⭐', href: 'https://github.com/MinJieLiu/react-photo-view' },
   ],
