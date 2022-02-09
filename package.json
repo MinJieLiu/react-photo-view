@@ -30,11 +30,6 @@
     "lint:style": "stylelint --fix \"**/*.less\" --syntax less",
     "lint-staged": "lint-staged"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "lint-staged": {
     "**/*.less": "stylelint --syntax less",
     "**/*.{js,jsx,ts,tsx}": "eslint --fix --ext .js,.jsx,.ts,.tsx",
