@@ -20,6 +20,7 @@ export default defineConfig({
     react(),
     pages({
       pagesDir: path.join(__dirname, 'pages'),
+      useHashRouter: true,
     }),
   ],
 });
