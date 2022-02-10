@@ -1,13 +1,14 @@
 import React from 'react';
 import { PhotoProvider, PhotoView } from 'react-photo-view';
-import { Button, ImageList, photoImages } from './doc-components';
+import { Button, ImageList } from './doc-components';
+import photo4 from '../images/4.jpg';
 
 export default function DocDemo() {
   return (
-    <PhotoProvider loop={false} maskOpacity={0.5}>
+    <PhotoProvider>
       <ImageList>
-        <PhotoView src={photoImages[3]}>
-          <Button>打开预览</Button>
+        <PhotoView src={photo4}>
+          <Button primary>点击预览</Button>
         </PhotoView>
       </ImageList>
     </PhotoProvider>

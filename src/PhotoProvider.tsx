@@ -29,10 +29,10 @@ export default function PhotoProvider({ children, onIndexChange, onVisibleChange
   const { images, visible, index } = state;
 
   const methods = useMethods({
-    uniqueId() {
+    nextId() {
       return (uniqueIdRef.current += 1);
     },
-    updateItem(imageItem: DataType) {
+    update(imageItem: DataType) {
       const currentIndex = images.findIndex((n) => n.key === imageItem.key);
       if (currentIndex > -1) {
         const nextImages = images.slice();
@@ -46,7 +46,7 @@ export default function PhotoProvider({ children, onIndexChange, onVisibleChange
         images: prev.images.concat(imageItem),
       }));
     },
-    removeItem(key: number) {
+    remove(key: number) {
       const nextImages = images.filter((item) => item.key !== key);
       const nextEndIndex = nextImages.length - 1;
       updateState({
@@ -54,7 +54,7 @@ export default function PhotoProvider({ children, onIndexChange, onVisibleChange
         index: Math.min(nextEndIndex, index),
       });
     },
-    onShow(key: number) {
+    show(key: number) {
       const currentIndex = images.findIndex((item) => item.key === key);
       updateState({
         visible: true,

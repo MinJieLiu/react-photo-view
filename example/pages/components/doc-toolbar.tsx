@@ -43,7 +43,6 @@ export default function DocDemo() {
   }
   return (
     <PhotoProvider
-      pullClosable={false}
       toolbarRender={({ rotate, onRotate, onScale, scale, index }) => {
         return (
           <>

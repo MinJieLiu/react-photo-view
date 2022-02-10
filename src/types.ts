@@ -11,7 +11,19 @@ export interface DataType {
   /**
    * 资源地址
    */
-  src: string;
+  src?: string;
+  /**
+   * 自定义渲染，优先级比 src 低
+   */
+  render?: (props: Partial<React.HTMLAttributes<HTMLElement>>) => React.ReactNode;
+  /**
+   * 自定义渲染节点宽度
+   */
+  width?: number;
+  /**
+   * 自定义渲染节点高度
+   */
+  height?: number;
   /**
    * 触发 ref
    */

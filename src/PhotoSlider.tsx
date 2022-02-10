@@ -44,15 +44,15 @@ type PhotoSliderState = {
   // 图片处于触摸的状态
   touched: boolean;
   // 该状态是否需要 transition
-  shouldTransition: boolean;
+  easing: boolean;
   // Reach 开始时 x 坐标
-  lastClientX: number | undefined;
+  lastCX: number | undefined;
   // Reach 开始时 y 坐标
-  lastClientY: number | undefined;
+  lastCY: number | undefined;
   // 背景透明度
-  backdropOpacity: number | undefined;
+  bgOpacity: number | undefined;
   // 上次关闭的背景透明度
-  lastBackdropOpacity: number | undefined;
+  lastBgOpacity: number | undefined;
   // 覆盖物可见度
   overlayVisible: boolean;
   // 可下拉关闭
@@ -64,12 +64,12 @@ type PhotoSliderState = {
 const initialState: PhotoSliderState = {
   translateX: 0,
   touched: false,
-  shouldTransition: true,
+  easing: true,
 
-  lastClientX: undefined,
-  lastClientY: undefined,
-  backdropOpacity: undefined,
-  lastBackdropOpacity: undefined,
+  lastCX: undefined,
+  lastCY: undefined,
+  bgOpacity: undefined,
+  lastBgOpacity: undefined,
   overlayVisible: true,
   canPullClose: true,
 
@@ -105,13 +105,13 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   const {
     translateX,
     touched,
-    shouldTransition,
+    easing,
 
-    lastClientX,
-    lastClientY,
+    lastCX,
+    lastCY,
 
-    backdropOpacity = maskOpacity,
-    lastBackdropOpacity,
+    bgOpacity = maskOpacity,
+    lastBgOpacity,
     overlayVisible,
     canPullClose,
 
@@ -138,7 +138,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     // 显示弹出层，修正正确的指向
     if (realVisible) {
       updateState({
-        shouldTransition: false,
+        easing: false,
         translateX: index * -(window.innerWidth + horizontalOffset),
       });
       virtualIndexRef.current = index;
@@ -154,7 +154,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       updateState({
         overlayVisible: true,
         // 记录当前关闭时的透明度
-        lastBackdropOpacity: backdropOpacity,
+        lastBgOpacity: bgOpacity,
       });
     },
     changeIndex(nextIndex: number, should: boolean = true) {
@@ -170,10 +170,10 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
 
       updateState({
         touched: false,
-        lastClientX: undefined,
-        lastClientY: undefined,
+        lastCX: undefined,
+        lastCY: undefined,
         translateX: -singlePageWidth * nextVirtualIndex,
-        shouldTransition: should,
+        easing: should,
       });
 
       virtualIndexRef.current = nextVirtualIndex;
@@ -225,9 +225,9 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     const { innerWidth } = window;
     updateState({
       translateX: -(innerWidth + horizontalOffset) * index,
-      lastClientX: undefined,
-      lastClientY: undefined,
-      shouldTransition: false,
+      lastCX: undefined,
+      lastCY: undefined,
+      easing: false,
     });
     virtualIndexRef.current = index;
   }
@@ -247,38 +247,38 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   }
 
   function handleReachVerticalMove(clientY: number, scale?: number) {
-    if (lastClientY === undefined) {
+    if (lastCY === undefined) {
       updateState({
         touched: true,
-        lastClientY: clientY,
-        backdropOpacity,
+        lastCY: clientY,
+        bgOpacity,
         canPullClose: true,
       });
       return;
     }
-    const offsetClientY = Math.abs(clientY - lastClientY);
+    const offsetClientY = Math.abs(clientY - lastCY);
     const opacity = Math.max(Math.min(maskOpacity, maskOpacity - offsetClientY / 100 / 4), 0);
 
     updateState({
       touched: true,
-      lastClientY,
-      backdropOpacity: scale === 1 ? opacity : maskOpacity,
+      lastCY,
+      bgOpacity: scale === 1 ? opacity : maskOpacity,
       canPullClose: scale === 1,
     });
   }
 
   function handleReachHorizontalMove(clientX: number) {
     const { innerWidth } = window;
-    if (lastClientX === undefined) {
+    if (lastCX === undefined) {
       updateState({
         touched: true,
-        lastClientX: clientX,
+        lastCX: clientX,
         translateX,
-        shouldTransition: true,
+        easing: true,
       });
       return;
     }
-    const originOffsetClientX = clientX - lastClientX;
+    const originOffsetClientX = clientX - lastCX;
     let offsetClientX = originOffsetClientX;
 
     // 第一张和最后一张超出距离减半
@@ -291,9 +291,9 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
 
     updateState({
       touched: true,
-      lastClientX: lastClientX,
+      lastCX: lastCX,
       translateX: -(innerWidth + horizontalOffset) * virtualIndexRef.current + offsetClientX,
-      shouldTransition: true,
+      easing: true,
     });
   }
 
@@ -306,8 +306,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   }
 
   function handleReachUp(clientX: number, clientY: number) {
-    const offsetClientX = clientX - (lastClientX ?? clientX);
-    const offsetClientY = clientY - (lastClientY ?? clientY);
+    const offsetClientX = clientX - (lastCX ?? clientX);
+    const offsetClientY = clientY - (lastCY ?? clientY);
     let willClose = false;
     // 下一张
     if (offsetClientX < -maxMoveOffset) {
@@ -331,9 +331,9 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     updateState({
       touched: false,
       translateX: currentTranslateX,
-      lastClientX: undefined,
-      lastClientY: undefined,
-      backdropOpacity: maskOpacity,
+      lastCX: undefined,
+      lastCY: undefined,
+      bgOpacity: maskOpacity,
       overlayVisible: willClose ? true : overlayVisible,
     });
   }
@@ -349,7 +349,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   const { innerWidth } = window;
   const currentOverlayVisible = overlayVisible && !activeAnimation;
   // 关闭过程中使用下拉保存的透明度
-  const currentOpacity = visible ? backdropOpacity : lastBackdropOpacity;
+  const currentOpacity = visible ? bgOpacity : lastBgOpacity;
   const photoItem = currentImage ? photoMap.get(currentImage.key) : undefined;
   // 覆盖物参数
   const overlayParams: OverlayRenderProps = {
@@ -403,8 +403,11 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
 
         return (
           <PhotoBox
-            key={loop ? `${item.key}/${item.src}/${nextIndex}` : item.key + item.src}
+            key={loop ? `${item.key}/${item.src}/${nextIndex}` : item.key}
             src={item.src}
+            render={item.render}
+            width={item.width}
+            height={item.height}
             onReachMove={handleReachMove}
             onReachUp={handleReachUp}
             onPhotoTap={handlePhotoTap}
@@ -414,7 +417,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             style={{
               left: `${(innerWidth + horizontalOffset) * nextIndex}px`,
               transform,
-              transition: touched || !shouldTransition ? undefined : 'transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)',
+              transition: touched || !easing ? undefined : 'transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)',
             }}
             loadingElement={loadingElement}
             brokenElement={brokenElement}

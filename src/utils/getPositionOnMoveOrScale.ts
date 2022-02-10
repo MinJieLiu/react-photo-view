@@ -35,7 +35,7 @@ export default function getPositionOnMoveOrScale(
   return {
     x: originX + (closedEdgeX ? offsetX / 2 : offsetX),
     y: originY + (closedEdgeY ? offsetY / 2 : offsetY),
-    lastClientX: clientX,
-    lastClientY: clientY,
+    lastCX: clientX,
+    lastCY: clientY,
   };
 }

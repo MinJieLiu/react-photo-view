@@ -4,10 +4,10 @@ import type { DataType } from './types';
 export type UpdateItemType = (dataType: DataType) => void;
 
 export interface PhotoContextType {
-  onShow: (key: number) => void;
-  updateItem: UpdateItemType;
-  removeItem: (key: number) => void;
-  uniqueId: () => number;
+  show: (key: number) => void;
+  update: UpdateItemType;
+  remove: (key: number) => void;
+  nextId: () => number;
 }
 
 export default React.createContext<PhotoContextType>(undefined as unknown as PhotoContextType);
