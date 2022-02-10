@@ -1,4 +1,4 @@
-import { OriginRectType } from '../types';
+import type { OriginRectType } from '../types';
 
 export default function getAnimateOrigin(
   originRect: OriginRectType,

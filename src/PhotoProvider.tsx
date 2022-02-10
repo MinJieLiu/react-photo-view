@@ -1,116 +1,105 @@
-import React from 'react';
-import PhotoContext, { onShowType, updateItemType, removeItemType } from './photo-context';
+import React, { useMemo, useRef } from 'react';
+import type { DataType, PhotoProviderBase } from './types';
+import useMethods from './hooks/useMethods';
+import useSetState from './hooks/useSetState';
+import PhotoContext from './photo-context';
 import PhotoSlider from './PhotoSlider';
-import { dataType, IPhotoProviderBase } from './types';
 
-export interface IPhotoProvider extends IPhotoProviderBase {
+export interface PhotoProviderProps extends PhotoProviderBase {
   children: React.ReactNode;
   onIndexChange?: (index: number, state: PhotoProviderState) => void;
   onVisibleChange?: (visible: boolean, index: number, state: PhotoProviderState) => void;
 }
 
 type PhotoProviderState = {
-  images: dataType[];
+  images: DataType[];
   visible: boolean;
   index: number;
-  onShow: onShowType;
-  updateItem: updateItemType;
-  removeItem: removeItemType;
 };
 
-export default class PhotoProvider extends React.Component<IPhotoProvider, PhotoProviderState> {
-  constructor(props) {
-    super(props);
+const initialState: PhotoProviderState = {
+  images: [],
+  visible: false,
+  index: 0,
+};
 
-    this.state = {
-      images: [],
-      visible: false,
-      index: 0,
-      updateItem: this.handleUpdateItem,
-      removeItem: this.handleRemoveItem,
-      onShow: this.handleShow,
-    };
-  }
+export default function PhotoProvider({ children, onIndexChange, onVisibleChange, ...restProps }: PhotoProviderProps) {
+  const [state, updateState] = useSetState(initialState);
+  const uniqueIdRef = useRef(0);
+  const { images, visible, index } = state;
 
-  handleUpdateItem: updateItemType = (imageItem) => {
-    this.setState((prev) => {
-      const { images } = prev;
-      const index = images.findIndex((n) => n.key === imageItem.key);
-      if (index > -1) {
-        images.splice(index, 1, imageItem);
-        return {
-          images: [...images],
-        };
+  const methods = useMethods({
+    nextId() {
+      return (uniqueIdRef.current += 1);
+    },
+    update(imageItem: DataType) {
+      const currentIndex = images.findIndex((n) => n.key === imageItem.key);
+      if (currentIndex > -1) {
+        const nextImages = images.slice();
+        nextImages.splice(currentIndex, 1, imageItem);
+        updateState({
+          images: nextImages,
+        });
+        return;
       }
-      return {
-        images: images.concat(imageItem),
-      };
-    });
-  };
-
-  handleRemoveItem = (key: string) => {
-    this.setState(({ images, index }) => {
+      updateState((prev) => ({
+        images: prev.images.concat(imageItem),
+      }));
+    },
+    remove(key: number) {
       const nextImages = images.filter((item) => item.key !== key);
       const nextEndIndex = nextImages.length - 1;
-      return {
+      updateState({
         images: nextImages,
         index: Math.min(nextEndIndex, index),
-      };
-    });
-  };
+      });
+    },
+    show(key: number) {
+      const currentIndex = images.findIndex((item) => item.key === key);
+      updateState({
+        visible: true,
+        index: currentIndex,
+      });
+      if (typeof onVisibleChange === 'function') {
+        onVisibleChange(true, currentIndex, state);
+      }
+    },
+  });
 
-  handleShow = (key: string) => {
-    const { onVisibleChange } = this.props;
-    const { images } = this.state;
-    const index = images.findIndex((item) => item.key === key);
-    this.setState({
-      visible: true,
-      index,
-    });
+  const fn = useMethods({
+    close() {
+      updateState({
+        visible: false,
+      });
 
-    if (typeof onVisibleChange === 'function') {
-      onVisibleChange(true, index, this.state);
-    }
-  };
+      if (typeof onVisibleChange === 'function') {
+        onVisibleChange(false, index, state);
+      }
+    },
+    changeIndex(nextIndex: number) {
+      updateState({
+        index: nextIndex,
+      });
 
-  handleClose = () => {
-    const { onVisibleChange } = this.props;
-    this.setState({
-      visible: false,
-    });
+      if (typeof onIndexChange === 'function') {
+        onIndexChange(nextIndex, state);
+      }
+    },
+  });
 
-    if (typeof onVisibleChange === 'function') {
-      onVisibleChange(false, this.state.index, this.state);
-    }
-  };
+  const value = useMemo(() => ({ ...state, ...methods }), [state, methods]);
 
-  handleIndexChange = (index: number) => {
-    const { onIndexChange } = this.props;
-    this.setState({
-      index,
-    });
-
-    if (typeof onIndexChange === 'function') {
-      onIndexChange(index, this.state);
-    }
-  };
-
-  render() {
-    const { children, onIndexChange, onVisibleChange, ...restProps } = this.props;
-    const { images, visible, index } = this.state;
-
-    return (
-      <PhotoContext.Provider value={this.state}>
-        {children}
-        <PhotoSlider
-          images={images}
-          visible={visible}
-          index={index}
-          onIndexChange={this.handleIndexChange}
-          onClose={this.handleClose}
-          {...restProps}
-        />
-      </PhotoContext.Provider>
-    );
-  }
+  return (
+    <PhotoContext.Provider value={value}>
+      {children}
+      <PhotoSlider
+        images={images}
+        visible={visible}
+        index={index}
+        onIndexChange={fn.changeIndex}
+        onClose={fn.close}
+        {...restProps}
+      />
+    </PhotoContext.Provider>
+  );
 }

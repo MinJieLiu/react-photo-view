@@ -1,19 +1,34 @@
-*.log
-*.diff
-*.patch
-*.bak
-.DS_Store
-Thumbs.db
-.project
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+**/node_modules
+
+# production
+**/dist
+dist-ssr
+
+# misc
+*.DS_Store
+npm-debug.log*
+yarn-error.log
+
+/coverage
 .idea
-.*proj
-.svn
-*.swp
-*.swo
-*.pyc
-*.pyo
-.build
-node_modules
-.cache
-dist
-coverage
+package-lock.json
+*bak
+
+# visual studio code
+.vscode
+.history
+*.log
+functions/*
+.temp/**
+
+# screenshot
+screenshot
+.firebase
+.eslintcache
+
+build
+*.local
+stats*

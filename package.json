@@ -1,64 +1,58 @@
 {
   "name": "react-photo-view",
-  "version": "0.5.7",
+  "version": "1.0.0-beta.0",
   "description": "一款精致的 React 的图片预览组件",
   "author": "MinJieLiu",
   "license": "MIT",
   "repository": "https://github.com/MinJieLiu/react-photo-view.git",
-  "main": "dist/index.js",
-  "module": "dist/index.es.js",
-  "jsnext:main": "dist/index.es.js",
-  "typings": "dist/index.d.ts",
+  "type": "module",
+  "source": "src/index.ts",
+  "main": "./dist/react-photo-view.umd.js",
+  "module": "./dist/react-photo-view.module.js",
+  "types": "./dist/index.d.ts",
   "keywords": [
     "react",
-    "react-component",
-    "react-photo",
+    "react component",
+    "react photo",
     "react-photo-view",
     "photo",
-    "photo-view",
+    "photo view",
     "gallery"
   ],
-  "engines": {
-    "node": ">=8",
-    "npm": ">=5"
-  },
   "scripts": {
-    "build": "rollup -c",
-    "start": "rollup -c -w",
-    "prepare": "npm run build"
+    "dev": "pnpm -C ./example dev",
+    "build": "microbundle --jsx React.createElement --external react,react-dom",
+    "prepublishOnly": "npm run build",
+    "prepare": "husky install",
+    "lint": "npm run lint:js && npm run lint:prettier",
+    "lint:js": "eslint --cache --ext .js,.jsx,.ts,.tsx --format=pretty src/ --fix",
+    "lint:prettier": "prettier --check \"**/*\" --end-of-line auto --write",
+    "lint:style": "stylelint --fix \"**/*.less\" --syntax less",
+    "lint-staged": "lint-staged"
   },
-  "dependencies": {
-    "lodash.debounce": "^4.0.8",
-    "lodash.uniqueid": "^4.0.1"
+  "lint-staged": {
+    "**/*.less": "stylelint --syntax less",
+    "**/*.{js,jsx,ts,tsx}": "eslint --fix --ext .js,.jsx,.ts,.tsx",
+    "**/*.{js,jsx,tsx,ts,less,md,json}": [
+      "prettier --write"
+    ]
   },
   "peerDependencies": {
-    "classnames": "^2.2.0",
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
   },
   "devDependencies": {
-    "@svgr/rollup": "^4.3.3",
-    "@types/lodash.debounce": "^4.0.6",
-    "@types/lodash.uniqueid": "^4.0.6",
-    "@types/react": "^17.0.14",
+    "@types/react": "^17.0.19",
     "@types/react-dom": "^17.0.9",
-    "@types/styled-components": "^5.1.11",
-    "classnames": "^2.3.1",
-    "cross-env": "^6.0.3",
+    "@umijs/fabric": "^2.10.1",
+    "husky": "^7.0.4",
     "less": "^4.1.2",
-    "postcss": "^8.3.5",
-    "prettier": "^2.3.2",
+    "lint-staged": "^12.3.3",
+    "microbundle": "^0.14.2",
+    "prettier": "^2.5.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "rollup": "^2.53.2",
-    "rollup-plugin-babel": "^4.4.0",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-postcss": "^4.0.0",
-    "rollup-plugin-typescript2": "^0.31.1",
-    "rollup-plugin-url": "^3.0.1",
-    "typescript": "^4.5.4"
+    "typescript": "^4.5.5"
   },
   "files": [
     "dist"

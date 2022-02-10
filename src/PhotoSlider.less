@@ -12,7 +12,7 @@
     .PhotoView-PhotoSlider__BannerWrap,
     .PhotoView-PhotoSlider__ArrowLeft,
     .PhotoView-PhotoSlider__ArrowRight,
-    .PhotoView-PhotoSlider__FooterWrap {
+    .PhotoView-PhotoSlider__Overlay {
       opacity: 0;
     }
   }
@@ -123,22 +123,5 @@
 
   &-PhotoSlider__ArrowRight {
     right: 0;
-  }
-
-  &-PhotoSlider__FooterWrap {
-    box-sizing: border-box;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    padding: 10px;
-    width: 100%;
-    min-height: 44px;
-    line-height: 1.5;
-    font-size: 14px;
-    color: #ccc;
-    background-color: rgba(0, 0, 0, 0.5);
-    text-align: justify;
-    transition: opacity 0.2s ease-out;
-    z-index: 20;
   }
 }
