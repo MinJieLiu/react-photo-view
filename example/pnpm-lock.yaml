@@ -3,6 +3,7 @@ lockfileVersion: 5.3
 specifiers:
   '@mdx-js/mdx': ^1.6.22
   '@mdx-js/react': ^1.6.22
+  '@types/node': ^16.11.24
   '@types/react': ^17.0.39
   '@types/react-dom': ^17.0.11
   '@types/styled-components': ^5.1.21
@@ -29,6 +30,7 @@ dependencies:
 devDependencies:
   '@mdx-js/mdx': 1.6.22
   '@mdx-js/react': 1.6.22_react@17.0.2
+  '@types/node': 16.11.24
   '@types/react': 17.0.39
   '@types/react-dom': 17.0.11
   '@types/styled-components': 5.1.21
@@ -663,6 +665,10 @@ packages:
     resolution: {integrity: sha512-W864tg/Osz1+9f4lrGTZpCSO5/z4608eUp19tbozkq2HJK6i3z1kT0H9tlADXuYIb1YYOBByU4Jsqkk75q48qA==}
     dependencies:
       '@types/unist': 2.0.6
+    dev: true
+
+  /@types/node/16.11.24:
+    resolution: {integrity: sha512-Ezv33Rl4mIi6YdSHfIRNBd4Q9kUe5okiaw/ikvJiJDmuQZNW5kfdg7+oQPF8NO6sTcr3woIpj3jANzTXdvEZXA==}
     dev: true
 
   /@types/parse5/5.0.3:

@@ -6,6 +6,15 @@ import pages from 'vite-plugin-react-pages';
 import pkg from './package.json';
 
 export default defineConfig({
+  base: '/react-photo-view/',
+  server: {
+    fs: {
+      allow: ['..'],
+    },
+  },
+  optimizeDeps: {
+    include: Object.keys(pkg.dependencies),
+  },
   plugins: [
     mdx(),
     react(),
@@ -13,7 +22,4 @@ export default defineConfig({
       pagesDir: path.join(__dirname, 'pages'),
     }),
   ],
-  optimizeDeps: {
-    include: Object.keys(pkg.dependencies),
-  },
 });
