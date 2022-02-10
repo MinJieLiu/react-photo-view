@@ -128,7 +128,6 @@ export interface OverlayRenderProps {
   scale: number;
   /**
    * 缩放事件回调
-   * @param scale
    */
   onScale: (scale: number) => void;
 }
