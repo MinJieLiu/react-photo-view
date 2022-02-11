@@ -4,6 +4,7 @@ import useInitial from './hooks/useInitial';
 import useMethods from './hooks/useMethods';
 import type { PhotoContextType } from './photo-context';
 import PhotoContext from './photo-context';
+import type { PhotoRenderParams } from './types';
 import isTouchDevice from './utils/isTouchDevice';
 
 export interface PhotoViewProps {
@@ -14,7 +15,7 @@ export interface PhotoViewProps {
   /**
    * 自定义渲染，优先级比 src 低
    */
-  render?: (props: Partial<React.HTMLAttributes<HTMLElement>>) => React.ReactNode;
+  render?: (props: PhotoRenderParams) => React.ReactNode;
   /**
    * 自定义渲染节点宽度
    */
@@ -45,7 +46,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({ src, render, width, height, child
   }, []);
 
   const fn = useMethods({
-    render(props: Partial<React.HTMLAttributes<HTMLElement>>) {
+    render(props: PhotoRenderParams) {
       if (render) {
         return render(props);
       }

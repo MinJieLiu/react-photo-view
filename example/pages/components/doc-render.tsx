@@ -12,20 +12,31 @@ const PreviewElement = styled.div`
   background-color: white;
 `;
 
+const customSize = 400;
+
 export default function DocDemo() {
   return (
     <PhotoProvider maskOpacity={0.5} loop={false}>
       <ImageList>
         <PhotoView
-          width={400}
-          height={400}
-          render={(props) => (
-            <PreviewElement {...props} onWheel={undefined}>
-              <div>自定义节点</div>
-              <Button>按钮</Button>
-              <input onMouseDown={(e) => e.stopPropagation()} />
-            </PreviewElement>
-          )}
+          width={customSize}
+          height={customSize}
+          render={({ scale, attrs }) => {
+            const width = attrs.style!.width as number;
+            const offset = (width - customSize) / customSize;
+            // 保持子节点的 scale 的稳定
+            const childScale = scale === 1 ? scale + offset : 1 + offset;
+
+            return (
+              <PreviewElement {...attrs}>
+                <div style={{ transform: `scale(${childScale})` }}>
+                  <div>自定义节点</div>
+                  <Button>按钮</Button>
+                  <input onMouseDown={(e) => e.stopPropagation()} />
+                </div>
+              </PreviewElement>
+            );
+          }}
         >
           <Button primary>自定义渲染</Button>
         </PhotoView>

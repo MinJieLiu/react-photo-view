@@ -6,7 +6,14 @@ import { getReachType, getClosedEdge } from './utils/edgeHandle';
 import getAnimateOrigin from './utils/getAnimateOrigin';
 import getRotateSize from './utils/getRotateSize';
 import { maxScale, minStartTouchOffset, minScale, scaleBuffer, animationCSS } from './variables';
-import type { ReachMoveFunction, ReachFunction, PhotoTapFunction, OriginRectType, BrokenElementParams } from './types';
+import type {
+  ReachMoveFunction,
+  ReachFunction,
+  PhotoTapFunction,
+  OriginRectType,
+  BrokenElementParams,
+  PhotoRenderParams,
+} from './types';
 import type { ReachType, TouchStartType } from './types';
 import useSetState from './hooks/useSetState';
 import getSuitableImageSize from './utils/getSuitableImageSize';
@@ -24,7 +31,7 @@ export interface PhotoBoxProps {
   // 图片地址
   src?: string;
   // 自定义渲染
-  render?: (props: Partial<React.HTMLAttributes<HTMLElement>>) => React.ReactNode;
+  render?: (props: PhotoRenderParams) => React.ReactNode;
   // 自定义渲染节点宽度
   width?: number;
   // 自定义渲染节点高度
@@ -110,7 +117,6 @@ const initialState = {
   easing: true,
   // 停止 Raf
   stopRaf: true,
-
   // 当前边缘触发状态
   currReach: undefined as ReachType,
 };
@@ -224,22 +230,21 @@ export default function PhotoBox({
           if (scale !== toScale) {
             onWheel(toScale);
           }
-          const position = getPositionOnMoveOrScale(
-            x,
-            y,
-            nextClientX,
-            nextClientY,
-            width,
-            height,
-            scale,
-            toScale,
-            offsetX,
-            offsetY,
-          );
           updateState({
             touchLength: currentTouchLength,
             currReach: currentReach,
-            ...position,
+            ...getPositionOnMoveOrScale(
+              x,
+              y,
+              nextClientX,
+              nextClientY,
+              width,
+              height,
+              scale,
+              toScale,
+              offsetX,
+              offsetY,
+            ),
           });
         }
       }
@@ -444,7 +449,7 @@ export default function PhotoBox({
     updateState({ easing: should }),
   );
 
-  const photoProps = {
+  const attrs = {
     className,
     onMouseDown: isTouchDevice ? undefined : handleMouseDown,
     onTouchStart: isTouchDevice ? handleTouchStart : undefined,
@@ -486,13 +491,13 @@ export default function PhotoBox({
             src={src}
             loaded={loaded}
             broken={broken}
-            {...photoProps}
+            {...attrs}
             onPhotoLoad={handlePhotoLoad}
             loadingElement={loadingElement}
             brokenElement={brokenElement}
           />
         ) : (
-          render?.(photoProps)
+          render?.({ attrs, scale: currentScale, rotate })
         )}
       </div>
     </div>

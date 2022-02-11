@@ -2,11 +2,12 @@
 
 **一款超精致的图片预览方案**
 
-[![npm](https://img.shields.io/npm/v/react-photo-view.svg?style=flat-square)](https://www.npmjs.com/package/react-photo-view)
-[![react-photo-view](https://badgen.net/bundlephobia/minzip/react-photo-view)](https://github.com/MinJieLiu/react-photo-view)
-[![react-photo-view](https://badgen.net/npm/dt/react-photo-view)](https://github.com/MinJieLiu/react-photo-view)
+[![NPM version][npm-image]][npm-url]
+[![Downloads][downloads-image]][downloads-url]
+[![Minified size][min-size-image]][bundlephobia-url]
+[![Gzip size][gzip-size-image]][bundlephobia-url]
 
-文档: [https://minjieliu.github.io/react-photo-view](https://minjieliu.github.io/react-photo-view)
+文档演示: [https://minjieliu.github.io/react-photo-view](https://minjieliu.github.io/react-photo-view)
 
 ## 特性
 
@@ -43,21 +44,21 @@ yarn add react-photo-view
 import { PhotoProvider, PhotoView } from 'react-photo-view';
 import 'react-photo-view/dist/react-photo-view.css';
 
-function ImageView() {
+function App() {
   return (
     <PhotoProvider>
-      <div>
-        <PhotoView src="/1.jpg">
-          <img src="/1-thumbnail.jpg" alt="" />
-        </PhotoView>
-      </div>
-
-      <div>
-        <PhotoView src="/2.jpg">
-          <img src="/2-thumbnail.jpg" alt="" />
-        </PhotoView>
-      </div>
+      <PhotoView src="/1.jpg">
+        <img src="/1-thumbnail.jpg" alt="" />
+      </PhotoView>
     </PhotoProvider>
   );
 }
 ```
+
+[npm-image]: https://img.shields.io/npm/v/react-photo-view.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/react-photo-view
+[downloads-image]: http://img.shields.io/npm/dm/react-photo-view.svg?style=flat-square
+[downloads-url]: https://npmjs.org/package/react-photo-view
+[min-size-image]: https://badgen.net/bundlephobia/min/react-photo-view?label=minified
+[gzip-size-image]: https://badgen.net/bundlephobia/minzip/react-photo-view?label=gzip
+[bundlephobia-url]: https://bundlephobia.com/result?p=react-photo-view

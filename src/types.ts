@@ -15,7 +15,7 @@ export interface DataType {
   /**
    * 自定义渲染，优先级比 src 低
    */
-  render?: (props: Partial<React.HTMLAttributes<HTMLElement>>) => React.ReactNode;
+  render?: (props: PhotoRenderParams) => React.ReactNode;
   /**
    * 自定义渲染节点宽度
    */
@@ -81,6 +81,15 @@ export interface PhotoProviderBase {
    */
   brokenElement?: JSX.Element | ((photoProps: BrokenElementParams) => JSX.Element);
 }
+
+export type PhotoRenderParams = {
+  /**
+   * 自定义渲染 DOM 属性
+   */
+  attrs: Partial<React.HTMLAttributes<HTMLElement>>;
+  scale: number;
+  rotate: number;
+};
 
 /**
  * brokenElement 函数参数

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Spinner from './components/Spinner';
 import useMountedRef from './hooks/useMountedRef';
 import type { BrokenElementParams } from './types';
@@ -32,7 +32,7 @@ export default function Photo({
 }: IPhotoProps) {
   const mountedRef = useMountedRef();
 
-  function handleImageLoaded(e: Event) {
+  function handleImageLoaded(e: React.SyntheticEvent<HTMLImageElement>) {
     const { naturalWidth, naturalHeight } = e.target as HTMLImageElement;
     if (mountedRef.current) {
       onPhotoLoad({
@@ -51,23 +51,19 @@ export default function Photo({
     }
   }
 
-  useEffect(() => {
-    const currPhoto = new Image();
-    currPhoto.onload = handleImageLoaded;
-    currPhoto.onerror = handleImageBroken;
-    currPhoto.src = src;
-  }, []);
-
   if (src && !broken) {
-    return loaded ? (
-      <img
-        className={`PhotoView__Photo${className ? ` ${className}` : ''}`}
-        src={src}
-        alt=""
-        {...restProps}
-      />
-    ) : (
-      loadingElement || <Spinner />
+    return (
+      <>
+        <img
+          className={`PhotoView__Photo${className ? ` ${className}` : ''}`}
+          src={src}
+          onLoad={handleImageLoaded}
+          onError={handleImageBroken}
+          alt=""
+          {...restProps}
+        />
+        {!loaded && (loadingElement || <Spinner />)}
+      </>
     );
   }
 

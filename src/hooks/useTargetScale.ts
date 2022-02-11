@@ -10,7 +10,7 @@ export default function useTargetScale(
   realWidth: number,
   realHeight: number,
   realScale: number,
-  updateShouldTransition: (transition: boolean) => void,
+  updateEasing: (transition: boolean) => void,
 ) {
   const execRef = useRef(false);
 
@@ -18,7 +18,7 @@ export default function useTargetScale(
 
   const moveScale = useDebounceCallback(
     async (current: number) => {
-      updateShouldTransition(false);
+      updateEasing(false);
       updateState({ leading: false, scale: current });
     },
     { wait: animationTime },
@@ -29,7 +29,7 @@ export default function useTargetScale(
       execRef.current = true;
       return;
     }
-    updateShouldTransition(true);
+    updateEasing(true);
     updateState({ leading: true });
 
     moveScale(realScale);
