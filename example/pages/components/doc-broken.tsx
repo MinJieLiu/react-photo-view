@@ -7,12 +7,12 @@ export default function DocDemo() {
   return (
     <ImageList>
       <PhotoProvider>
-        <PhotoView src="">
+        <PhotoView src="/error.png">
           <Button>无默认图</Button>
         </PhotoView>
       </PhotoProvider>
       <PhotoProvider brokenElement={<DefaultImage src={defaultPhoto} />}>
-        <PhotoView src="">
+        <PhotoView src="/error.png">
           <Button>自定义默认图</Button>
         </PhotoView>
       </PhotoProvider>
