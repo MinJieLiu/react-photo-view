@@ -7,13 +7,13 @@
 [![Minified size][min-size-image]][bundlephobia-url]
 [![Gzip size][gzip-size-image]][bundlephobia-url]
 
-### 快速开始
+## 快速开始
 
 - [文档入口](https://minjieliu.github.io/react-photo-view)
 - [基本示例](https://minjieliu.github.io/react-photo-view/#/getting-started)
 - [API](https://minjieliu.github.io/react-photo-view/#/api)
 
-### 特性
+## 特性
 
 1. 拖动切换预览
 2. 物理减速
@@ -34,14 +34,15 @@
 17. 无依赖
 18. 支持服务端渲染
 19. 高扩展性
+20. 更多...
 
-### 安装
+## 安装
 
 ```bash
 yarn add react-photo-view
 ```
 
-### 基本使用:
+## 基本使用:
 
 ```js
 import { PhotoProvider, PhotoView } from 'react-photo-view';
@@ -58,7 +59,7 @@ function App() {
 }
 ```
 
-### License
+## License
 
 Apache-2.0 © [MinJieLiu](https://github.com/MinJieLiu)
 
