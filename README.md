@@ -7,38 +7,41 @@
 [![Minified size][min-size-image]][bundlephobia-url]
 [![Gzip size][gzip-size-image]][bundlephobia-url]
 
-文档演示: [https://minjieliu.github.io/react-photo-view](https://minjieliu.github.io/react-photo-view)
+### 快速开始
 
-## 特性
+- [文档入口](https://minjieliu.github.io/react-photo-view)
+- [基本示例](https://minjieliu.github.io/react-photo-view/#/getting-started)
+- [API](https://minjieliu.github.io/react-photo-view/#/api)
 
-1. 滑动左右切换
-2. 拖动预览
-3. 物理减速
-4. 双击放大/缩小
-5. 双指放大/缩小/平移
-6. 左右切换导航
-7. 上/下滑关闭
-8. 键盘导航
-9. 旋转 API
-10. 点击切换控件
-11. 缩放动画
-12. 自适应图像适应
-13. 长图模式
-14. 自定义元素预览
-15. 支持桌面端（兼容 IE10+）/移动端
-16. 基于 `typescript`
-17. 6KB
-18. 无依赖
-19. 支持服务端渲染
-20. 高扩展性
+### 特性
 
-## 安装
+1. 拖动切换预览
+2. 物理减速
+3. 双击放大/缩小
+4. 双指放大/缩小/平移
+5. 左右切换导航
+6. 上/下滑关闭
+7. 键盘导航
+8. 旋转 API
+9. 点击切换控件
+10. 缩放动画
+11. 自适应图像适应
+12. 长图模式
+13. 自定义元素预览
+14. 支持桌面端（兼容 IE10+）/移动端
+15. 基于 `typescript`
+16. 6KB
+17. 无依赖
+18. 支持服务端渲染
+19. 高扩展性
+
+### 安装
 
 ```bash
 yarn add react-photo-view
 ```
 
-## 基本使用:
+### 基本使用:
 
 ```js
 import { PhotoProvider, PhotoView } from 'react-photo-view';
@@ -54,6 +57,10 @@ function App() {
   );
 }
 ```
+
+### License
+
+Apache-2.0 © [MinJieLiu](https://github.com/MinJieLiu)
 
 [npm-image]: https://img.shields.io/npm/v/react-photo-view.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/react-photo-view
