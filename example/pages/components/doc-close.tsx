@@ -5,7 +5,7 @@ import photo4 from '../images/4.jpg';
 
 export default function DocDemo() {
   return (
-    <PhotoProvider pullClosable={false} maskClosable={false} loop={false}>
+    <PhotoProvider pullClosable={false} maskClosable={false}>
       <ImageList>
         <PhotoView src={photo4}>
           <ViewBox viewImage={photo4} />

@@ -78,9 +78,9 @@ const initialState = {
   // 真实高度
   naturalHeight: undefined as number | undefined,
   // 宽度
-  width: 1,
+  width: 0,
   // 高度
-  height: 1,
+  height: 0,
   // 加载成功状态
   loaded: undefined as boolean | undefined,
   // 破碎状态
@@ -480,11 +480,7 @@ export default function PhotoBox({
               : ''
             : ''
         }`}
-        style={{
-          transformOrigin: loaded ? getAnimateOrigin(originRect, width, height) : undefined,
-          width,
-          height,
-        }}
+        style={{ transformOrigin: loaded ? getAnimateOrigin(originRect, width, height) : undefined }}
       >
         {src ? (
           <Photo

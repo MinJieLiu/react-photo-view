@@ -78,7 +78,7 @@ const initialState: PhotoSliderState = {
 
 export default function PhotoSlider(props: IPhotoSliderProps) {
   const {
-    loop = true,
+    loop = 3,
     photoClosable,
     maskClosable = true,
     maskOpacity = defaultOpacity,
@@ -129,6 +129,9 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   const imageLength = images.length;
   const currentImage: DataType | undefined = images[index];
 
+  // 是否开启
+  const enableLoop = loop === true || imageLength > loop;
+
   // 显示动画处理
   const { realVisible, activeAnimation, onAnimationEnd } = useAnimationVisible(visible);
   // 动画位置计算
@@ -159,12 +162,12 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     },
     changeIndex(nextIndex: number, should: boolean = true) {
       // 当前索引
-      const currentIndex = loop ? virtualIndexRef.current + (nextIndex - index) : nextIndex;
+      const currentIndex = enableLoop ? virtualIndexRef.current + (nextIndex - index) : nextIndex;
       const max = imageLength - 1;
       // 虚拟 index
       // 非循环模式，限制区间
       const limitIndex = Math.min(max, Math.max(currentIndex, 0));
-      const nextVirtualIndex = loop ? currentIndex : limitIndex;
+      const nextVirtualIndex = enableLoop ? currentIndex : limitIndex;
       // 单个屏幕宽度
       const singlePageWidth = window.innerWidth + horizontalOffset;
 
@@ -179,7 +182,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       virtualIndexRef.current = nextVirtualIndex;
       // 更新真实的 index
       const realLoopIndex = nextIndex < 0 ? max : nextIndex > max ? 0 : nextIndex;
-      onIndexChange?.(loop ? realLoopIndex : limitIndex);
+      onIndexChange?.(enableLoop ? realLoopIndex : limitIndex);
     },
     onRotate(rotate: number) {
       handleMergePhotoMap({ rotate });
@@ -283,7 +286,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
 
     // 第一张和最后一张超出距离减半
     if (
-      !loop &&
+      !enableLoop &&
       ((index === 0 && originOffsetClientX > 0) || (index === images.length - 1 && originOffsetClientX < 0))
     ) {
       offsetClientX = originOffsetClientX / 2;
@@ -340,7 +343,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
 
   const transform = `translate3d(${translateX}px, 0px, 0)`;
   // 截取相邻的图片
-  const adjacentImages = useAdjacentImages(images, index, loop);
+  const adjacentImages = useAdjacentImages(images, index, enableLoop);
 
   if (!realVisible) {
     return null;
@@ -399,11 +402,12 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       )}
       {adjacentImages.map((item: DataType, currentIndex) => {
         // 截取之前的索引位置
-        const nextIndex = !loop && index === 0 ? index + currentIndex : virtualIndexRef.current - 1 + currentIndex;
+        const nextIndex =
+          !enableLoop && index === 0 ? index + currentIndex : virtualIndexRef.current - 1 + currentIndex;
 
         return (
           <PhotoBox
-            key={loop ? `${item.key}/${item.src}/${nextIndex}` : item.key}
+            key={enableLoop ? `${item.key}/${item.src}/${nextIndex}` : item.key}
             src={item.src}
             render={item.render}
             width={item.width}
@@ -432,12 +436,12 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       })}
       {!isTouchDevice && bannerVisible && (
         <>
-          {(loop || index !== 0) && (
+          {(enableLoop || index !== 0) && (
             <div className="PhotoView-PhotoSlider__ArrowLeft" onClick={() => changeIndex(index - 1, false)}>
               <ArrowLeft />
             </div>
           )}
-          {(loop || index + 1 < imageLength) && (
+          {(enableLoop || index + 1 < imageLength) && (
             <div className="PhotoView-PhotoSlider__ArrowRight" onClick={() => changeIndex(index + 1, false)}>
               <ArrowRight />
             </div>

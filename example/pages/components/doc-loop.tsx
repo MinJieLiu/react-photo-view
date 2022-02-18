@@ -1,15 +1,16 @@
 import React from 'react';
 import { PhotoProvider, PhotoView } from 'react-photo-view';
-import { ImageList, ViewBox } from './doc-components';
-import photo4 from '../images/4.jpg';
+import { ImageList, ViewBox, photoImages } from './doc-components';
 
 export default function DocDemo() {
   return (
-    <PhotoProvider loop={false}>
+    <PhotoProvider loop={4}>
       <ImageList>
-        <PhotoView src={photo4}>
-          <ViewBox viewImage={photo4} />
-        </PhotoView>
+        {photoImages.slice(0, 3).map((item, index) => (
+          <PhotoView key={index} src={item}>
+            <ViewBox viewImage={item} />
+          </PhotoView>
+        ))}
       </ImageList>
     </PhotoProvider>
   );

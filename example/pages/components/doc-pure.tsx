@@ -5,7 +5,7 @@ import photo5 from '../images/5.jpg';
 
 export default function DocDemo() {
   return (
-    <PhotoProvider maskOpacity={0.5} bannerVisible={false} loop={false}>
+    <PhotoProvider maskOpacity={0.5} bannerVisible={false}>
       <ImageList>
         <PhotoView src={photo5}>
           <ViewBox viewImage={photo5} />

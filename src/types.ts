@@ -32,10 +32,10 @@ export interface DataType {
 
 export interface PhotoProviderBase {
   /**
-   * 是否循环预览
-   * @defaultValue true
+   * 是否循环预览，达到该数量则启用
+   * @defaultValue 3
    */
-  loop?: boolean;
+  loop?: boolean | number;
   /**
    * 图片点击是否可关闭
    */
