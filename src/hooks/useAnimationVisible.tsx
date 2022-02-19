@@ -8,16 +8,16 @@ import useForkedVariable from './useForkedVariable';
 export default function useAnimationVisible(visible: boolean | undefined, leaveCallback?: () => void) {
   const [, handleRender] = useReducer((c) => !c, false);
 
-  const activeAnimation = useRef<'enter' | 'leave'>();
+  const activeAnimation = useRef<'in' | 'out'>();
 
   // 可见状态分支
   const [realVisible, modifyRealVisible] = useForkedVariable(visible, (modify) => {
     // 可见状态：设置进入动画
     if (visible) {
       modify(visible);
-      activeAnimation.current = 'enter';
+      activeAnimation.current = 'in';
     } else {
-      activeAnimation.current = 'leave';
+      activeAnimation.current = 'out';
     }
   });
 
@@ -25,7 +25,7 @@ export default function useAnimationVisible(visible: boolean | undefined, leaveC
     // 动画结束后触发渲染
     handleRender();
     // 结束动画：设置隐藏状态
-    if (activeAnimation.current === 'leave') {
+    if (activeAnimation.current === 'out') {
       modifyRealVisible(false);
       // 触发隐藏回调
       leaveCallback?.();

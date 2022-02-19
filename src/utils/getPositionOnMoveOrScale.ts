@@ -1,4 +1,4 @@
-import { getClosedEdge } from './edgeHandle';
+import { computePositionEdge } from './edgeHandle';
 
 /**
  * 获取移动或缩放之后的中心点
@@ -18,8 +18,8 @@ export default function getPositionOnMoveOrScale(
   const { innerWidth, innerHeight } = window;
 
   // 是否接触边缘
-  const closedEdgeX = getClosedEdge(x, toScale, width, innerWidth);
-  const closedEdgeY = getClosedEdge(y, toScale, height, innerHeight);
+  const [closedEdgeX] = computePositionEdge(x, toScale, width, innerWidth);
+  const [closedEdgeY] = computePositionEdge(y, toScale, height, innerHeight);
 
   const centerClientX = innerWidth / 2;
   const centerClientY = innerHeight / 2;

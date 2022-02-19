@@ -49,11 +49,11 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
 
     // 时间过长
     if (moveTime >= maxTouchTime) {
-      const [nextX, isEdgeX] = computePositionEdge(x, scale, currentWidth, innerWidth);
+      const [isEdgeX, nextX] = computePositionEdge(x, scale, currentWidth, innerWidth);
       if (isEdgeX) {
         easeOutMove(x, nextX, callback.X);
       }
-      const [nextY, isEdgeY] = computePositionEdge(y, scale, currentHeight, innerHeight);
+      const [isEdgeY, nextY] = computePositionEdge(y, scale, currentHeight, innerHeight);
       if (isEdgeY) {
         easeOutMove(y, nextY, callback.Y);
       }
@@ -72,8 +72,8 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
       const nextX = x + spatial * (speedX / speedT);
       const nextY = y + spatial * (speedY / speedT);
 
-      const [currentX, isEdgeX] = computePositionEdge(nextX, scale, currentWidth, innerWidth);
-      const [currentY, isEdgeY] = computePositionEdge(nextY, scale, currentHeight, innerHeight);
+      const [isEdgeX, currentX] = computePositionEdge(nextX, scale, currentWidth, innerWidth);
+      const [isEdgeY, currentY] = computePositionEdge(nextY, scale, currentHeight, innerHeight);
 
       if (isEdgeX && !edgeX) {
         edgeX = true;

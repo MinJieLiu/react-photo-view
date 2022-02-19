@@ -2,7 +2,7 @@ import React, { useLayoutEffect, useRef } from 'react';
 import isTouchDevice from './utils/isTouchDevice';
 import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
-import { getReachType, getClosedEdge } from './utils/edgeHandle';
+import { getReachType, computePositionEdge } from './utils/edgeHandle';
 import getAnimateOrigin from './utils/getAnimateOrigin';
 import getRotateSize from './utils/getRotateSize';
 import { maxScale, minStartTouchOffset, minScale, scaleBuffer, animationCSS } from './variables';
@@ -67,7 +67,7 @@ export interface PhotoBoxProps {
   isActive: boolean;
 
   // 动画类型
-  activeAnimation?: 'enter' | 'leave';
+  activeAnimation?: 'in' | 'out';
   // 动画源位置
   originRect?: OriginRectType;
 }
@@ -204,8 +204,8 @@ export default function PhotoBox({
         let currentReach: ReachType = undefined;
         if (currentTouchLength === 0) {
           // 边缘超出状态
-          const horizontalCloseEdge = getClosedEdge(offsetX + lastX, scale, currentWidth, window.innerWidth);
-          const verticalCloseEdge = getClosedEdge(offsetY + lastY, scale, currentHeight, window.innerHeight);
+          const [horizontalCloseEdge] = computePositionEdge(offsetX + lastX, scale, currentWidth, window.innerWidth);
+          const [verticalCloseEdge] = computePositionEdge(offsetY + lastY, scale, currentHeight, window.innerHeight);
           // 边缘触发检测
           currentReach = getReachType(initialTouchRef.current, horizontalCloseEdge, verticalCloseEdge, currReach);
 
@@ -254,25 +254,19 @@ export default function PhotoBox({
     },
   );
 
+  function updateRaf(position: { x?: number; y?: number }) {
+    if (stopRaf || touched) {
+      return false;
+    }
+    if (mounted.current) {
+      updateState({ ...position, easing: false });
+    }
+    return mounted.current;
+  }
+
   const slideToPosition = useScrollPosition(
-    (nextX) => {
-      if (stopRaf || touched) {
-        return false;
-      }
-      if (mounted.current) {
-        updateState({ x: nextX, easing: false });
-      }
-      return mounted.current;
-    },
-    (nextY) => {
-      if (stopRaf || touched) {
-        return false;
-      }
-      if (mounted.current) {
-        updateState({ y: nextY, easing: false });
-      }
-      return mounted.current;
-    },
+    (nextX) => updateRaf({ x: nextX }),
+    (nextY) => updateRaf({ y: nextY }),
     (nextScale) => {
       if (mounted.current) {
         onWheel(nextScale);
@@ -362,7 +356,7 @@ export default function PhotoBox({
     'resize',
     useDebounceCallback(
       () => {
-        if (loaded) {
+        if (loaded && !touched) {
           updateState(getSuitableImageSize(naturalWidth, naturalHeight, rotate));
           if (onPhotoResize) {
             onPhotoResize();
@@ -473,9 +467,9 @@ export default function PhotoBox({
       <div
         className={`PhotoView__PhotoBox${
           loaded
-            ? activeAnimation === 'enter'
+            ? activeAnimation === 'in'
               ? ' PhotoView__animateIn'
-              : activeAnimation === 'leave'
+              : activeAnimation === 'out'
               ? ' PhotoView__animateOut'
               : ''
             : ''

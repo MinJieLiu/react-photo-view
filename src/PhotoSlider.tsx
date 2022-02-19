@@ -130,7 +130,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   const currentImage: DataType | undefined = images[index];
 
   // 是否开启
-  const enableLoop = loop === true || imageLength > loop;
+  // noinspection SuspiciousTypeOfGuard
+  const enableLoop = typeof loop === 'boolean' ? loop : imageLength > loop;
 
   // 显示动画处理
   const { realVisible, activeAnimation, onAnimationEnd } = useAnimationVisible(visible);
@@ -377,9 +378,9 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       {visible && <PreventScroll />}
       <div
         className={`PhotoView-PhotoSlider__Backdrop${maskClassName ? ` ${maskClassName}` : ''}${
-          activeAnimation === 'enter'
+          activeAnimation === 'in'
             ? ' PhotoView-PhotoSlider__fadeIn'
-            : activeAnimation === 'leave'
+            : activeAnimation === 'out'
             ? ' PhotoView-PhotoSlider__fadeOut'
             : ''
         }`}

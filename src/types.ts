@@ -151,9 +151,9 @@ export type PhotoTapFunction = (clientX: number, clientY: number) => void;
  * 边缘超出状态
  */
 export type CloseEdgeType =
-  | 'small' // 小于屏幕宽度
-  | 'before' // 抵触左边/上边
-  | 'after' // 抵触右边/下边
+  | 'S' // 小于屏幕宽度
+  | 'F' // 抵触左边/上边
+  | 'E' // 抵触右边/下边
   | undefined; // 正常滑动
 
 /**
