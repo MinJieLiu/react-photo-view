@@ -2,9 +2,11 @@ export default {
   projectLink: 'https://github.com/MinJieLiu/react-photo-view', // GitHub link in the navbar
   docsRepositoryBase: 'https://github.com/MinJieLiu/react-photo-view/tree/master/example', // base URL for the docs repository
   titleSuffix: ' – react-photo-view',
+  search: true,
+  unstable_flexsearch: true,
+  floatTOC: true,
   nextLinks: true,
   prevLinks: true,
-  search: true,
   customSearch: null,
   darkMode: true,
   footer: true,

@@ -5,6 +5,7 @@ title: Getting Started
 import Callout from 'nextra-theme-docs/callout';
 
 import DocBasic from '../../components/doc-basic';
+import DocCover from '../../components/doc-cover';
 import DocToolbar from '../../components/doc-toolbar';
 import DocButton from '../../components/doc-button';
 import DocLoop from '../../components/doc-loop';
@@ -72,6 +73,18 @@ export default function MyComponent() {
 <DocBasic />
 
 如果需要整个页面的图片形成一组进行预览，则可以在页面的入口处嵌套 `PhotoProvider`。
+
+## object-fit 裁切
+
+`<PhotoView />` 组件会自动识别子节点类型，如果子节点为 `<img />`，并且使用 `CSS` 设置了 `object-fit` 属性，则在缩放动画中附带裁切效果：
+
+```jsx
+<PhotoView src={imageURL}>
+  <img src={imageURL} className="block w-64 h-64 object-cover" alt="" />
+</PhotoView>
+```
+
+<DocCover />
 
 ## 自定义工具栏
 

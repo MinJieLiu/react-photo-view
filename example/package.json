@@ -7,9 +7,9 @@
     "start": "next start"
   },
   "dependencies": {
-    "next": "^12.1.0",
-    "nextra": "^2.0.0-beta.5",
-    "nextra-theme-docs": "^2.0.0-beta.5"
+    "next": "^12.0.8",
+    "nextra": "^2.0.0-alpha.24",
+    "nextra-theme-docs": "^2.0.0-alpha.23"
   },
   "devDependencies": {
     "@types/node": "17.0.18",

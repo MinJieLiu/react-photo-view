@@ -6,7 +6,7 @@ import Callout from 'nextra-theme-docs/callout';
 import Bleed from 'nextra-theme-docs/bleed';
 import Features from '../components/features';
 
-import Basic from '../components/doc-basic';
+import Index from '../components/doc-index';
 import qrcode from '../images/qrcode.jpg';
 
 <h1 className="text-center font-bold md:text-5xl mt-8">react-photo-view</h1>
@@ -15,13 +15,13 @@ import qrcode from '../images/qrcode.jpg';
   <Features />
 </Bleed>
 
-`react-photo-view` 拥有无与伦比的预览交互体验：从打开图像开始，每一帧的动画、细节和交互都经过了精心设计与反复调试，从而媲美原生图片预览的效果。
+`react-photo-view` 拥有无与伦比的预览交互体验：从打开图像开始，每一帧的动画、细节和交互都经过了精心设计与反复调试，媲美原生图片预览的效果。
 
 <div className="mt-16 mb-20 text-center">
-  [示例](/docs) · [API](/docs/api) · [GitHub 仓库](https://github.com/MinJieLiu/react-photo-view.git)
+  [示例](/docs/getting-started) · [API](/docs/api) · [GitHub 仓库](https://github.com/MinJieLiu/react-photo-view.git)
 </div>
 
-<Basic />
+<Index />
 
 ## 概览
 
@@ -50,7 +50,7 @@ export default function App() {
 - 全方面动画衔接，**打开/关闭/回弹/触边**，顺其自然的交互效果
 - 图像自适应，以一个合适的最初呈现大小，并根据调整自适应
 - 支持自定义如 `<video />` 或任意 `HTML` 元素的预览
-- 键盘导航，完美适应桌面端
+- 键盘导航，完美适配桌面端
 - 支持自定义节点扩展，轻松实现全屏预览、旋转控制、图片介绍以及更多功能
 - 基于 `typescript`，6KB 大小，支持服务端渲染
 - 简单易用的 API，上手零成本

@@ -14,14 +14,7 @@ export const ImageList: React.FC = ({ children }) => {
 
 export const Image = React.forwardRef<HTMLImageElement, React.ImgHTMLAttributes<HTMLImageElement>>(
   ({ src, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className="mr-2 mb-2 w-24 h-24 cursor-pointer bg-cover bg-no-repeat"
-        style={{ backgroundImage: `url(${src})` }}
-        {...props}
-      />
-    );
+    return <img ref={ref} src={src} className="mr-2 mb-2 w-24 h-24 cursor-pointer object-cover" alt="" {...props} />;
   },
 );
 

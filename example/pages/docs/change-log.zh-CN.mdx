@@ -2,17 +2,27 @@
 title: Change Log
 ---
 
-## 1.0.0-beta.0
+## 1.0.0-beta.4
 
-基于 `hooks` 重构逻辑
+features:
+
+1. 完美衔接打开/关闭动画
+2. 自动识别 `object-fit` 图像填充模式动画
+3. 其他元素动画 `opacity` 降级处理
 
 break changes:
 
-1. `PhotoConsumer ` 名称更改为 `PhotoView`
-2. `DataType` 移除 `intro` 字段，移除参数 `introVisible`
-3. `viewClassName` 参数名更改为 `photoWrapClassName`
-4. `imageClassName` 参数名更改为 `photoClassName`
-5. `DataType` 中 `key` 为必填字段
+1. 调整图片居中逻辑
+2. 更改 CSS 少许名称
+
+fix:
+
+1. `next.js` 中导入报错
+2. 放大后关闭动画指向问题
+
+## 1.0.0-beta.0
+
+基于 `hooks` 重构逻辑
 
 features:
 
@@ -21,6 +31,14 @@ features:
 3. 支持 `loop` 循环预览
 4. 支持 `render` 自定义预览元素
 5. 新增参数 `maskOpacity` 支持自定义背景默认透明度
+
+break changes:
+
+1. `PhotoConsumer ` 名称更改为 `PhotoView`
+2. `DataType` 移除 `intro` 字段，移除参数 `introVisible`
+3. `viewClassName` 参数名更改为 `photoWrapClassName`
+4. `imageClassName` 参数名更改为 `photoClassName`
+5. `DataType` 中 `key` 为必填字段
 
 others:
 
