@@ -1,14 +1,18 @@
 import { useReducer, useRef } from 'react';
+import { ActiveAnimationType } from '../types';
 import useForkedVariable from './useForkedVariable';
 
 /**
  * 动画关闭处理真实关闭状态
  * 通过 onAnimationEnd 回调实现 leaveCallback
  */
-export default function useAnimationVisible(visible: boolean | undefined, leaveCallback?: () => void) {
+export default function useAnimationVisible(
+  visible: boolean | undefined,
+  leaveCallback?: () => void,
+): [realVisible: boolean | undefined, activeAnimation: ActiveAnimationType, onAnimationEnd: () => void] {
   const [, handleRender] = useReducer((c) => !c, false);
 
-  const activeAnimation = useRef<'in' | 'out'>();
+  const activeAnimation = useRef<ActiveAnimationType>();
 
   // 可见状态分支
   const [realVisible, modifyRealVisible] = useForkedVariable(visible, (modify) => {
@@ -34,7 +38,7 @@ export default function useAnimationVisible(visible: boolean | undefined, leaveC
     activeAnimation.current = undefined;
   }
 
-  return {
+  return [
     /**
      * 真实可见状态
      */
@@ -42,10 +46,10 @@ export default function useAnimationVisible(visible: boolean | undefined, leaveC
     /**
      * 正在进行的动画
      */
-    activeAnimation: activeAnimation.current,
+    activeAnimation.current,
     /**
      * 动画结束后回调
      */
     onAnimationEnd,
-  };
+  ];
 }

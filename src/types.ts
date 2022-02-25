@@ -17,11 +17,11 @@ export interface DataType {
    */
   render?: (props: PhotoRenderParams) => React.ReactNode;
   /**
-   * 自定义渲染节点宽度
+   * 指定渲染节点宽度
    */
   width?: number;
   /**
-   * 自定义渲染节点高度
+   * 指定渲染节点高度
    */
   height?: number;
   /**
@@ -173,12 +173,37 @@ export type TouchStartType =
   | 'pull' // Y 轴往下
   | undefined; // 未触发
 
+export type OriginRectType = {
+  // top
+  T: number;
+  // left
+  L: number;
+  // width
+  W: number;
+  // height
+  H: number;
+  // object-fit
+  FIT: 'contain' | 'cover' | 'fill' | undefined;
+};
+
 /**
- * 触发源位置
+ * 动画状态
  */
-export type OriginRectType =
-  | {
-      clientX: number;
-      clientY: number;
-    }
-  | undefined;
+export type EasingMode =
+  // 未初始化
+  | 0
+  // 进入：开始
+  | 1
+  // 进入：动画开始
+  | 2
+  // 进入：动画第二帧
+  | 3
+  // 正常
+  | 4
+  // 关闭
+  | 5;
+
+/**
+ * 进行中的动画
+ */
+export type ActiveAnimationType = 'in' | 'out' | undefined;

@@ -1,5 +1,6 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useRef } from 'react';
 import useSetState from './useSetState';
+import useIsomorphicLayoutEffect from './useIsomorphicLayoutEffect';
 import useDebounceCallback from './useDebounceCallback';
 import { animationTime } from '../variables';
 
@@ -14,29 +15,29 @@ export default function useTargetScale(
 ) {
   const execRef = useRef(false);
 
-  const [{ leading, scale }, updateState] = useSetState({ leading: true, scale: realScale });
+  const [{ top, scale }, updateState] = useSetState({ top: true, scale: realScale });
 
   const moveScale = useDebounceCallback(
     async (current: number) => {
       updateEasing(false);
-      updateState({ leading: false, scale: current });
+      updateState({ top: false, scale: current });
     },
     { wait: animationTime },
   );
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!execRef.current) {
       execRef.current = true;
       return;
     }
     updateEasing(true);
-    updateState({ leading: true });
+    updateState({ top: true });
 
     moveScale(realScale);
   }, [realScale]);
 
   // 运动开始
-  if (leading) {
+  if (top) {
     return [realWidth * scale, realHeight * scale, realScale / scale] as const;
   }
 

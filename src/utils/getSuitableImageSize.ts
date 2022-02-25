@@ -4,42 +4,38 @@ import getRotateSize from './getRotateSize';
  * 获取图片合适的大小
  */
 export default function getSuitableImageSize(naturalWidth: number, naturalHeight: number, rotate: number) {
-  let width;
-  let height;
+  const [currentWidth, currentHeight, isVertical] = getRotateSize(rotate, innerWidth, innerHeight);
+
   let y = 0;
-  const [innerWidth, innerHeight, isVertical] = getRotateSize(rotate, window.innerWidth, window.innerHeight);
+  let width = currentWidth;
+  let height = currentHeight;
 
-  const autoWidth = (naturalWidth / naturalHeight) * innerHeight;
-  const autoHeight = (naturalHeight / naturalWidth) * innerWidth;
+  // 自适应宽高
+  const autoWidth = (naturalWidth / naturalHeight) * currentHeight;
+  const autoHeight = (naturalHeight / naturalWidth) * currentWidth;
 
-  if (naturalWidth < innerWidth && naturalHeight < innerHeight) {
+  if (naturalWidth < currentWidth && naturalHeight < currentHeight) {
     width = naturalWidth;
     height = naturalHeight;
-  } else if (naturalWidth < innerWidth && naturalHeight >= innerHeight) {
+  } else if (naturalWidth < currentWidth && naturalHeight >= currentHeight) {
     width = autoWidth;
-    height = innerHeight;
-  } else if (naturalWidth >= innerWidth && naturalHeight < innerHeight) {
-    width = innerWidth;
+  } else if (naturalWidth >= currentWidth && naturalHeight < currentHeight) {
     height = autoHeight;
-  } else if (naturalWidth / naturalHeight > innerWidth / innerHeight) {
-    width = innerWidth;
+  } else if (naturalWidth / naturalHeight > currentWidth / currentHeight) {
     height = autoHeight;
   }
   // 长图模式
   else if (naturalHeight / naturalWidth >= 3 && !isVertical) {
-    width = innerWidth;
     height = autoHeight;
-    // 默认定位到顶部区域
-    y = (height - innerHeight) / 2;
+    y = (height - currentHeight) / 2;
   } else {
     width = autoWidth;
-    height = innerHeight;
   }
   return {
     width: Math.floor(width),
     height: Math.floor(height),
     x: 0,
     y,
-    easing: true,
+    easing: false,
   };
 }

@@ -1,0 +1,27 @@
+---
+title: Change Log
+---
+
+## 1.0.0-beta.0
+
+基于 `hooks` 重构逻辑
+
+break changes:
+
+1. `PhotoConsumer ` 名称更改为 `PhotoView`
+2. `DataType` 移除 `intro` 字段，移除参数 `introVisible`
+3. `viewClassName` 参数名更改为 `photoWrapClassName`
+4. `imageClassName` 参数名更改为 `photoClassName`
+5. `DataType` 中 `key` 为必填字段
+
+features:
+
+1. 模拟物理滚动预览/带回弹
+2. 调整缩放后延迟更新宽/高
+3. 支持 `loop` 循环预览
+4. 支持 `render` 自定义预览元素
+5. 新增参数 `maskOpacity` 支持自定义背景默认透明度
+
+others:
+
+修复诸多细节问题

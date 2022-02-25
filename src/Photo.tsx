@@ -62,17 +62,21 @@ export default function Photo({
           alt=""
           {...restProps}
         />
-        {!loaded && (loadingElement || <Spinner />)}
+        {!loaded && (loadingElement || <Spinner className="PhotoView__icon" />)}
       </>
     );
   }
 
   if (brokenElement) {
-    return typeof brokenElement === 'function'
-      ? brokenElement({
-          src,
-        })
-      : brokenElement;
+    return (
+      <span className="PhotoView__icon">
+        {typeof brokenElement === 'function'
+          ? brokenElement({
+              src,
+            })
+          : brokenElement}
+      </span>
+    );
   }
 
   return null;

@@ -4,12 +4,12 @@ import type { ReachType, TouchStartType } from '../types';
 /**
  * 获取接触边缘类型
  */
-export function getReachType(
+export const getReachType = (
   initialTouchState: TouchStartType,
   horizontalCloseEdge: CloseEdgeType,
   verticalCloseEdge: CloseEdgeType,
   reachPosition: ReachType,
-): ReachType {
+): ReachType => {
   if ((horizontalCloseEdge && initialTouchState === 'x') || reachPosition === 'x') {
     return 'x';
   } else if (
@@ -19,7 +19,7 @@ export function getReachType(
     return 'y';
   }
   return undefined;
-}
+};
 
 /**
  * 计算接触边缘位置
@@ -29,7 +29,7 @@ export function getReachType(
  * @param innerSize - innerWidth/innerHeight
  * @return [CloseEdgeType, position]
  */
-export function computePositionEdge(position: number, scale: number, size: number, innerSize: number) {
+export const computePositionEdge = (position: number, scale: number, size: number, innerSize: number) => {
   const currentWidth = size * scale;
   // 图片超出的宽度
   const outOffset = (currentWidth - innerSize) / 2;
@@ -48,4 +48,4 @@ export function computePositionEdge(position: number, scale: number, size: numbe
   }
 
   return [closedEdge, current] as const;
-}
+};

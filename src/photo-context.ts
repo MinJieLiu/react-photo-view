@@ -1,4 +1,4 @@
-import React from 'react';
+import { createContext } from 'react';
 import type { DataType } from './types';
 
 export type UpdateItemType = (dataType: DataType) => void;
@@ -10,4 +10,4 @@ export interface PhotoContextType {
   nextId: () => number;
 }
 
-export default React.createContext<PhotoContextType>(undefined as unknown as PhotoContextType);
+export default createContext<PhotoContextType>(undefined as unknown as PhotoContextType);

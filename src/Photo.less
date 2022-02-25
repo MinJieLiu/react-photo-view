@@ -1,7 +1,16 @@
 .PhotoView__Photo {
+  max-width: initial;
   cursor: grab;
 
   &:active {
     cursor: grabbing;
   }
+}
+
+.PhotoView__icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-block;
+  transform: translate(-50%, -50%);
 }

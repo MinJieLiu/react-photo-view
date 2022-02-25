@@ -1,0 +1,281 @@
+---
+title: Getting Started
+---
+
+import Callout from 'nextra-theme-docs/callout';
+
+import DocBasic from '../../components/doc-basic';
+import DocToolbar from '../../components/doc-toolbar';
+import DocButton from '../../components/doc-button';
+import DocLoop from '../../components/doc-loop';
+import DocBackdrop from '../../components/doc-backdrop';
+import DocPure from '../../components/doc-pure';
+import DocClose from '../../components/doc-close';
+import DocBroken from '../../components/doc-broken';
+import DocControlled from '../../components/doc-controlled';
+import DocPart from '../../components/doc-part';
+import DocOverlay from '../../components/doc-overlay';
+import DocRender from '../../components/doc-render';
+
+## 安装
+
+在 `React` 项目目录运行以下命令：
+
+pnpm:
+
+```plaintext
+pnpm i react-photo-view
+```
+
+yarn:
+
+```plaintext
+yarn add react-photo-view
+```
+
+或者用 npm:
+
+```plaintext
+npm install react-photo-view
+```
+
+## 快速开始
+
+在应用入口处引入 `CSS` 文件
+
+```js
+import 'react-photo-view/dist/react-photo-view.css';
+```
+
+在需要使用的地方引入 `PhotoProvider` 和 `PhotoView` 组件，基本用法：
+
+```jsx
+import { PhotoProvider, PhotoView } from 'react-photo-view';
+
+export default function MyComponent() {
+  return (
+    <PhotoProvider>
+      <div className="foo">
+        {images.map((item, index) => (
+          <PhotoView key={index} src={item}>
+            <img src={item} alt="" />
+          </PhotoView>
+        ))}
+      </div>
+    </PhotoProvider>
+  );
+}
+```
+
+以 `PhotoProvider`为界限，里面所有的 `PhotoView` 图片会按照运行顺序提取为一组图片预览画廊。当某个 `<img />` 被点击，则会定位到指定的图片并打开预览：
+
+<DocBasic />
+
+如果需要整个页面的图片形成一组进行预览，则可以在页面的入口处嵌套 `PhotoProvider`。
+
+## 自定义工具栏
+
+在 `<PhotoProvider />` 上添加参数 `toolbarRender` 函数，该函数须返回一个 `ReactNode` 节点。
+
+以下代码可以添加一个增加放大按钮：
+
+```jsx
+<PhotoProvider
+  toolbarRender={({ onScale, scale }) => {
+    return <div className="toolbarIcon" onClick={() => onScale(scale + 1)} />;
+  }}
+>
+  {images.map((item, index) => (
+    <PhotoView key={index} src={item}>
+      <img src={item} alt="" />
+    </PhotoView>
+  ))}
+</PhotoProvider>
+```
+
+`toolbarRender` 函数提供的参数有：
+
+- `images` - 图片列表 `DataType[]`
+- `index` - 当前索引 `number`
+- `onIndexChange` - 索引改变回调 `(index: number) => void`
+- `visible` - 是否可见 `boolean`
+- `onClose` - 关闭事件回调 `() => void`
+- `overlayVisible` - 覆盖物是否可见 `boolean`
+- `rotate` - 当前旋转角度 `number`
+- `onRotate` - 旋转事件回调 `(rotate: number) => void`
+- `scale` - 当前缩放 `number`
+- `onScale` - 缩放事件回调 `(scale: number) => void`
+
+以下示例实现了**旋转/全屏/放大/缩小**工具栏：
+
+<DocToolbar />
+
+## 触发节点
+
+`<PhotoView>` 子组件可以是常规 `React.HTMLAttributes` 类型，如 `<img />`、`<div />` 等。
+
+如果是自定义组件则需要保证 `onClick` （桌面端），`onTouchStart` 和 `onTouchEnd` （移动端）事件能正常触发，转发 `ref` 到 `HTMLElement` 上保证打开/关闭动画源的正确性。
+
+```jsx
+<PhotoProvider>
+  <PhotoView src={imageURL}>
+    <Button primary>点击预览</Button>
+  </PhotoView>
+</PhotoProvider>
+```
+
+<DocButton />
+
+## `PhotoSlider`
+
+一般情况，使用 `<PhotoProvider />` 配合 `<PhotoView />` 已经满足大部分需求。如果有更高级的自定义控制，可以使用 `<PhotoSlider />`。
+
+`<PhotoSlider />` 的参数继承自 `<PhotoProvider />`。会额外暴露几个 API：
+
+- `images` 图片列表，`DataType[]`
+- `visible` 是否可见受控属性 `boolean`
+- `onClose` 关闭事件回调 `() => void`
+- `index` 当前索引受控属性 `number`
+- `onIndexChange` 索引改变回调 `(index: number) => void`
+
+`visible` 和 `onClose` 搭配形成受控，`index` 搭配 `onIndexChange` 形成受控。
+
+```jsx
+export default function MyComponent() {
+  const [visible, setVisible] = useState(false);
+  const [photoIndex, setPhotoIndex] = useState(0);
+
+  return (
+    <>
+      <Button onClick={() => setPhotoIndex(2)}>setPhotoIndex(2)</Button>
+      <Button onClick={() => setPhotoIndex(4)}>setPhotoIndex(4)</Button>
+      <Button onClick={() => setVisible(true)} primary>
+        Open
+      </Button>
+
+      <PhotoSlider
+        images={images.map((item) => ({ src: item, key: item }))}
+        visible={visible}
+        onClose={() => setVisible(false)}
+        index={photoIndex}
+        onIndexChange={setPhotoIndex}
+      />
+    </>
+  );
+}
+```
+
+<DocControlled />
+
+## 预览更多
+
+`<PhotoView />` 无子组件的情况下也能加入到预览队列，只是无法直接触发当前图片的预览。通过这个特性，我们可以实现经过一个入口，预览更多图片的功能：
+
+```jsx
+<PhotoProvider>
+  {images.map((item, index) => (
+    <PhotoView key={index} src={item}>
+      {index < 2 ? <img src={item} alt="" /> : undefined}
+    </PhotoView>
+  ))}
+</PhotoProvider>
+```
+
+<DocPart />
+
+## 自定义渲染节点
+
+`<PhotoView />` 默认内置支持图片的预览，只需传递 `src` 即可，组件会自动识别图片的宽高。
+
+我们也可以通过 `render` 函数实现自定义节点的预览，以支持 `video` 或 `pdf` 的需求。
+
+```jsx
+const elementSize = 400;
+
+<PhotoView
+  width={elementSize}
+  height={elementSize}
+  render={({ scale, attrs }) => {
+    const width = attrs.style.width;
+    const offset = (width - elementSize) / elementSize;
+    const childScale = scale === 1 ? scale + offset : 1 + offset;
+
+    return (
+      <div {...attrs}>
+        <div style={{ transform: `scale(${childScale})` }}>
+          <div>Hello world</div>
+          <Button>button</Button>
+          <input onMouseDown={(e) => e.stopPropagation()} />
+        </div>
+      </div>
+    );
+  }}
+>
+  <Button primary>Click</Button>
+</PhotoView>;
+```
+
+<Callout emoji="💡">
+  注意：画廊在缩放之后，先会用 `scale` 进行缩放，在动画结束后则调整为当前 `scale` 所对应的宽高，并重置 `scale` 为 `1`。
+</Callout>
+
+<DocRender />
+
+## PhotoProvider 参数
+
+### 自定义描述
+
+在 `<PhotoProvider />` 上添加 `overlayRender` 函数，可以实现自定义节点，函数参数返回值与 `toolbarRender` 一致。
+
+<DocOverlay />
+
+### 循环预览
+
+在 `<PhotoProvider />` 上添加参数 `loop` 可以更改循环预览数量。设为 `boolean` 启用/关闭，设为 `number` 类型则达到具体数量以开启循环预览，默认值为 `3` 张：
+
+```jsx
+<PhotoProvider loop={4}>
+  {images.map((item, index) => (
+    <PhotoView key={index} src={item}>
+      <img src={item} alt="" />
+    </PhotoView>
+  ))}
+</PhotoProvider>
+```
+
+<DocLoop />
+
+### 蒙层透明度
+
+预设为不透明，上拉过程中会慢慢减少透明度，可在 `<PhotoProvider />` 添加 `maskOpacity` 调整默认透明度，可设置为 `0-1` 之间的数字：
+
+```jsx
+<PhotoProvider maskOpacity={0.5}>
+  <PhotoView src={imageURL}>
+    <img src={imageURL} alt="" />
+  </PhotoView>
+</PhotoProvider>
+```
+
+<DocBackdrop />
+
+### 不显示顶部按钮区域
+
+设置 `bannerVisible` 为 `false` 则可以不显示顶部区域：
+
+<DocPure />
+
+### 蒙层事件
+
+`pullClosable` 是否可以通过下拉关闭画廊，默认 `true`，`maskClosable` 是否可以点击蒙版关闭画廊，默认 `true`。
+
+<DocClose />
+
+## 自定义反馈
+
+`<PhotoView />` 如果加载失败，默认渲染空节点，你很可能需要根据当前 UI 设置属于自己的错误反馈节点。
+
+- `brokenElement` - 设置加载失败图案 `React.ReactElement`
+- `loadingElement` - 设置加载中图案 `React.ReactElement`
+
+<DocBroken />

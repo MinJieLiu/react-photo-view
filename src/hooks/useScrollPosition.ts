@@ -43,9 +43,7 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
     }
 
     const moveTime = Date.now() - touchedTime;
-
     const [currentWidth, currentHeight] = getRotateSize(rotate, width, height);
-    const { innerWidth, innerHeight } = window;
 
     // 时间过长
     if (moveTime >= maxTouchTime) {
@@ -160,7 +158,7 @@ function easeOutMove(start: number, end: number, callback: (spatial: number) => 
 
   const calcMove = () => {
     const time = Math.min(1, (Date.now() - startTime) / animationTime);
-    const result = callback(start + easeOutExpo(time) * distance);
+    const result = callback(start + easeOutQuart(time) * distance);
 
     if (result && time < 1) {
       raf();
@@ -181,6 +179,6 @@ function easeOutMove(start: number, end: number, callback: (spatial: number) => 
 /**
  * 缓动函数
  */
-function easeOutExpo(x: number): number {
-  return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+function easeOutQuart(x: number): number {
+  return 1 - Math.pow(1 - x, 4);
 }

@@ -1,13 +1,22 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import type { DataType, PhotoProviderBase, OverlayRenderProps } from './types';
 import type { ReachType } from './types';
-import { animationCSS, defaultOpacity, horizontalOffset, maxMoveOffset, maxScale, minScale } from './variables';
+import {
+  animationCSS,
+  animationTime,
+  defaultOpacity,
+  horizontalOffset,
+  maxMoveOffset,
+  maxScale,
+  minScale,
+} from './variables';
 import isTouchDevice from './utils/isTouchDevice';
+import limitNumber from './utils/limitNumber';
+import useIsomorphicLayoutEffect from './hooks/useIsomorphicLayoutEffect';
 import useAdjacentImages from './hooks/useAdjacentImages';
 import useSetState from './hooks/useSetState';
 import useEventListener from './hooks/useEventListener';
 import useAnimationVisible from './hooks/useAnimationVisible';
-import useAnimationOrigin from './hooks/useAnimationOrigin';
 import useMethods from './hooks/useMethods';
 import SlidePortal from './components/SlidePortal';
 import CloseIcon from './components/CloseIcon';
@@ -134,11 +143,9 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   const enableLoop = typeof loop === 'boolean' ? loop : imageLength > loop;
 
   // 显示动画处理
-  const { realVisible, activeAnimation, onAnimationEnd } = useAnimationVisible(visible);
-  // 动画位置计算
-  const originRect = useAnimationOrigin(visible, currentImage?.originRef);
+  const [realVisible, activeAnimation, onAnimationEnd] = useAnimationVisible(visible);
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     // 显示弹出层，修正正确的指向
     if (realVisible) {
       updateState({
@@ -154,12 +161,13 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
 
   const { close, changeIndex, onRotate, onScale } = useMethods({
     close(evt?: React.MouseEvent | React.TouchEvent) {
-      onClose(evt);
+      onRotate(0);
       updateState({
         overlayVisible: true,
         // 记录当前关闭时的透明度
         lastBgOpacity: bgOpacity,
       });
+      onClose(evt);
     },
     changeIndex(nextIndex: number, should: boolean = true) {
       // 当前索引
@@ -167,7 +175,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       const max = imageLength - 1;
       // 虚拟 index
       // 非循环模式，限制区间
-      const limitIndex = Math.min(max, Math.max(currentIndex, 0));
+      const limitIndex = limitNumber(currentIndex, 0, max);
       const nextVirtualIndex = enableLoop ? currentIndex : limitIndex;
       // 单个屏幕宽度
       const singlePageWidth = window.innerWidth + horizontalOffset;
@@ -189,7 +197,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       handleMergePhotoMap({ rotate });
     },
     onScale(scale: number) {
-      handleMergePhotoMap({ scale: Math.max(minScale, Math.min(maxScale, scale)) });
+      handleMergePhotoMap({ scale: limitNumber(scale, minScale, maxScale) });
     },
   });
 
@@ -226,7 +234,6 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   }
 
   function handleResize() {
-    const { innerWidth } = window;
     updateState({
       translateX: -(innerWidth + horizontalOffset) * index,
       lastCX: undefined,
@@ -261,7 +268,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       return;
     }
     const offsetClientY = Math.abs(clientY - lastCY);
-    const opacity = Math.max(Math.min(maskOpacity, maskOpacity - offsetClientY / 100 / 4), 0);
+    const opacity = limitNumber(maskOpacity, 0, maskOpacity - offsetClientY / 100 / 4);
 
     updateState({
       touched: true,
@@ -272,7 +279,6 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   }
 
   function handleReachHorizontalMove(clientX: number) {
-    const { innerWidth } = window;
     if (lastCX === undefined) {
       updateState({
         touched: true,
@@ -342,7 +348,6 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     });
   }
 
-  const transform = `translate3d(${translateX}px, 0px, 0)`;
   // 截取相邻的图片
   const adjacentImages = useAdjacentImages(images, index, enableLoop);
 
@@ -350,7 +355,6 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     return null;
   }
 
-  const { innerWidth } = window;
   const currentOverlayVisible = overlayVisible && !activeAnimation;
   // 关闭过程中使用下拉保存的透明度
   const currentOpacity = visible ? bgOpacity : lastBgOpacity;
@@ -370,34 +374,34 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   };
   return (
     <SlidePortal
-      className={`${!currentOverlayVisible ? 'PhotoView-PhotoSlider__clean' : ''}${
-        !visible ? ' PhotoView-PhotoSlider__willClose' : ''
+      className={`${!currentOverlayVisible ? 'PhotoView-Slider__clean' : ''}${
+        !visible ? ' PhotoView-Slider__willClose' : ''
       }${className ? ` ${className}` : ''}`}
       onClick={(e) => e.stopPropagation()}
     >
       {visible && <PreventScroll />}
       <div
-        className={`PhotoView-PhotoSlider__Backdrop${maskClassName ? ` ${maskClassName}` : ''}${
+        className={`PhotoView-Slider__Backdrop${maskClassName ? ` ${maskClassName}` : ''}${
           activeAnimation === 'in'
-            ? ' PhotoView-PhotoSlider__fadeIn'
+            ? ' PhotoView-Slider__fadeIn'
             : activeAnimation === 'out'
-            ? ' PhotoView-PhotoSlider__fadeOut'
+            ? ' PhotoView-Slider__fadeOut'
             : ''
         }`}
         style={{
           background: `rgba(0, 0, 0, ${currentOpacity})`,
-          transition: touched ? undefined : `background-color 0.4s ${animationCSS}`,
+          transition: touched ? undefined : `background-color ${animationTime}ms ${animationCSS}`,
         }}
         onAnimationEnd={onAnimationEnd}
       />
       {bannerVisible && (
-        <div className="PhotoView-PhotoSlider__BannerWrap">
-          <div className="PhotoView-PhotoSlider__Counter">
+        <div className="PhotoView-Slider__BannerWrap">
+          <div className="PhotoView-Slider__Counter">
             {index + 1} / {imageLength}
           </div>
-          <div className="PhotoView-PhotoSlider__BannerRight">
+          <div className="PhotoView-Slider__BannerRight">
             {toolbarRender && toolbarRender(overlayParams)}
-            <CloseIcon className="PhotoView-PhotoSlider__toolbarIcon" onClick={close} />
+            <CloseIcon className="PhotoView-Slider__toolbarIcon" onClick={close} />
           </div>
         </div>
       )}
@@ -409,10 +413,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
         return (
           <PhotoBox
             key={enableLoop ? `${item.key}/${item.src}/${nextIndex}` : item.key}
-            src={item.src}
-            render={item.render}
-            width={item.width}
-            height={item.height}
+            item={item}
+            visible={visible}
             onReachMove={handleReachMove}
             onReachUp={handleReachUp}
             onPhotoTap={handlePhotoTap}
@@ -421,15 +423,13 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             className={photoClassName}
             style={{
               left: `${(innerWidth + horizontalOffset) * nextIndex}px`,
-              transform,
-              transition: touched || !easing ? undefined : 'transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1)',
+              transform: `translate3d(${translateX}px, 0px, 0)`,
+              transition: touched || !easing ? undefined : `transform 0.6s ${animationCSS}`,
             }}
             loadingElement={loadingElement}
             brokenElement={brokenElement}
             onPhotoResize={handleResize}
             isActive={currentImage?.key === item.key}
-            activeAnimation={activeAnimation}
-            originRect={originRect}
             onWheel={onWheel}
             {...photoMap.get(item.key)}
           />
@@ -438,18 +438,18 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       {!isTouchDevice && bannerVisible && (
         <>
           {(enableLoop || index !== 0) && (
-            <div className="PhotoView-PhotoSlider__ArrowLeft" onClick={() => changeIndex(index - 1, false)}>
+            <div className="PhotoView-Slider__ArrowLeft" onClick={() => changeIndex(index - 1, false)}>
               <ArrowLeft />
             </div>
           )}
           {(enableLoop || index + 1 < imageLength) && (
-            <div className="PhotoView-PhotoSlider__ArrowRight" onClick={() => changeIndex(index + 1, false)}>
+            <div className="PhotoView-Slider__ArrowRight" onClick={() => changeIndex(index + 1, false)}>
               <ArrowRight />
             </div>
           )}
         </>
       )}
-      {overlayRender && <div className="PhotoView-PhotoSlider__Overlay">{overlayRender(overlayParams)}</div>}
+      {overlayRender && <div className="PhotoView-Slider__Overlay">{overlayRender(overlayParams)}</div>}
     </SlidePortal>
   );
 }

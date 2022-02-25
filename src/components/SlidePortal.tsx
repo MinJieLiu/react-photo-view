@@ -4,7 +4,7 @@ import useInitial from '../hooks/useInitial';
 import './SlidePortal.less';
 
 const SlidePortal: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, children, ...restProps }) => {
-  const dialogNode = useInitial(() => document.createElement('section'));
+  const dialogNode = useInitial(() => document.createElement('div'));
 
   React.useEffect(() => {
     document.body.appendChild(dialogNode);
@@ -14,12 +14,7 @@ const SlidePortal: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className
   }, []);
 
   return createPortal(
-    <div
-      className={`PhotoView-SlidePortal${className ? ` ${className}` : ''}`}
-      role="dialog"
-      id="PhotoView_Slider"
-      {...restProps}
-    >
+    <div className={`PhotoView-Portal${className ? ` ${className}` : ''}`} role="dialog" {...restProps}>
       {children}
     </div>,
     dialogNode,

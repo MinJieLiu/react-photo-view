@@ -1,0 +1,63 @@
+---
+title: API
+---
+
+import Callout from 'nextra-theme-docs/callout';
+
+## PhotoProvider
+
+| Name               | Description                    | Type                                                                       | Default Value |
+| ------------------ | ------------------------------ | -------------------------------------------------------------------------- | ------------- |
+| children           |                                | React.ReactNode                                                            | Required\*    |
+| onIndexChange      |                                | (index: number, state: PhotoProviderState) =&gt; void                      |
+| onVisibleChange    |                                | (visible: boolean, index: number, state: PhotoProviderState) =&gt; void    |
+| loop               | 是否循环预览，达到该数量则启用 | boolean \| number                                                          | 3             |
+| photoClosable      | 图片点击是否可关闭             | boolean                                                                    |
+| maskClosable       | 背景点击是否可关闭             | boolean                                                                    | true          |
+| maskOpacity        | 默认背景透明度                 | number                                                                     | 1             |
+| pullClosable       | 下拉是否可关闭                 | boolean                                                                    | true          |
+| bannerVisible      | 导航条 visible                 | boolean                                                                    | true          |
+| overlayRender      | 自定义渲染覆盖物               | \(overlayProps: OverlayRenderProps\) =&gt; React\.ReactNode                |
+| toolbarRender      | 自定义渲染工具栏               | \(overlayProps: OverlayRenderProps\) =&gt; React\.ReactNode                |
+| className          |                                | string                                                                     |
+| maskClassName      |                                | string                                                                     |
+| photoWrapClassName |                                | string                                                                     |
+| photoClassName     |                                | string                                                                     |
+| loadingElement     | 自定义 loading                 | JSX\.Element                                                               |
+| brokenElement      | 自定义加载失败渲染             | JSX\.Element \| \(\(photoProps: BrokenElementParams\) =&gt; JSX\.Element\) |
+
+## PhotoView
+
+| Name     | Description                 | Type                                                | Default Value |
+| -------- | --------------------------- | --------------------------------------------------- | ------------- |
+| src      | 图片地址                    | string                                              |
+| render   | 自定义渲染，优先级比 src 低 | \(props: PhotoRenderParams\) =&gt; React\.ReactNode |
+| width    | 自定义渲染节点宽度          | number                                              |
+| height   | 自定义渲染节点高度          | number                                              |
+| children | 子节点，一般为缩略图        | React\.ReactElement                                 |
+
+## DataType
+
+| Name      | Description                 | Type                                                | Default Value |
+| --------- | --------------------------- | --------------------------------------------------- | ------------- |
+| key       | 唯一标识                    | number \| string                                    | Required\*    |
+| src       | 资源地址                    | string                                              |
+| render    | 自定义渲染，优先级比 src 低 | \(props: PhotoRenderParams\) =&gt; React\.ReactNode |
+| width     | 自定义渲染节点宽度          | number                                              |
+| height    | 自定义渲染节点高度          | number                                              |
+| originRef | 触发 ref                    | React\.MutableRefObject&lt;HTMLElement \| null&gt;  |
+
+## OverlayRenderProps
+
+| Name           | Description    | Type                                                        | Default Value |
+| -------------- | -------------- | ----------------------------------------------------------- | ------------- |
+| images         | 图片列表       | DataType\[\]                                                | Required\*    |
+| index          | 当前索引       | number                                                      | Required\*    |
+| onIndexChange  | 索引改变回调   | \(index: number\) =&gt; void                                | Required\*    |
+| visible        | 是否可见       | boolean                                                     | Required\*    |
+| onClose        | 关闭事件回调   | \(evt?: React\.MouseEvent \| React\.TouchEvent\) =&gt; void | Required\*    |
+| overlayVisible | 覆盖物是否可见 | boolean                                                     | Required\*    |
+| rotate         | 当前旋转角度   | number                                                      | Required\*    |
+| onRotate       | 旋转事件回调   | \(rotate: number\) =&gt; void                               | Required\*    |
+| scale          | 当前缩放       | number                                                      | Required\*    |
+| onScale        | 缩放事件回调   | \(scale: number\) =&gt; void                                | Required\*    |

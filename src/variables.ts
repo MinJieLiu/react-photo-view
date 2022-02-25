@@ -44,6 +44,16 @@ export const maxScale = 6;
 export const scaleBuffer = 0.2;
 
 /**
+ * 最大等待动画时间
+ */
+export const maxWaitAnimationTime = 250;
+
+/**
  * 动画属性
  */
 export const animationCSS = 'cubic-bezier(0.25, 0.8, 0.25, 1)';
+
+/**
+ * transform 渐变样式
+ */
+export const transitionCSS = `transform ${animationTime}ms ${animationCSS}`;

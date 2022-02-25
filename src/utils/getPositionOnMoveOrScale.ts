@@ -15,8 +15,6 @@ export default function getPositionOnMoveOrScale(
   offsetX: number = 0,
   offsetY: number = 0,
 ) {
-  const { innerWidth, innerHeight } = window;
-
   // 是否接触边缘
   const [closedEdgeX] = computePositionEdge(x, toScale, width, innerWidth);
   const [closedEdgeY] = computePositionEdge(y, toScale, height, innerHeight);

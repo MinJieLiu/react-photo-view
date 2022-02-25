@@ -8,22 +8,22 @@
 }
 
 .PhotoView {
-  &-PhotoSlider__clean {
-    .PhotoView-PhotoSlider__BannerWrap,
-    .PhotoView-PhotoSlider__ArrowLeft,
-    .PhotoView-PhotoSlider__ArrowRight,
-    .PhotoView-PhotoSlider__Overlay {
+  &-Slider__clean {
+    .PhotoView-Slider__BannerWrap,
+    .PhotoView-Slider__ArrowLeft,
+    .PhotoView-Slider__ArrowRight,
+    .PhotoView-Slider__Overlay {
       opacity: 0;
     }
   }
 
-  &-PhotoSlider__willClose {
-    .PhotoView-PhotoSlider__BannerWrap:hover {
+  &-Slider__willClose {
+    .PhotoView-Slider__BannerWrap:hover {
       opacity: 0;
     }
   }
 
-  &-PhotoSlider__Backdrop {
+  &-Slider__Backdrop {
     position: absolute;
     top: 0;
     left: 0;
@@ -33,17 +33,17 @@
     z-index: -1;
   }
 
-  &-PhotoSlider__fadeIn {
+  &-Slider__fadeIn {
     opacity: 0;
     animation: PhotoView__fade 0.4s linear both;
   }
 
-  &-PhotoSlider__fadeOut {
+  &-Slider__fadeOut {
     opacity: 0;
     animation: PhotoView__fade 0.4s linear both reverse;
   }
 
-  &-PhotoSlider__BannerWrap {
+  &-Slider__BannerWrap {
     position: absolute;
     left: 0;
     top: 0;
@@ -62,21 +62,22 @@
     }
   }
 
-  &-PhotoSlider__Counter {
+  &-Slider__Counter {
     padding: 0 10px;
     font-size: 14px;
     opacity: 0.75;
   }
 
-  &-PhotoSlider__BannerRight {
+  &-Slider__BannerRight {
     display: flex;
     align-items: center;
     height: 100%;
   }
 
-  &-PhotoSlider__toolbarIcon {
+  &-Slider__toolbarIcon {
     box-sizing: border-box;
     padding: 10px;
+    fill: white;
     opacity: 0.75;
     cursor: pointer;
     transition: opacity 0.2s linear;
@@ -86,8 +87,8 @@
     }
   }
 
-  &-PhotoSlider__ArrowLeft,
-  &-PhotoSlider__ArrowRight {
+  &-Slider__ArrowLeft,
+  &-Slider__ArrowRight {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -117,11 +118,11 @@
     }
   }
 
-  &-PhotoSlider__ArrowLeft {
+  &-Slider__ArrowLeft {
     left: 0;
   }
 
-  &-PhotoSlider__ArrowRight {
+  &-Slider__ArrowRight {
     right: 0;
   }
 }
