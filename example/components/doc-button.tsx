@@ -8,7 +8,7 @@ export default function DocDemo() {
     <PhotoProvider>
       <ImageList>
         <PhotoView src={photo4.src}>
-          <Button primary>点击预览</Button>
+          <Button primary>Click</Button>
         </PhotoView>
       </ImageList>
     </PhotoProvider>

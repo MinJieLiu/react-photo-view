@@ -4,6 +4,7 @@ specifiers:
   '@types/node': 17.0.18
   '@types/react': 17.0.39
   autoprefixer: ^10.4.2
+  mac-scrollbar: ^0.9.6
   next: ^12.0.8
   nextra: ^2.0.0-alpha.24
   nextra-theme-docs: ^2.0.0-alpha.23
@@ -11,6 +12,7 @@ specifiers:
   tailwindcss: ^3.0.23
 
 dependencies:
+  mac-scrollbar: 0.9.6
   next: 12.0.8
   nextra: 2.0.0-alpha.24
   nextra-theme-docs: 2.0.0-alpha.23_@types+react@17.0.39+next@12.0.8
@@ -1080,6 +1082,10 @@ packages:
     dependencies:
       pseudomap: 1.0.2
       yallist: 2.1.2
+    dev: false
+
+  /mac-scrollbar/0.9.6:
+    resolution: {integrity: sha512-dBa6KzluhlcgfMlz5GImDyjHAGdhzrPRbrQVVdR14N/nGTl55MckaX5Hmnv8YrbvvedOgNhx4L0lJ3W1ANE9EA==}
     dev: false
 
   /markdown-extensions/1.1.1:

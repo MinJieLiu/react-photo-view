@@ -1,7 +1,7 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import { useState, useEffect, useRef } from 'react';
-import { EasingMode, OriginRectType } from '../types';
-import { animationTime, maxWaitAnimationTime } from '../variables';
+import type { EasingMode, OriginRectType } from '../types';
+import { maxWaitAnimationTime } from '../variables';
 
 const initialRect: OriginRectType = {
   T: 0,
@@ -16,6 +16,7 @@ export default function useAnimationOrigin(
   visible: boolean | undefined,
   originRef: MutableRefObject<HTMLElement | null> | undefined,
   loaded: boolean,
+  motionTime: number,
   updateEasing: (transition: boolean) => void,
 ): [
   // 动画状态
@@ -46,7 +47,7 @@ export default function useAnimationOrigin(
           updateEasingMode(2);
           requestAnimationFrame(() => handleToShape(3));
         });
-        setTimeout(() => updateEasingMode(4), animationTime);
+        setTimeout(() => updateEasingMode(4), motionTime);
         return;
       }
       // 超出则不执行

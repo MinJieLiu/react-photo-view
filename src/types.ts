@@ -37,6 +37,16 @@ export interface PhotoProviderBase {
    */
   loop?: boolean | number;
   /**
+   * 动画时间
+   * @defaultValue 400
+   */
+  motionTime?: number;
+  /**
+   * 动画函数
+   * @defaultValue 'cubic-bezier(0.25, 0.8, 0.25, 1)'
+   */
+  motionFn?: string;
+  /**
    * 图片点击是否可关闭
    */
   photoClosable?: boolean;

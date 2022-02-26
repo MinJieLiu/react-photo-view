@@ -5,6 +5,7 @@ title: Getting Started
 import Callout from 'nextra-theme-docs/callout';
 
 import DocBasic from '../../components/doc-basic';
+import DocMotion from '../../components/doc-motion';
 import DocCover from '../../components/doc-cover';
 import DocToolbar from '../../components/doc-toolbar';
 import DocButton from '../../components/doc-button';
@@ -74,13 +75,35 @@ export default function MyComponent() {
 
 如果需要整个页面的图片形成一组进行预览，则可以在页面的入口处嵌套 `PhotoProvider`。
 
-## object-fit 裁切
+<Callout emoji="💡">
+  注意： `react-photo-view` 一次只在 `DOM` 中加载保留三张图片，因为每张图片都是一个合成层，这会消耗相当多的内存。
+</Callout>
+
+## 过渡动画
+
+### 动画效果
+
+`react-photo-view` 为保证更流畅体验，使用了相当多的 `CSS3` 动画，在滚动时使用弹簧动画贴近原生滚动效果。`CSS3` 动画默认持续时间为 `400ms`，使用 `cubic-bezier(0.25, 0.8, 0.25, 1)` 动画函数。
+
+可通过设置 `motionTime` 、`motionFn` 来自定义动画时间或函数：
+
+```jsx
+<PhotoProvider motionTime={800} motionFn="cubic-bezier(0.65, 0, 0.35, 1)" />
+```
+
+<DocMotion />
+
+<Callout emoji="💡">
+  若子节点不是 `img` 节点将额外添加 `opacity` 淡入淡出效果。
+</Callout>
+
+### 裁切缩略图
 
 `<PhotoView />` 组件会自动识别子节点类型，如果子节点为 `<img />`，并且使用 `CSS` 设置了 `object-fit` 属性，则在缩放动画中附带裁切效果：
 
 ```jsx
 <PhotoView src={imageURL}>
-  <img src={imageURL} className="block w-64 h-64 object-cover" alt="" />
+  <img src={imageURL} style={{ objectFit: 'cover' }} alt="" />
 </PhotoView>
 ```
 
@@ -90,20 +113,33 @@ export default function MyComponent() {
 
 在 `<PhotoProvider />` 上添加参数 `toolbarRender` 函数，该函数须返回一个 `ReactNode` 节点。
 
-以下代码可以添加一个增加放大按钮：
+### 放大/缩小
+
+添加对 `scale` 的控制即可实现放大/缩小按钮：
 
 ```jsx
 <PhotoProvider
   toolbarRender={({ onScale, scale }) => {
-    return <div className="toolbarIcon" onClick={() => onScale(scale + 1)} />;
+    return (
+      <>
+        <svg className="PhotoView-Slider__toolbarIcon" onClick={() => onScale(scale + 1)} />
+        <svg className="PhotoView-Slider__toolbarIcon" onClick={() => onScale(scale - 1)} />
+      </>
+    );
   }}
->
-  {images.map((item, index) => (
-    <PhotoView key={index} src={item}>
-      <img src={item} alt="" />
-    </PhotoView>
-  ))}
-</PhotoProvider>
+/>
+```
+
+### 旋转
+
+`react-photo-view` 默认不内置旋转控制按钮，但提供了旋转 `API`。我们只需简单添加一个 `SVG` 图片即可实现旋转效果：
+
+```jsx
+<PhotoProvider
+  toolbarRender={({ rotate, onRotate }) => {
+    return <svg className="PhotoView-Slider__toolbarIcon" onClick={() => onRotate(rotate + 90)} />;
+  }}
+/>
 ```
 
 `toolbarRender` 函数提供的参数有：
@@ -130,11 +166,9 @@ export default function MyComponent() {
 如果是自定义组件则需要保证 `onClick` （桌面端），`onTouchStart` 和 `onTouchEnd` （移动端）事件能正常触发，转发 `ref` 到 `HTMLElement` 上保证打开/关闭动画源的正确性。
 
 ```jsx
-<PhotoProvider>
-  <PhotoView src={imageURL}>
-    <Button primary>点击预览</Button>
-  </PhotoView>
-</PhotoProvider>
+<PhotoView src={imageURL}>
+  <Button primary>点击预览</Button>
+</PhotoView>
 ```
 
 <DocButton />
@@ -156,22 +190,22 @@ export default function MyComponent() {
 ```jsx
 export default function MyComponent() {
   const [visible, setVisible] = useState(false);
-  const [photoIndex, setPhotoIndex] = useState(0);
+  const [index, setIndex] = useState(0);
 
   return (
     <>
-      <Button onClick={() => setPhotoIndex(2)}>setPhotoIndex(2)</Button>
-      <Button onClick={() => setPhotoIndex(4)}>setPhotoIndex(4)</Button>
+      <Button onClick={() => setIndex(2)}>setIndex(2)</Button>
+      <Button onClick={() => setIndex(4)}>setIndex(4)</Button>
       <Button onClick={() => setVisible(true)} primary>
-        Open
+        Click
       </Button>
 
       <PhotoSlider
         images={images.map((item) => ({ src: item, key: item }))}
         visible={visible}
         onClose={() => setVisible(false)}
-        index={photoIndex}
-        onIndexChange={setPhotoIndex}
+        index={index}
+        onIndexChange={setIndex}
       />
     </>
   );
@@ -205,27 +239,31 @@ export default function MyComponent() {
 ```jsx
 const elementSize = 400;
 
-<PhotoView
-  width={elementSize}
-  height={elementSize}
-  render={({ scale, attrs }) => {
-    const width = attrs.style.width;
-    const offset = (width - elementSize) / elementSize;
-    const childScale = scale === 1 ? scale + offset : 1 + offset;
+function MyComponent() {
+  return (
+    <PhotoView
+      width={elementSize}
+      height={elementSize}
+      render={({ scale, attrs }) => {
+        const width = attrs.style.width;
+        const offset = (width - elementSize) / elementSize;
+        const childScale = scale === 1 ? scale + offset : 1 + offset;
 
-    return (
-      <div {...attrs}>
-        <div style={{ transform: `scale(${childScale})` }}>
-          <div>Hello world</div>
-          <Button>button</Button>
-          <input onMouseDown={(e) => e.stopPropagation()} />
-        </div>
-      </div>
-    );
-  }}
->
-  <Button primary>Click</Button>
-</PhotoView>;
+        return (
+          <div {...attrs}>
+            <div style={{ transform: `scale(${childScale})` }}>
+              <div>Hello world</div>
+              <Button>button</Button>
+              <input onMouseDown={(e) => e.stopPropagation()} />
+            </div>
+          </div>
+        );
+      }}
+    >
+      <Button primary>Click</Button>
+    </PhotoView>
+  );
+}
 ```
 
 <Callout emoji="💡">
@@ -247,13 +285,7 @@ const elementSize = 400;
 在 `<PhotoProvider />` 上添加参数 `loop` 可以更改循环预览数量。设为 `boolean` 启用/关闭，设为 `number` 类型则达到具体数量以开启循环预览，默认值为 `3` 张：
 
 ```jsx
-<PhotoProvider loop={4}>
-  {images.map((item, index) => (
-    <PhotoView key={index} src={item}>
-      <img src={item} alt="" />
-    </PhotoView>
-  ))}
-</PhotoProvider>
+<PhotoProvider loop={4} />
 ```
 
 <DocLoop />
@@ -263,11 +295,7 @@ const elementSize = 400;
 预设为不透明，上拉过程中会慢慢减少透明度，可在 `<PhotoProvider />` 添加 `maskOpacity` 调整默认透明度，可设置为 `0-1` 之间的数字：
 
 ```jsx
-<PhotoProvider maskOpacity={0.5}>
-  <PhotoView src={imageURL}>
-    <img src={imageURL} alt="" />
-  </PhotoView>
-</PhotoProvider>
+<PhotoProvider maskOpacity={0.5} />
 ```
 
 <DocBackdrop />
@@ -276,11 +304,19 @@ const elementSize = 400;
 
 设置 `bannerVisible` 为 `false` 则可以不显示顶部区域：
 
+```jsx
+<PhotoProvider bannerVisible={false} />
+```
+
 <DocPure />
 
 ### 蒙层事件
 
-`pullClosable` 是否可以通过下拉关闭画廊，默认 `true`，`maskClosable` 是否可以点击蒙版关闭画廊，默认 `true`。
+`pullClosable`(默认 `true`) 是否可以通过下拉关闭画廊，`maskClosable`(默认 `true`) 是否可以点击蒙版关闭画廊：
+
+```jsx
+<PhotoProvider pullClosable={false} maskClosable={false} />
+```
 
 <DocClose />
 

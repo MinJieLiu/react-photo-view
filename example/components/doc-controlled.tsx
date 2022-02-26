@@ -4,7 +4,7 @@ import { Button, ImageList, photoImages } from './doc-components';
 
 export default function DocDemo() {
   const [visible, setVisible] = React.useState(false);
-  const [photoIndex, setPhotoIndex] = React.useState(0);
+  const [index, setIndex] = React.useState(0);
 
   function handleShowSlider() {
     setVisible(true);
@@ -14,18 +14,18 @@ export default function DocDemo() {
   }
   return (
     <ImageList>
-      <Button onClick={() => setPhotoIndex(2)}>setPhotoIndex(2)</Button>
-      <Button onClick={() => setPhotoIndex(4)}>setPhotoIndex(4)</Button>
+      <Button onClick={() => setIndex(2)}>setIndex(2)</Button>
+      <Button onClick={() => setIndex(4)}>setIndex(4)</Button>
       <Button onClick={handleShowSlider} primary>
-        打开预览
+        Click
       </Button>
 
       <PhotoSlider
         images={photoImages.map((item: string) => ({ src: item, key: item }))}
         visible={visible}
         onClose={handleCloseSlider}
-        index={photoIndex}
-        onIndexChange={setPhotoIndex}
+        index={index}
+        onIndexChange={setIndex}
       />
     </ImageList>
   );

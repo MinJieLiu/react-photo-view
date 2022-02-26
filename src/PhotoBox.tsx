@@ -4,15 +4,7 @@ import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import { getReachType, computePositionEdge } from './utils/edgeHandle';
 import getRotateSize from './utils/getRotateSize';
-import {
-  maxScale,
-  minStartTouchOffset,
-  scaleBuffer,
-  animationTime,
-  minScale,
-  transitionCSS,
-  animationCSS,
-} from './variables';
+import { maxScale, minStartTouchOffset, scaleBuffer, minScale } from './variables';
 import type { DataType, ReachMoveFunction, ReachFunction, PhotoTapFunction, BrokenElementParams } from './types';
 import type { ReachType, TouchStartType } from './types';
 import useSetState from './hooks/useSetState';
@@ -34,6 +26,10 @@ export interface PhotoBoxProps {
   item: DataType;
   // 是否可见
   visible: boolean;
+  // 动画时间
+  motionTime: number;
+  // 动画函数
+  motionFn: string;
   // 容器类名
   wrapClassName?: string;
   // 图片类名
@@ -117,6 +113,8 @@ const initialState = {
 export default function PhotoBox({
   item: { src, render, width: customWidth, height: customHeight, originRef },
   visible,
+  motionTime,
+  motionFn,
   wrapClassName,
   className,
   style,
@@ -291,7 +289,7 @@ export default function PhotoBox({
         currReach: undefined,
       });
       // Go
-      slideToPosition(x, y, lastX, lastY, width, height, scale, rotate, touchTime);
+      slideToPosition(x, y, lastX, lastY, width, height, scale, rotate, touchTime, motionTime);
 
       onReachUp?.(nextClientX, nextClientY);
       // 触发 Tap 事件
@@ -418,11 +416,12 @@ export default function PhotoBox({
 
   // 计算位置
   const [translateX, translateY, currentWidth, currentHeight, currentScale, opacity, easingMode, FIT] =
-    useAnimationPosition(visible, originRef, loaded, x, y, width, height, scale, (should: boolean) =>
+    useAnimationPosition(visible, originRef, loaded, x, y, width, height, scale, motionTime, (should: boolean) =>
       updateState({ easing: should }),
     );
   // 图片 objectFit 渐变时间
-  const transitionLayoutTime = easingMode < 4 ? animationTime / 4 : easingMode > 4 ? animationTime : 0;
+  const transitionLayoutTime = easingMode < 4 ? motionTime / 4 : easingMode > 4 ? motionTime : 0;
+  const transitionCSS = `transform ${motionTime}ms ${motionFn}`;
 
   const attrs = {
     className,
@@ -437,7 +436,7 @@ export default function PhotoBox({
       transform: rotate ? `rotate(${rotate}deg)` : undefined,
       transition:
         easingMode > 2 || easingMode > 4
-          ? `${transitionCSS}, opacity ${animationTime}ms ease, height ${transitionLayoutTime}ms ${animationCSS}`
+          ? `${transitionCSS}, opacity ${motionTime}ms ease, height ${transitionLayoutTime}ms ${motionFn}`
           : undefined,
     },
   };

@@ -2,7 +2,6 @@ import { useRef } from 'react';
 import useSetState from './useSetState';
 import useIsomorphicLayoutEffect from './useIsomorphicLayoutEffect';
 import useDebounceCallback from './useDebounceCallback';
-import { animationTime } from '../variables';
 
 /**
  * 目标缩放延迟处理
@@ -11,6 +10,7 @@ export default function useTargetScale(
   realWidth: number,
   realHeight: number,
   realScale: number,
+  motionTime: number,
   updateEasing: (transition: boolean) => void,
 ) {
   const execRef = useRef(false);
@@ -22,7 +22,7 @@ export default function useTargetScale(
       updateEasing(false);
       updateState({ top: false, scale: current });
     },
-    { wait: animationTime },
+    { wait: motionTime },
   );
 
   useIsomorphicLayoutEffect(() => {

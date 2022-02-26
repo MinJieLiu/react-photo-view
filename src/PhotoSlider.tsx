@@ -2,8 +2,8 @@ import React, { useRef, useState } from 'react';
 import type { DataType, PhotoProviderBase, OverlayRenderProps } from './types';
 import type { ReachType } from './types';
 import {
-  animationCSS,
-  animationTime,
+  defaultMotionFn,
+  defaultMotionTime,
   defaultOpacity,
   horizontalOffset,
   maxMoveOffset,
@@ -88,6 +88,8 @@ const initialState: PhotoSliderState = {
 export default function PhotoSlider(props: IPhotoSliderProps) {
   const {
     loop = 3,
+    motionTime = defaultMotionTime,
+    motionFn = defaultMotionFn,
     photoClosable,
     maskClosable = true,
     maskOpacity = defaultOpacity,
@@ -372,6 +374,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     scale: photoItem?.scale || 1,
     rotate: photoItem?.rotate || 0,
   };
+  const duration = `${motionTime}ms`;
+
   return (
     <SlidePortal
       className={`${!currentOverlayVisible ? 'PhotoView-Slider__clean' : ''}${
@@ -390,7 +394,10 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
         }`}
         style={{
           background: `rgba(0, 0, 0, ${currentOpacity})`,
-          transition: touched ? undefined : `background-color ${animationTime}ms ${animationCSS}`,
+          transitionProperty: touched ? undefined : 'background-color',
+          transitionTimingFunction: motionFn,
+          transitionDuration: duration,
+          animationDuration: duration,
         }}
         onAnimationEnd={onAnimationEnd}
       />
@@ -414,6 +421,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
           <PhotoBox
             key={enableLoop ? `${item.key}/${item.src}/${nextIndex}` : item.key}
             item={item}
+            motionTime={motionTime}
+            motionFn={motionFn}
             visible={visible}
             onReachMove={handleReachMove}
             onReachUp={handleReachUp}
@@ -424,7 +433,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             style={{
               left: `${(innerWidth + horizontalOffset) * nextIndex}px`,
               transform: `translate3d(${translateX}px, 0px, 0)`,
-              transition: touched || !easing ? undefined : `transform 0.6s ${animationCSS}`,
+              transition: touched || !easing ? undefined : `transform ${motionTime + 200}ms ${motionFn}`,
             }}
             loadingElement={loadingElement}
             brokenElement={brokenElement}

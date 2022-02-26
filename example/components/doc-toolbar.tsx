@@ -11,14 +11,7 @@ const FullScreenIcon = (props: React.HTMLAttributes<any>) => {
     };
   }, []);
   return (
-    <svg
-      className="PhotoView-Slider__toolbarIcon"
-      fill="white"
-      width="44"
-      height="44"
-      viewBox="0 0 768 768"
-      {...props}
-    >
+    <svg className="PhotoView-Slider__toolbarIcon" fill="white" width="44" height="44" viewBox="0 0 768 768" {...props}>
       {fullscreen ? (
         <path d="M511.5 256.5h96v63h-159v-159h63v96zM448.5 607.5v-159h159v63h-96v96h-63zM256.5 256.5v-96h63v159h-159v-63h96zM160.5 511.5v-63h159v159h-63v-96h-96z" />
       ) : (
@@ -53,7 +46,7 @@ export default function DocDemo() {
               height="44"
               viewBox="0 0 768 768"
               fill="white"
-              onClick={() => onScale(scale + 0.2)}
+              onClick={() => onScale(scale + 0.5)}
             >
               <path d="M384 640.5q105 0 180.75-75.75t75.75-180.75-75.75-180.75-180.75-75.75-180.75 75.75-75.75 180.75 75.75 180.75 180.75 75.75zM384 64.5q132 0 225.75 93.75t93.75 225.75-93.75 225.75-225.75 93.75-225.75-93.75-93.75-225.75 93.75-225.75 225.75-93.75zM415.5 223.5v129h129v63h-129v129h-63v-129h-129v-63h129v-129h63z" />
             </svg>
@@ -63,7 +56,7 @@ export default function DocDemo() {
               height="44"
               viewBox="0 0 768 768"
               fill="white"
-              onClick={() => onScale(scale - 0.2)}
+              onClick={() => onScale(scale - 0.5)}
             >
               <path d="M384 640.5q105 0 180.75-75.75t75.75-180.75-75.75-180.75-180.75-75.75-180.75 75.75-75.75 180.75 75.75 180.75 180.75 75.75zM384 64.5q132 0 225.75 93.75t93.75 225.75-93.75 225.75-225.75 93.75-225.75-93.75-93.75-225.75 93.75-225.75 225.75-93.75zM223.5 352.5h321v63h-321v-63z" />
             </svg>

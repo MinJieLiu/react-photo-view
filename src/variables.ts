@@ -6,7 +6,7 @@ export const maxTouchTime = 200;
 /**
  * 动画持续时间
  */
-export const animationTime = 400;
+export const defaultMotionTime = 400;
 
 /**
  * 最大滑动切换图片距离
@@ -51,9 +51,4 @@ export const maxWaitAnimationTime = 250;
 /**
  * 动画属性
  */
-export const animationCSS = 'cubic-bezier(0.25, 0.8, 0.25, 1)';
-
-/**
- * transform 渐变样式
- */
-export const transitionCSS = `transform ${animationTime}ms ${animationCSS}`;
+export const defaultMotionFn = 'cubic-bezier(0.25, 0.8, 0.25, 1)';
