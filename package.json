@@ -23,7 +23,7 @@
   ],
   "scripts": {
     "dev": "pnpm -C ./example dev",
-    "build": "rimraf ./dist && microbundle --jsx React.createElement --external react,react-dom --format cjs,esm",
+    "build": "rimraf ./dist && microbundle --jsx React.createElement --external react,react-dom --format cjs,esm,modern",
     "prepublishOnly": "npm run build",
     "prepare": "husky install",
     "lint": "npm run lint:js && npm run lint:prettier",
