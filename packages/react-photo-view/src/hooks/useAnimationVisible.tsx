@@ -1,5 +1,5 @@
 import { useReducer, useRef } from 'react';
-import { ActiveAnimationType } from '../types';
+import type { ActiveAnimationType } from '../types';
 import useForkedVariable from './useForkedVariable';
 
 /**

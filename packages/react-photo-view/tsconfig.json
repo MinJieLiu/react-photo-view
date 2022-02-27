@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "rootDir": "src",
+    "declarationDir": "dist",
     "target": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
@@ -21,5 +23,7 @@
     "declaration": true,
     "noEmitOnError": true,
     "jsx": "react"
-  }
+  },
+  "include": ["src", "typings.d.ts"],
+  "exclude": ["__tests__"]
 }

@@ -5,6 +5,7 @@
 
 # production
 **/dist
+.next
 dist-ssr
 
 # misc

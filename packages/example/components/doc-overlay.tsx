@@ -3,7 +3,6 @@ import { PhotoView, PhotoProvider } from 'react-photo-view';
 import { ImageList, Overlay, photoImages, Image } from './doc-components';
 
 export default function DocDemo() {
-
   return (
     <PhotoProvider
       // @ts-ignore

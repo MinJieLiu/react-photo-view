@@ -1,0 +1,44 @@
+{
+  "name": "react-photo-view",
+  "version": "1.0.0-beta.4",
+  "description": "An exquisite React photo preview component",
+  "author": "MinJieLiu",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/MinJieLiu/react-photo-view.git",
+  "source": "src/index.ts",
+  "main": "./dist/react-photo-view.js",
+  "module": "./dist/react-photo-view.module.js",
+  "types": "./dist/index.d.ts",
+  "keywords": [
+    "react",
+    "react component",
+    "react photo",
+    "react-photo-view",
+    "photo",
+    "image",
+    "photo preview",
+    "image preview",
+    "gallery",
+    "carousel"
+  ],
+  "scripts": {
+    "build": "rimraf ./dist && microbundle --jsx React.createElement --external react,react-dom --format cjs,esm,modern",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.39",
+    "@types/react-dom": "^17.0.11",
+    "less": "^4.1.2",
+    "microbundle": "^0.14.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "rimraf": "^3.0.2"
+  },
+  "files": [
+    "dist"
+  ]
+}

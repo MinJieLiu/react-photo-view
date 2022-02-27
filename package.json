@@ -1,34 +1,17 @@
 {
-  "name": "react-photo-view",
-  "version": "1.0.0-beta.4",
+  "name": "root",
+  "private": true,
   "description": "An exquisite React photo preview component",
   "author": "MinJieLiu",
   "license": "Apache-2.0",
   "repository": "https://github.com/MinJieLiu/react-photo-view.git",
-  "source": "src/index.ts",
-  "main": "./dist/react-photo-view.js",
-  "module": "./dist/react-photo-view.module.js",
-  "types": "./dist/index.d.ts",
-  "keywords": [
-    "react",
-    "react component",
-    "react photo",
-    "react-photo-view",
-    "photo",
-    "image",
-    "photo preview",
-    "image preview",
-    "gallery",
-    "carousel"
-  ],
   "scripts": {
-    "dev": "pnpm -C ./example dev",
-    "build": "rimraf ./dist && microbundle --jsx React.createElement --external react,react-dom --format cjs,esm,modern",
-    "prepublishOnly": "npm run build",
+    "dev": "pnpm -C ./packages/example dev",
+    "build": "pnpm -C ./packages/react-photo-view build && pnpm -C ./packages/example build",
+    "start": "pnpm -C ./packages/example start",
     "prepare": "husky install",
-    "build:example": "pnpm -C ./example build",
     "lint": "npm run lint:js && npm run lint:prettier",
-    "lint:js": "eslint --cache --ext .js,.jsx,.ts,.tsx --format=pretty src/ --fix",
+    "lint:js": "eslint --cache --ext .js,.jsx,.ts,.tsx --format=pretty packages/ --fix",
     "lint:prettier": "prettier --check \"**/*\" --end-of-line auto --write",
     "lint:style": "stylelint --fix \"**/*.less\" --syntax less",
     "lint-staged": "lint-staged"
@@ -40,25 +23,16 @@
       "prettier --write"
     ]
   },
-  "peerDependencies": {
-    "react": ">=16.8.0",
-    "react-dom": ">=16.8.0"
-  },
   "devDependencies": {
     "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.11",
     "@umijs/fabric": "^2.10.1",
     "husky": "^7.0.4",
-    "less": "^4.1.2",
     "lint-staged": "^12.3.3",
-    "microbundle": "^0.14.2",
+    "next": "^12.0.8",
     "prettier": "^2.5.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "rimraf": "^3.0.2",
     "typescript": "^4.5.5"
-  },
-  "files": [
-    "dist"
-  ]
+  }
 }
