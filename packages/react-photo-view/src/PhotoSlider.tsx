@@ -398,9 +398,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
         }`}
         style={{
           background: `rgba(0, 0, 0, ${currentOpacity})`,
-          transitionProperty: touched ? undefined : 'background-color',
           transitionTimingFunction: currentEasing,
-          transitionDuration: `${currentSpeed}ms`,
+          transitionDuration: `${touched ? 0 : currentSpeed}ms`,
           animationDuration: `${currentSpeed}ms`,
         }}
         onAnimationEnd={onAnimationEnd}
