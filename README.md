@@ -9,9 +9,10 @@
 
 ## 快速开始
 
-- [文档入口](https://minjieliu.github.io/react-photo-view)
-- [基本示例](https://minjieliu.github.io/react-photo-view/#/getting-started)
-- [API](https://minjieliu.github.io/react-photo-view/#/api)
+- [文档入口](https://react-photo-view.vercel.app)
+- [基本示例](https://react-photo-view.vercel.app/docs/getting-started)
+- [API](https://react-photo-view.vercel.app/docs/api)
+- [更新日志](https://react-photo-view.vercel.app/docs/change-log)
 
 ## 特性
 
@@ -22,7 +23,7 @@
 - 键盘导航，完美适配桌面端
 - 支持自定义节点扩展，轻松实现**全屏预览、旋转控制、图片介绍**以及更多功能
 - 基于 `typescript`，`7KB Gzipped`，支持服务端渲染
-- 简单易用的 API，上手零成本
+- 简单易用的 `API`，上手零成本
 
 ## 安装
 

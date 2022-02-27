@@ -9,7 +9,10 @@ const withNextra = nextra({
 
 module.exports = withNextra({
   i18n: {
-    locales: ['zh-CN', 'en-US'],
+    locales: [
+      'zh-CN',
+      // 'en-US'
+    ],
     defaultLocale: 'zh-CN',
   },
   redirects: () => {
