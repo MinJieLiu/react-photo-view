@@ -6,7 +6,10 @@ import photo4 from '../images/4.jpg';
 
 export default function DocDemo() {
   return (
-    <PhotoProvider motionTime={800} motionFn="cubic-bezier(0.65, 0, 0.35, 1)">
+    <PhotoProvider
+      speed={() => 800}
+      easing={(type) => (type === 2 ? 'cubic-bezier(0.36, 0, 0.66, -0.56)' : 'cubic-bezier(0.34, 1.56, 0.64, 1)')}
+    >
       <ImageList>
         <div>
           <PhotoView src={photo3.src}>

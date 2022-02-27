@@ -85,11 +85,20 @@ export default function MyComponent() {
 
 `react-photo-view` 为保证更流畅体验，使用了相当多的 `CSS3` 动画，在滚动时使用弹簧动画贴近原生滚动效果。`CSS3` 动画默认持续时间为 `400ms`，使用 `cubic-bezier(0.25, 0.8, 0.25, 1)` 动画函数。
 
-可通过设置 `motionTime` 、`motionFn` 来自定义动画时间或函数：
+可通过设置 `speed` 、`easing` 来自定义动画时间或函数：
 
 ```jsx
-<PhotoProvider motionTime={800} motionFn="cubic-bezier(0.65, 0, 0.35, 1)" />
+<PhotoProvider
+  speed={() => 800}
+  easing={(type) => (type === 2 ? 'cubic-bezier(0.36, 0, 0.66, -0.56)' : 'cubic-bezier(0.34, 1.56, 0.64, 1)')}
+/>
 ```
+
+`speed` 、`easing`为函数，可通过参数 `type` 判断当前动画的类型，`type` 的值有：
+
+- `1` - 打开中
+- `2` - 关闭中
+- `3` - 切换 `index`
 
 <DocMotion />
 

@@ -37,15 +37,15 @@ export interface PhotoProviderBase {
    */
   loop?: boolean | number;
   /**
-   * 动画时间
+   * 动画速度
    * @defaultValue 400
    */
-  motionTime?: number;
+  speed?: (type: ActiveAnimationType) => number;
   /**
    * 动画函数
    * @defaultValue 'cubic-bezier(0.25, 0.8, 0.25, 1)'
    */
-  motionFn?: string;
+  easing?: (type: ActiveAnimationType) => string;
   /**
    * 图片点击是否可关闭
    */
@@ -178,10 +178,10 @@ export type ReachType =
  * 初始响应状态
  */
 export type TouchStartType =
-  | 'x' // X 轴优先
-  | 'push' // Y 轴往上
-  | 'pull' // Y 轴往下
-  | undefined; // 未触发
+  | 0 // 未触发
+  | 1 // X 轴优先
+  | 2 // Y 轴往上 push
+  | 3; // Y 轴往下 pull
 
 export type OriginRectType = {
   // top
@@ -216,4 +216,12 @@ export type EasingMode =
 /**
  * 进行中的动画
  */
-export type ActiveAnimationType = 'in' | 'out' | undefined;
+export type ActiveAnimationType =
+  // 未初始化
+  | 0
+  // 进入
+  | 1
+  // 离开
+  | 2
+  // 切换
+  | 3;

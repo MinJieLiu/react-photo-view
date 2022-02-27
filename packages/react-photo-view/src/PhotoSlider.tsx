@@ -2,8 +2,8 @@ import React, { useRef, useState } from 'react';
 import type { DataType, PhotoProviderBase, OverlayRenderProps } from './types';
 import type { ReachType } from './types';
 import {
-  defaultMotionFn,
-  defaultMotionTime,
+  defaultEasing,
+  defaultSpeed,
   defaultOpacity,
   horizontalOffset,
   maxMoveOffset,
@@ -52,8 +52,8 @@ type PhotoSliderState = {
 
   // 图片处于触摸的状态
   touched: boolean;
-  // 该状态是否需要 transition
-  easing: boolean;
+  // 是否暂停 transition
+  pause: boolean;
   // Reach 开始时 x 坐标
   lastCX: number | undefined;
   // Reach 开始时 y 坐标
@@ -73,7 +73,7 @@ type PhotoSliderState = {
 const initialState: PhotoSliderState = {
   translateX: 0,
   touched: false,
-  easing: true,
+  pause: false,
 
   lastCX: undefined,
   lastCY: undefined,
@@ -88,8 +88,8 @@ const initialState: PhotoSliderState = {
 export default function PhotoSlider(props: IPhotoSliderProps) {
   const {
     loop = 3,
-    motionTime = defaultMotionTime,
-    motionFn = defaultMotionFn,
+    speed: speedFn,
+    easing: easingFn,
     photoClosable,
     maskClosable = true,
     maskOpacity = defaultOpacity,
@@ -116,7 +116,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   const {
     translateX,
     touched,
-    easing,
+    pause,
 
     lastCX,
     lastCY,
@@ -151,7 +151,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     // 显示弹出层，修正正确的指向
     if (realVisible) {
       updateState({
-        easing: false,
+        pause: true,
         translateX: index * -(window.innerWidth + horizontalOffset),
       });
       virtualIndexRef.current = index;
@@ -171,7 +171,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       });
       onClose(evt);
     },
-    changeIndex(nextIndex: number, should: boolean = true) {
+    changeIndex(nextIndex: number, isPause: boolean = false) {
       // 当前索引
       const currentIndex = enableLoop ? virtualIndexRef.current + (nextIndex - index) : nextIndex;
       const max = imageLength - 1;
@@ -187,7 +187,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
         lastCX: undefined,
         lastCY: undefined,
         translateX: -singlePageWidth * nextVirtualIndex,
-        easing: should,
+        pause: isPause,
       });
 
       virtualIndexRef.current = nextVirtualIndex;
@@ -207,10 +207,10 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     if (visible) {
       switch (evt.key) {
         case 'ArrowLeft':
-          changeIndex(index - 1, false);
+          changeIndex(index - 1, true);
           break;
         case 'ArrowRight':
-          changeIndex(index + 1, false);
+          changeIndex(index + 1, true);
           break;
         case 'Escape':
           close();
@@ -240,7 +240,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       translateX: -(innerWidth + horizontalOffset) * index,
       lastCX: undefined,
       lastCY: undefined,
-      easing: false,
+      pause: true,
     });
     virtualIndexRef.current = index;
   }
@@ -286,7 +286,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
         touched: true,
         lastCX: clientX,
         translateX,
-        easing: true,
+        pause: false,
       });
       return;
     }
@@ -305,7 +305,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       touched: true,
       lastCX: lastCX,
       translateX: -(innerWidth + horizontalOffset) * virtualIndexRef.current + offsetClientX,
-      easing: true,
+      pause: false,
     });
   }
 
@@ -374,7 +374,11 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     scale: photoItem?.scale || 1,
     rotate: photoItem?.rotate || 0,
   };
-  const duration = `${motionTime}ms`;
+  // 动画时间
+  const currentSpeed = speedFn ? speedFn(activeAnimation) : defaultSpeed;
+  const currentEasing = easingFn ? easingFn(activeAnimation) : defaultEasing;
+  const slideSpeed = speedFn ? speedFn(3) : defaultSpeed + 200;
+  const slideEasing = easingFn ? easingFn(3) : defaultEasing;
 
   return (
     <SlidePortal
@@ -386,18 +390,18 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       {visible && <PreventScroll />}
       <div
         className={`PhotoView-Slider__Backdrop${maskClassName ? ` ${maskClassName}` : ''}${
-          activeAnimation === 'in'
+          activeAnimation === 1
             ? ' PhotoView-Slider__fadeIn'
-            : activeAnimation === 'out'
+            : activeAnimation === 2
             ? ' PhotoView-Slider__fadeOut'
             : ''
         }`}
         style={{
           background: `rgba(0, 0, 0, ${currentOpacity})`,
           transitionProperty: touched ? undefined : 'background-color',
-          transitionTimingFunction: motionFn,
-          transitionDuration: duration,
-          animationDuration: duration,
+          transitionTimingFunction: currentEasing,
+          transitionDuration: `${currentSpeed}ms`,
+          animationDuration: `${currentSpeed}ms`,
         }}
         onAnimationEnd={onAnimationEnd}
       />
@@ -421,8 +425,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
           <PhotoBox
             key={enableLoop ? `${item.key}/${item.src}/${nextIndex}` : item.key}
             item={item}
-            motionTime={motionTime}
-            motionFn={motionFn}
+            speed={currentSpeed}
+            easing={currentEasing}
             visible={visible}
             onReachMove={handleReachMove}
             onReachUp={handleReachUp}
@@ -433,7 +437,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             style={{
               left: `${(innerWidth + horizontalOffset) * nextIndex}px`,
               transform: `translate3d(${translateX}px, 0px, 0)`,
-              transition: touched || !easing ? undefined : `transform ${motionTime + 200}ms ${motionFn}`,
+              transition: touched || pause ? undefined : `transform ${slideSpeed}ms ${slideEasing}`,
             }}
             loadingElement={loadingElement}
             brokenElement={brokenElement}
@@ -447,12 +451,12 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       {!isTouchDevice && bannerVisible && (
         <>
           {(enableLoop || index !== 0) && (
-            <div className="PhotoView-Slider__ArrowLeft" onClick={() => changeIndex(index - 1, false)}>
+            <div className="PhotoView-Slider__ArrowLeft" onClick={() => changeIndex(index - 1, true)}>
               <ArrowLeft />
             </div>
           )}
           {(enableLoop || index + 1 < imageLength) && (
-            <div className="PhotoView-Slider__ArrowRight" onClick={() => changeIndex(index + 1, false)}>
+            <div className="PhotoView-Slider__ArrowRight" onClick={() => changeIndex(index + 1, true)}>
               <ArrowRight />
             </div>
           )}

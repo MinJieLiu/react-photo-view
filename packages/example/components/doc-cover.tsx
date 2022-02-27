@@ -5,7 +5,7 @@ import photo6 from '../images/6.jpg';
 
 export default function DocDemo() {
   return (
-    <PhotoProvider motionTime={800}>
+    <PhotoProvider speed={() => 800}>
       <ImageList>
         <PhotoView src={photo6.src}>
           <img src={photo6.src} className="block w-32 h-32 md:w-64 md:h-64 object-cover" alt="" />

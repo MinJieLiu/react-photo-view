@@ -4,9 +4,14 @@
 export const maxTouchTime = 200;
 
 /**
- * 动画持续时间
+ * 默认动画速度
  */
-export const defaultMotionTime = 400;
+export const defaultSpeed = 400;
+
+/**
+ * 默认动画函数
+ */
+export const defaultEasing = 'cubic-bezier(0.25, 0.8, 0.25, 1)';
 
 /**
  * 最大滑动切换图片距离
@@ -47,8 +52,3 @@ export const scaleBuffer = 0.2;
  * 最大等待动画时间
  */
 export const maxWaitAnimationTime = 250;
-
-/**
- * 动画属性
- */
-export const defaultMotionFn = 'cubic-bezier(0.25, 0.8, 0.25, 1)';

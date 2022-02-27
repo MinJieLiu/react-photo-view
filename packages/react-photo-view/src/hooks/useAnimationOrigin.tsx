@@ -17,7 +17,7 @@ export default function useAnimationOrigin(
   originRef: MutableRefObject<HTMLElement | null> | undefined,
   loaded: boolean,
   motionTime: number,
-  updateEasing: (transition: boolean) => void,
+  updateEasing: (pause: boolean) => void,
 ): [
   // 动画状态
   easingMode: EasingMode,
@@ -59,7 +59,7 @@ export default function useAnimationOrigin(
   }, [visible, loaded]);
 
   function handleToShape(currentShape: EasingMode) {
-    updateEasing(true);
+    updateEasing(false);
     updateEasingMode(currentShape);
   }
 

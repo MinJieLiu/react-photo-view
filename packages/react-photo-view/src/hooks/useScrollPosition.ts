@@ -1,6 +1,6 @@
 import { computePositionEdge } from '../utils/edgeHandle';
 import getRotateSize from '../utils/getRotateSize';
-import { maxTouchTime } from '../variables';
+import { defaultSpeed, maxTouchTime } from '../variables';
 import useMethods from './useMethods';
 
 /**
@@ -33,13 +33,12 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
     scale: number,
     rotate: number,
     touchedTime: number,
-    motionTime: number,
   ) => {
     // 缩小的情况下不执行滚动逻辑，恢复居中位置
     if (scale < 1) {
-      easeOutMove(x, 0, motionTime, callback.X);
-      easeOutMove(y, 0, motionTime, callback.Y);
-      easeOutMove(scale, 1, motionTime, callback.S);
+      easeOutMove(x, 0, callback.X);
+      easeOutMove(y, 0, callback.Y);
+      easeOutMove(scale, 1, callback.S);
       return;
     }
 
@@ -50,11 +49,11 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
     if (moveTime >= maxTouchTime) {
       const [isEdgeX, nextX] = computePositionEdge(x, scale, currentWidth, innerWidth);
       if (isEdgeX) {
-        easeOutMove(x, nextX, motionTime, callback.X);
+        easeOutMove(x, nextX, callback.X);
       }
       const [isEdgeY, nextY] = computePositionEdge(y, scale, currentHeight, innerHeight);
       if (isEdgeY) {
-        easeOutMove(y, nextY, motionTime, callback.Y);
+        easeOutMove(y, nextY, callback.Y);
       }
       return;
     }
@@ -76,12 +75,12 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
 
       if (isEdgeX && !edgeX) {
         edgeX = true;
-        easeOutMove(nextX, currentX, motionTime, callback.X);
+        easeOutMove(nextX, currentX, callback.X);
       }
 
       if (isEdgeY && !edgeY) {
         edgeY = true;
-        easeOutMove(nextY, currentY, motionTime, callback.Y);
+        easeOutMove(nextY, currentY, callback.Y);
       }
       // 同时接触边缘的情况下停止滚动
       if (edgeX && edgeY) {
@@ -148,7 +147,7 @@ function scrollMove(initialSpeed: number, callback: (spatial: number) => boolean
 /**
  * 缓动回调
  */
-function easeOutMove(start: number, end: number, motionTime: number, callback: (spatial: number) => boolean) {
+function easeOutMove(start: number, end: number, callback: (spatial: number) => boolean) {
   const distance = end - start;
   if (distance === 0) {
     return;
@@ -158,7 +157,7 @@ function easeOutMove(start: number, end: number, motionTime: number, callback: (
   let frameId = 0;
 
   const calcMove = () => {
-    const time = Math.min(1, (Date.now() - startTime) / motionTime);
+    const time = Math.min(1, (Date.now() - startTime) / defaultSpeed);
     const result = callback(start + easeOutQuart(time) * distance);
 
     if (result && time < 1) {

@@ -10,12 +10,9 @@ export const getReachType = (
   verticalCloseEdge: CloseEdgeType,
   reachPosition: ReachType,
 ): ReachType => {
-  if ((horizontalCloseEdge && initialTouchState === 'x') || reachPosition === 'x') {
+  if ((horizontalCloseEdge && initialTouchState === 1) || reachPosition === 'x') {
     return 'x';
-  } else if (
-    (verticalCloseEdge && (initialTouchState === 'pull' || initialTouchState === 'push')) ||
-    reachPosition === 'y'
-  ) {
+  } else if ((verticalCloseEdge && initialTouchState > 1) || reachPosition === 'y') {
     return 'y';
   }
   return undefined;

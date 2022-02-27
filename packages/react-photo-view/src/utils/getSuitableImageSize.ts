@@ -36,6 +36,6 @@ export default function getSuitableImageSize(naturalWidth: number, naturalHeight
     height: Math.floor(height),
     x: 0,
     y,
-    easing: false,
+    pause: true,
   };
 }

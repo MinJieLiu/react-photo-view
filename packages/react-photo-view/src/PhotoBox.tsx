@@ -27,9 +27,9 @@ export interface PhotoBoxProps {
   // 是否可见
   visible: boolean;
   // 动画时间
-  motionTime: number;
+  speed: number;
   // 动画函数
-  motionFn: string;
+  easing: string;
   // 容器类名
   wrapClassName?: string;
   // 图片类名
@@ -102,8 +102,8 @@ const initialState = {
   touchTime: 0,
   // 多指触控间距
   touchLength: 0,
-  // 是否渐变
-  easing: false,
+  // 是否暂停 transition
+  pause: true,
   // 停止 Raf
   stopRaf: true,
   // 当前边缘触发状态
@@ -113,8 +113,8 @@ const initialState = {
 export default function PhotoBox({
   item: { src, render, width: customWidth, height: customHeight, originRef },
   visible,
-  motionTime,
-  motionFn,
+  speed,
+  easing,
   wrapClassName,
   className,
   style,
@@ -132,7 +132,7 @@ export default function PhotoBox({
   isActive,
 }: PhotoBoxProps) {
   const [state, updateState] = useSetState(initialState);
-  const initialTouchRef = useRef<TouchStartType>();
+  const initialTouchRef = useRef<TouchStartType>(0);
   const mounted = useMountedRef();
 
   const {
@@ -155,7 +155,7 @@ export default function PhotoBox({
     lastCY,
     touchTime,
     touchLength,
-    easing,
+    pause,
     currReach,
   } = state;
 
@@ -165,7 +165,7 @@ export default function PhotoBox({
         // 通过旋转调换宽高
         const [currentWidth, currentHeight] = getRotateSize(rotate, width, height);
         // 单指最小缩放下，以初始移动距离来判断意图
-        if (currentTouchLength === 0 && initialTouchRef.current === undefined) {
+        if (currentTouchLength === 0 && initialTouchRef.current === 0) {
           const isStillX = Math.abs(nextClientX - CX) <= minStartTouchOffset;
           const isStillY = Math.abs(nextClientY - CY) <= minStartTouchOffset;
           // 初始移动距离不足
@@ -178,7 +178,7 @@ export default function PhotoBox({
             return;
           }
           // 设置响应状态
-          initialTouchRef.current = !isStillX ? 'x' : nextClientY > CY ? 'pull' : 'push';
+          initialTouchRef.current = !isStillX ? 1 : nextClientY > CY ? 3 : 2;
         }
 
         const offsetX = nextClientX - lastCX;
@@ -238,7 +238,7 @@ export default function PhotoBox({
     }
     if (mounted.current) {
       // 下拉关闭时可以有动画
-      updateState({ ...position, easing: !visible });
+      updateState({ ...position, pause: visible });
     }
     return mounted.current;
   }
@@ -274,7 +274,7 @@ export default function PhotoBox({
 
   function handleUp(nextClientX: number, nextClientY: number) {
     // 重置响应状态
-    initialTouchRef.current = undefined;
+    initialTouchRef.current = 0;
     if ((touched || maskTouched) && isActive) {
       const hasMove = CX !== nextClientX || CY !== nextClientY;
       const targetScale = limitNumber(scale, minScale, Math.max(maxScale, naturalWidth / width || 1));
@@ -284,12 +284,12 @@ export default function PhotoBox({
       updateState({
         touched: false,
         maskTouched: false,
-        easing: true,
+        pause: false,
         stopRaf: false,
         currReach: undefined,
       });
       // Go
-      slideToPosition(x, y, lastX, lastY, width, height, scale, rotate, touchTime, motionTime);
+      slideToPosition(x, y, lastX, lastY, width, height, scale, rotate, touchTime);
 
       onReachUp?.(nextClientX, nextClientY);
       // 触发 Tap 事件
@@ -416,12 +416,12 @@ export default function PhotoBox({
 
   // 计算位置
   const [translateX, translateY, currentWidth, currentHeight, currentScale, opacity, easingMode, FIT] =
-    useAnimationPosition(visible, originRef, loaded, x, y, width, height, scale, motionTime, (should: boolean) =>
-      updateState({ easing: should }),
+    useAnimationPosition(visible, originRef, loaded, x, y, width, height, scale, speed, (isPause: boolean) =>
+      updateState({ pause: isPause }),
     );
   // 图片 objectFit 渐变时间
-  const transitionLayoutTime = easingMode < 4 ? motionTime / 4 : easingMode > 4 ? motionTime : 0;
-  const transitionCSS = `transform ${motionTime}ms ${motionFn}`;
+  const transitionLayoutTime = easingMode < 4 ? speed / 4 : easingMode > 4 ? speed : 0;
+  const transitionCSS = `transform ${speed}ms ${easing}`;
 
   const attrs = {
     className,
@@ -436,7 +436,7 @@ export default function PhotoBox({
       transform: rotate ? `rotate(${rotate}deg)` : undefined,
       transition:
         easingMode > 2 || easingMode > 4
-          ? `${transitionCSS}, opacity ${motionTime}ms ease, height ${transitionLayoutTime}ms ${motionFn}`
+          ? `${transitionCSS}, opacity ${speed}ms ease, height ${transitionLayoutTime}ms ${easing}`
           : undefined,
     },
   };
@@ -452,7 +452,7 @@ export default function PhotoBox({
         className="PhotoView__PhotoBox"
         style={{
           transform: `translate3d(${translateX}px, ${translateY}px, 0) scale(${currentScale})`,
-          transition: touched || !easing ? undefined : transitionCSS,
+          transition: touched || pause ? undefined : transitionCSS,
           willChange: isActive ? 'transform' : undefined,
         }}
       >

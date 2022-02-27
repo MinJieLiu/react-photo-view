@@ -12,7 +12,7 @@ export default function useAnimationPosition(
   height: number,
   scale: number,
   motionTime: number,
-  updateEasing: (transition: boolean) => void,
+  updateEasing: (pause: boolean) => void,
 ) {
   // 延迟更新 width/height
   const [autoWidth, autoHeight, autoScale] = useTargetScale(width, height, scale, motionTime, updateEasing);
