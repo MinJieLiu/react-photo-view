@@ -420,7 +420,7 @@ export default function PhotoBox({
       updateState({ pause: isPause }),
     );
   // 图片 objectFit 渐变时间
-  const transitionLayoutTime = easingMode < 4 ? speed / 4 : easingMode > 4 ? speed : 0;
+  const transitionLayoutTime = easingMode < 4 ? speed / 2 : easingMode > 4 ? speed : 0;
   const transitionCSS = `transform ${speed}ms ${easing}`;
 
   const attrs = {

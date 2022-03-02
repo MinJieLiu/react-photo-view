@@ -1,8 +1,8 @@
 # react-photo-view
 
-**English** | [中文](./README.zh-CN.md)
+**中文** | [English](./README.md)
 
-**An exquisite React photo preview component.**
+**一款超精致的图片预览组件**
 
 [![NPM version][npm-image]][npm-url]
 [![Downloads][downloads-image]][downloads-url]
@@ -11,31 +11,31 @@
 
 ![example](./example.gif)
 
-## Quick start
+## 快速开始
 
-- [Getting Started](https://react-photo-view.vercel.app)
-- [Basic usage](https://react-photo-view.vercel.app/docs/getting-started)
+- [文档入口](https://react-photo-view.vercel.app)
+- [基本示例](https://react-photo-view.vercel.app/docs/getting-started)
 - [API](https://react-photo-view.vercel.app/docs/api)
-- [Change log](https://react-photo-view.vercel.app/docs/change-log)
+- [更新日志](https://react-photo-view.vercel.app/docs/change-log)
 
-## features
+## 特性
 
-- Support touch gestures, drag and pan physical effect sliding, two-finger specified position to zoom in and out
-- All aspects of animation connection, open and close the rebound touch edge, let the natural interaction effect
-- The image is adaptive, with a suitable initial rendering size, and adapts according to the adjustment
-- Support for custom previews like `<video>` or any `HTML` element
-- Keyboard navigation, perfect for desktop
-- Support custom node expansion, easy to achieve full-screen preview, rotation control, picture introduction and more functions
-- Based on `typescript`, `7KB Gzipped`, supports server-side rendering
-- Simple and easy to use `API`, zero cost to get started
+- 支持触摸手势，**拖动/平移/物理效果滑动，双指指定位置放大/缩小**
+- 全方面动画衔接，**打开/关闭/回弹/触边**，顺其自然的交互效果
+- 图像自适应，以一个合适的最初呈现大小，并根据调整自适应
+- 支持自定义如 `<video />` 或任意 `HTML` 元素的预览
+- 键盘导航，完美适配桌面端
+- 支持自定义节点扩展，轻松实现**全屏预览、旋转控制、图片介绍**以及更多功能
+- 基于 `typescript`，`7KB Gzipped`，支持服务端渲染
+- 简单易用的 `API`，上手零成本
 
-## Install
+## 安装
 
 ```bash
 yarn add react-photo-view
 ```
 
-## Basic usage:
+## 基本使用:
 
 ```js
 import { PhotoProvider, PhotoView } from 'react-photo-view';

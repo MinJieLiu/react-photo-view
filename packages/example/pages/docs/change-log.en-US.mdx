@@ -1,0 +1,50 @@
+---
+title: Change Log
+---
+
+## 1.0.0-beta.5
+
+fix: Cover animation detail adjustment
+
+## 1.0.0-beta.4
+
+features:
+
+1. Perfect connection open and close animation
+2. Automatically recognize `object-fit` image fill pattern animation
+3. Added `speed`, `easing` API
+4. Other element animation `opacity` downgrade handling
+
+break changes:
+
+1. Adjust image centering logic
+2. Change CSS a little name
+
+fix:
+
+1. Import error in `next.js`
+2. Turn off animation pointing problem after zooming in
+
+## 1.0.0-beta.0
+
+Refactoring logic based on `hooks`
+
+features:
+
+1. Simulate physical scrolling preview with bounce
+2. Delay update width and height after resizing
+3. Support `loop` loop preview
+4. Support for `render` custom preview elements
+5. Added parameter `maskOpacity` to support custom background default transparency
+
+break changes:
+
+1. `PhotoConsumer` name changed to `PhotoView`
+2. `DataType` removes the `intro` field, removes the parameter `introVisible`
+3. `viewClassName` parameter name changed to `photoWrapClassName`
+4. `imageClassName` parameter name changed to `photoClassName`
+5. `key` in `DataType` is a required field
+
+others:
+
+Fix many details
