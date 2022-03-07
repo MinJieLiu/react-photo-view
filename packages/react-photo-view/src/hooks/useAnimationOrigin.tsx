@@ -73,7 +73,7 @@ function handleUpdateOrigin(
   originRef: MutableRefObject<HTMLElement | null> | undefined,
   updateOriginRect: Dispatch<SetStateAction<typeof initialRect>>,
 ) {
-  const element = originRef?.current;
+  const element = originRef && originRef.current;
 
   if (element && element.nodeType === 1) {
     // 获取触发时节点位置

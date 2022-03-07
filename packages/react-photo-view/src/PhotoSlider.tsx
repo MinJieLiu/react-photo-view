@@ -152,7 +152,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     if (realVisible) {
       updateState({
         pause: true,
-        translateX: index * -(window.innerWidth + horizontalOffset),
+        translateX: index * -(innerWidth + horizontalOffset),
       });
       virtualIndexRef.current = index;
       return;
@@ -180,7 +180,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       const limitIndex = limitNumber(currentIndex, 0, max);
       const nextVirtualIndex = enableLoop ? currentIndex : limitIndex;
       // 单个屏幕宽度
-      const singlePageWidth = window.innerWidth + horizontalOffset;
+      const singlePageWidth = innerWidth + horizontalOffset;
 
       updateState({
         touched: false,
@@ -193,7 +193,9 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       virtualIndexRef.current = nextVirtualIndex;
       // 更新真实的 index
       const realLoopIndex = nextIndex < 0 ? max : nextIndex > max ? 0 : nextIndex;
-      onIndexChange?.(enableLoop ? realLoopIndex : limitIndex);
+      if (onIndexChange) {
+        onIndexChange(enableLoop ? realLoopIndex : limitIndex);
+      }
     },
     onRotate(rotate: number) {
       handleMergePhotoMap({ rotate });
@@ -219,19 +221,13 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     }
   });
 
-  function handlePhotoTap() {
-    if (photoClosable) {
+  function handlePhotoTap(closeable: boolean | undefined) {
+    if (closeable) {
       close();
     } else {
       updateState({
         overlayVisible: !overlayVisible,
       });
-    }
-  }
-
-  function handlePhotoMaskTap() {
-    if (maskClosable) {
-      close();
     }
   }
 
@@ -296,7 +292,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     // 第一张和最后一张超出距离减半
     if (
       !enableLoop &&
-      ((index === 0 && originOffsetClientX > 0) || (index === images.length - 1 && originOffsetClientX < 0))
+      ((index === 0 && originOffsetClientX > 0) || (index === imageLength - 1 && originOffsetClientX < 0))
     ) {
       offsetClientX = originOffsetClientX / 2;
     }
@@ -331,7 +327,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       changeIndex(index - 1);
       return;
     }
-    const singlePageWidth = window.innerWidth + horizontalOffset;
+    const singlePageWidth = innerWidth + horizontalOffset;
 
     // 当前偏移
     const currentTranslateX = -singlePageWidth * virtualIndexRef.current;
@@ -371,8 +367,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     overlayVisible: currentOverlayVisible,
     onRotate,
     onScale,
-    scale: photoItem?.scale || 1,
-    rotate: photoItem?.rotate || 0,
+    scale: photoItem ? photoItem.scale : 1,
+    rotate: photoItem ? photoItem.rotate : 0,
   };
   // 动画时间
   const currentSpeed = speedFn ? speedFn(activeAnimation) : defaultSpeed;
@@ -429,8 +425,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             visible={visible}
             onReachMove={handleReachMove}
             onReachUp={handleReachUp}
-            onPhotoTap={handlePhotoTap}
-            onMaskTap={handlePhotoMaskTap}
+            onPhotoTap={() => handlePhotoTap(photoClosable)}
+            onMaskTap={() => handlePhotoTap(maskClosable)}
             wrapClassName={photoWrapClassName}
             className={photoClassName}
             style={{
@@ -441,7 +437,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             loadingElement={loadingElement}
             brokenElement={brokenElement}
             onPhotoResize={handleResize}
-            isActive={currentImage?.key === item.key}
+            isActive={(currentImage && currentImage.key) === item.key}
             onWheel={onWheel}
             {...photoMap.get(item.key)}
           />

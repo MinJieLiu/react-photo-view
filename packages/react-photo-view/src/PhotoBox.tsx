@@ -256,7 +256,9 @@ export default function PhotoBox({
 
   const handlePhotoTap = useContinuousTap(
     (currentClientX: number, currentClientY: number) => {
-      onPhotoTap?.(currentClientX, currentClientY);
+      if (onPhotoTap) {
+        onPhotoTap(currentClientX, currentClientY);
+      }
     },
     (currentClientX: number, currentClientY: number) => {
       if (currReach !== undefined) {
@@ -291,7 +293,9 @@ export default function PhotoBox({
       // Go
       slideToPosition(x, y, lastX, lastY, width, height, scale, rotate, touchTime);
 
-      onReachUp?.(nextClientX, nextClientY);
+      if (onReachUp) {
+        onReachUp(nextClientX, nextClientY);
+      }
       // 触发 Tap 事件
       if (!hasMove) {
         if (touched && onPhotoTap) {
@@ -385,23 +389,14 @@ export default function PhotoBox({
     onWheel(toScale);
   }
 
-  function handleMaskStart(currentClientX: number, currentClientY: number) {
+  function handleMaskStart(e: { clientX: number; clientY: number }) {
     updateState({
       maskTouched: true,
-      CX: currentClientX,
-      CY: currentClientY,
+      CX: e.clientX,
+      CY: e.clientY,
       lastX: x,
       lastY: y,
     });
-  }
-
-  function handleMaskMouseDown(e: React.MouseEvent) {
-    handleMaskStart(e.clientX, e.clientY);
-  }
-
-  function handleMaskTouchStart(e: React.TouchEvent) {
-    const touch = e.touches[0];
-    handleMaskStart(touch.clientX, touch.clientY);
   }
 
   function handleTouchStart(e: React.TouchEvent) {
@@ -445,8 +440,8 @@ export default function PhotoBox({
     <div
       className={`PhotoView__PhotoWrap${wrapClassName ? ` ${wrapClassName}` : ''}`}
       style={style}
-      onMouseDown={!isTouchDevice && isActive ? handleMaskMouseDown : undefined}
-      onTouchStart={isTouchDevice && isActive ? handleMaskTouchStart : undefined}
+      onMouseDown={!isTouchDevice && isActive ? handleMaskStart : undefined}
+      onTouchStart={isTouchDevice && isActive ? (e) => handleMaskStart(e.touches[0]) : undefined}
     >
       <div
         className="PhotoView__PhotoBox"
@@ -467,7 +462,7 @@ export default function PhotoBox({
             brokenElement={brokenElement}
           />
         ) : (
-          render?.({ attrs, scale: currentScale, rotate })
+          render && render({ attrs, scale: currentScale, rotate })
         )}
       </div>
     </div>

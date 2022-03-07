@@ -32,7 +32,9 @@ export default function useAnimationVisible(
     if (activeAnimation.current === 2) {
       modifyRealVisible(false);
       // 触发隐藏回调
-      leaveCallback?.();
+      if (leaveCallback) {
+        leaveCallback();
+      }
     }
     // 重置状态
     activeAnimation.current = 0;
