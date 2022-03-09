@@ -16,7 +16,7 @@ export default function useAnimationOrigin(
   visible: boolean | undefined,
   originRef: MutableRefObject<HTMLElement | null> | undefined,
   loaded: boolean,
-  motionTime: number,
+  speed: number,
   updateEasing: (pause: boolean) => void,
 ): [
   // 动画状态
@@ -47,7 +47,7 @@ export default function useAnimationOrigin(
           updateEasingMode(2);
           requestAnimationFrame(() => handleToShape(3));
         });
-        setTimeout(() => updateEasingMode(4), motionTime);
+        setTimeout(() => updateEasingMode(4), speed);
         return;
       }
       // 超出则不执行

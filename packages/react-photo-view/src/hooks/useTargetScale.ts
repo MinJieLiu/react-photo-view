@@ -10,7 +10,7 @@ export default function useTargetScale(
   realWidth: number,
   realHeight: number,
   realScale: number,
-  motionTime: number,
+  speed: number,
   updateEasing: (pause: boolean) => void,
 ) {
   const execRef = useRef(false);
@@ -22,7 +22,7 @@ export default function useTargetScale(
       updateEasing(true);
       updateState({ top: false, scale: current });
     },
-    { wait: motionTime },
+    { wait: speed },
   );
 
   useIsomorphicLayoutEffect(() => {

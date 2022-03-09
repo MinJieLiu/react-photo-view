@@ -430,7 +430,8 @@ export default function PhotoBox({
       objectFit: easingMode === 4 ? undefined : FIT,
       transform: rotate ? `rotate(${rotate}deg)` : undefined,
       transition:
-        easingMode > 2 || easingMode > 4
+        // 初始状态无渐变
+        easingMode > 2
           ? `${transitionCSS}, opacity ${speed}ms ease, height ${transitionLayoutTime}ms ${easing}`
           : undefined,
     },

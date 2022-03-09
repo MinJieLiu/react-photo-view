@@ -94,15 +94,15 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
   };
 }
 
+// 加速度
+const acceleration = -0.002;
+// 阻力
+const resistance = 0.0002;
+
 /**
  * 通过速度滚动到停止
  */
 function scrollMove(initialSpeed: number, callback: (spatial: number) => boolean) {
-  // 加速度
-  const acceleration = -0.002;
-  // 阻力
-  const resistance = 0.0002;
-
   let v = initialSpeed;
   let s = 0;
   let lastTime: number | undefined = undefined;

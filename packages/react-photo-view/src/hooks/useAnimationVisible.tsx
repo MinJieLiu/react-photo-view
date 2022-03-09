@@ -8,7 +8,7 @@ import useForkedVariable from './useForkedVariable';
  */
 export default function useAnimationVisible(
   visible: boolean | undefined,
-  leaveCallback?: () => void,
+  afterClose?: () => void,
 ): [realVisible: boolean | undefined, activeAnimation: ActiveAnimationType, onAnimationEnd: () => void] {
   const [, handleRender] = useReducer((c) => !c, false);
 
@@ -32,8 +32,8 @@ export default function useAnimationVisible(
     if (activeAnimation.current === 2) {
       modifyRealVisible(false);
       // 触发隐藏回调
-      if (leaveCallback) {
-        leaveCallback();
+      if (afterClose) {
+        afterClose();
       }
     }
     // 重置状态

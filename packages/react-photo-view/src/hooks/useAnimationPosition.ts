@@ -11,13 +11,13 @@ export default function useAnimationPosition(
   width: number,
   height: number,
   scale: number,
-  motionTime: number,
+  speed: number,
   updateEasing: (pause: boolean) => void,
 ) {
   // 延迟更新 width/height
-  const [autoWidth, autoHeight, autoScale] = useTargetScale(width, height, scale, motionTime, updateEasing);
+  const [autoWidth, autoHeight, autoScale] = useTargetScale(width, height, scale, speed, updateEasing);
   // 动画源处理
-  const [easingMode, originRect] = useAnimationOrigin(visible, originRef, loaded, motionTime, updateEasing);
+  const [easingMode, originRect] = useAnimationOrigin(visible, originRef, loaded, speed, updateEasing);
 
   // 计算动画位置
   const { T, L, W, H, FIT } = originRect;

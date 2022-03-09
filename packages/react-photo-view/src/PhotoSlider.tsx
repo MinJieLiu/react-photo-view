@@ -35,8 +35,10 @@ export interface IPhotoSliderProps extends PhotoProviderBase {
   onIndexChange?: (index: number) => void;
   // 可见
   visible: boolean;
-  // 关闭事件
+  // 关闭回调
   onClose: (evt?: React.MouseEvent | React.TouchEvent) => void;
+  // 关闭动画结束后回调
+  afterClose?: () => void;
 }
 
 type PhotoState = {
@@ -108,6 +110,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     onIndexChange: controlledIndexChange,
     visible,
     onClose,
+    afterClose,
   } = props;
 
   const [state, updateState] = useSetState(initialState);
@@ -145,7 +148,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   const enableLoop = typeof loop === 'boolean' ? loop : imageLength > loop;
 
   // 显示动画处理
-  const [realVisible, activeAnimation, onAnimationEnd] = useAnimationVisible(visible);
+  const [realVisible, activeAnimation, onAnimationEnd] = useAnimationVisible(visible, afterClose);
 
   useIsomorphicLayoutEffect(() => {
     // 显示弹出层，修正正确的指向
