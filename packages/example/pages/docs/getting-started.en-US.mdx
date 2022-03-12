@@ -8,6 +8,7 @@ import DocBasic from '../../components/doc-basic';
 import DocMotion from '../../components/doc-motion';
 import DocCover from '../../components/doc-cover';
 import DocToolbar from '../../components/doc-toolbar';
+import DocRead from '../../components/doc-read';
 import DocButton from '../../components/doc-button';
 import DocLoop from '../../components/doc-loop';
 import DocBackdrop from '../../components/doc-backdrop';
@@ -167,6 +168,12 @@ The following example implements a **rotating full-screen zoom in and out toolba
 
 <DocToolbar />
 
+## Long image mode
+
+When loading images whose aspect ratio exceeds `3` times, the mobile device will enter the long image mode by default. That is, the preview starts at the top of the image, and the width of the image fills the width with the mobile device:
+
+<DocRead />
+
 ## Trigger node
 
 `<PhotoView>` child components can be of the regular `React.HTMLAttributes` type, such as `<img>`, `<div>`, etc.
@@ -276,7 +283,8 @@ function MyComponent() {
 ```
 
 <Callout emoji="💡">
-  Note: After the gallery is zoomed, it will first be scaled with `scale`, and after the animation is over, it will be adjusted to the width and height corresponding to the current `scale`, and the `scale` will be reset to `1`.
+  Note: After the gallery is zoomed, it will first be scaled with `scale`, and after the animation is over, it will be
+  adjusted to the width and height corresponding to the current `scale`, and the `scale` will be reset to `1`.
 </Callout>
 
 <DocRender />

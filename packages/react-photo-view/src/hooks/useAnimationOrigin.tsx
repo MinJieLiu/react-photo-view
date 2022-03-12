@@ -1,6 +1,7 @@
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import { useState, useEffect, useRef } from 'react';
 import type { EasingMode, OriginRectType } from '../types';
+import useMethods from './useMethods';
 import { maxWaitAnimationTime } from '../variables';
 
 const initialRect: OriginRectType = {
@@ -28,6 +29,10 @@ export default function useAnimationOrigin(
   const [easingMode, updateEasingMode] = useState<EasingMode>(0);
   const initialTime = useRef<number>();
 
+  const fn = useMethods({
+    OK: () => visible && updateEasingMode(4),
+  });
+
   useEffect(() => {
     // 记录初始打开的时间
     if (!initialTime.current) {
@@ -47,7 +52,7 @@ export default function useAnimationOrigin(
           updateEasingMode(2);
           requestAnimationFrame(() => handleToShape(3));
         });
-        setTimeout(() => updateEasingMode(4), speed);
+        setTimeout(fn.OK, speed);
         return;
       }
       // 超出则不执行

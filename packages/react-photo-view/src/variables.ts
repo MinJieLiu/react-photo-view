@@ -44,6 +44,11 @@ export const minScale = 1;
 export const maxScale = 6;
 
 /**
+ * 最小长图模式比例
+ */
+export const longModeRatio = 3;
+
+/**
  * 缩放弹性缓冲
  */
 export const scaleBuffer = 0.2;

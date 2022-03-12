@@ -28,7 +28,7 @@ export default function DocDemo() {
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
-      const element = document.getElementById('PhotoView_Slider');
+      const element = document.querySelector('.PhotoView-Portal');
       if (element) {
         element.requestFullscreen();
       }

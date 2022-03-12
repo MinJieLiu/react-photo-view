@@ -1,17 +1,9 @@
 import React, { useRef, useState } from 'react';
 import type { DataType, PhotoProviderBase, OverlayRenderProps } from './types';
 import type { ReachType } from './types';
-import {
-  defaultEasing,
-  defaultSpeed,
-  defaultOpacity,
-  horizontalOffset,
-  maxMoveOffset,
-  maxScale,
-  minScale,
-} from './variables';
+import { defaultEasing, defaultSpeed, defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
 import isTouchDevice from './utils/isTouchDevice';
-import limitNumber from './utils/limitNumber';
+import { limitNumber, limitScale } from './utils/limitTarget';
 import useIsomorphicLayoutEffect from './hooks/useIsomorphicLayoutEffect';
 import useAdjacentImages from './hooks/useAdjacentImages';
 import useSetState from './hooks/useSetState';
@@ -50,8 +42,7 @@ type PhotoState = {
 
 type PhotoSliderState = {
   // 偏移量
-  translateX: number;
-
+  x: number;
   // 图片处于触摸的状态
   touched: boolean;
   // 是否暂停 transition
@@ -61,29 +52,27 @@ type PhotoSliderState = {
   // Reach 开始时 y 坐标
   lastCY: number | undefined;
   // 背景透明度
-  bgOpacity: number | undefined;
+  bg: number | undefined;
   // 上次关闭的背景透明度
-  lastBgOpacity: number | undefined;
-  // 覆盖物可见度
-  overlayVisible: boolean;
-  // 可下拉关闭
-  canPullClose: boolean;
+  lastBg: number | undefined;
+  // 是否显示 overlay
+  overlay: boolean;
+  // 是否为最小状态，可下拉关闭
+  minimal: boolean;
   // 子组件状态集合
   photoMap: Map<number | string, PhotoState>;
 };
 
 const initialState: PhotoSliderState = {
-  translateX: 0,
+  x: 0,
   touched: false,
   pause: false,
-
   lastCX: undefined,
   lastCY: undefined,
-  bgOpacity: undefined,
-  lastBgOpacity: undefined,
-  overlayVisible: true,
-  canPullClose: true,
-
+  bg: undefined,
+  lastBg: undefined,
+  overlay: true,
+  minimal: true,
   photoMap: new Map<number, PhotoState>(),
 };
 
@@ -117,17 +106,17 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   const [innerIndex, updateInnerIndex] = useState(0);
 
   const {
-    translateX,
+    x,
     touched,
     pause,
 
     lastCX,
     lastCY,
 
-    bgOpacity = maskOpacity,
-    lastBgOpacity,
-    overlayVisible,
-    canPullClose,
+    bg = maskOpacity,
+    lastBg,
+    overlay,
+    minimal,
 
     photoMap,
   } = state;
@@ -155,7 +144,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     if (realVisible) {
       updateState({
         pause: true,
-        translateX: index * -(innerWidth + horizontalOffset),
+        x: index * -(innerWidth + horizontalOffset),
       });
       virtualIndexRef.current = index;
       return;
@@ -168,9 +157,9 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     close(evt?: React.MouseEvent | React.TouchEvent) {
       onRotate(0);
       updateState({
-        overlayVisible: true,
+        overlay: true,
         // 记录当前关闭时的透明度
-        lastBgOpacity: bgOpacity,
+        lastBg: bg,
       });
       onClose(evt);
     },
@@ -189,7 +178,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
         touched: false,
         lastCX: undefined,
         lastCY: undefined,
-        translateX: -singlePageWidth * nextVirtualIndex,
+        x: -singlePageWidth * nextVirtualIndex,
         pause: isPause,
       });
 
@@ -204,7 +193,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       handleMergePhotoMap({ rotate });
     },
     onScale(scale: number) {
-      handleMergePhotoMap({ scale: limitNumber(scale, minScale, maxScale) });
+      handleMergePhotoMap({ scale: limitScale(scale) });
     },
   });
 
@@ -225,18 +214,16 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   });
 
   function handlePhotoTap(closeable: boolean | undefined) {
-    if (closeable) {
-      close();
-    } else {
-      updateState({
-        overlayVisible: !overlayVisible,
-      });
-    }
+    return closeable
+      ? close()
+      : updateState({
+          overlay: !overlay,
+        });
   }
 
   function handleResize() {
     updateState({
-      translateX: -(innerWidth + horizontalOffset) * index,
+      x: -(innerWidth + horizontalOffset) * index,
       lastCX: undefined,
       lastCY: undefined,
       pause: true,
@@ -263,8 +250,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       updateState({
         touched: true,
         lastCY: clientY,
-        bgOpacity,
-        canPullClose: true,
+        bg,
+        minimal: true,
       });
       return;
     }
@@ -274,8 +261,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     updateState({
       touched: true,
       lastCY,
-      bgOpacity: scale === 1 ? opacity : maskOpacity,
-      canPullClose: scale === 1,
+      bg: scale === 1 ? opacity : maskOpacity,
+      minimal: scale === 1,
     });
   }
 
@@ -284,7 +271,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       updateState({
         touched: true,
         lastCX: clientX,
-        translateX,
+        x,
         pause: false,
       });
       return;
@@ -303,7 +290,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     updateState({
       touched: true,
       lastCX: lastCX,
-      translateX: -(innerWidth + horizontalOffset) * virtualIndexRef.current + offsetClientX,
+      x: -(innerWidth + horizontalOffset) * virtualIndexRef.current + offsetClientX,
       pause: false,
     });
   }
@@ -331,24 +318,22 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       return;
     }
     const singlePageWidth = innerWidth + horizontalOffset;
-
     // 当前偏移
     const currentTranslateX = -singlePageWidth * virtualIndexRef.current;
 
-    if (Math.abs(offsetClientY) > 100 && canPullClose && pullClosable) {
+    if (Math.abs(offsetClientY) > 100 && minimal && pullClosable) {
       willClose = true;
       close();
     }
     updateState({
       touched: false,
-      translateX: currentTranslateX,
+      x: currentTranslateX,
       lastCX: undefined,
       lastCY: undefined,
-      bgOpacity: maskOpacity,
-      overlayVisible: willClose ? true : overlayVisible,
+      bg: maskOpacity,
+      overlay: willClose ? true : overlay,
     });
   }
-
   // 截取相邻的图片
   const adjacentImages = useAdjacentImages(images, index, enableLoop);
 
@@ -356,9 +341,9 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     return null;
   }
 
-  const currentOverlayVisible = overlayVisible && !activeAnimation;
+  const currentOverlayVisible = overlay && !activeAnimation;
   // 关闭过程中使用下拉保存的透明度
-  const currentOpacity = visible ? bgOpacity : lastBgOpacity;
+  const currentOpacity = visible ? bg : lastBg;
   const photoItem = currentImage ? photoMap.get(currentImage.key) : undefined;
   // 覆盖物参数
   const overlayParams: OverlayRenderProps = {
@@ -370,8 +355,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     overlayVisible: currentOverlayVisible,
     onRotate,
     onScale,
-    scale: photoItem ? photoItem.scale : 1,
-    rotate: photoItem ? photoItem.rotate : 0,
+    scale: photoItem?.scale || 1,
+    rotate: photoItem?.rotate || 0,
   };
   // 动画时间
   const currentSpeed = speedFn ? speedFn(activeAnimation) : defaultSpeed;
@@ -381,9 +366,10 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
 
   return (
     <SlidePortal
-      className={`${!currentOverlayVisible ? 'PhotoView-Slider__clean' : ''}${
+      className={`PhotoView-Portal${!currentOverlayVisible ? ' PhotoView-Slider__clean' : ''}${
         !visible ? ' PhotoView-Slider__willClose' : ''
       }${className ? ` ${className}` : ''}`}
+      role="dialog"
       onClick={(e) => e.stopPropagation()}
     >
       {visible && <PreventScroll />}
@@ -434,7 +420,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             className={photoClassName}
             style={{
               left: `${(innerWidth + horizontalOffset) * nextIndex}px`,
-              transform: `translate3d(${translateX}px, 0px, 0)`,
+              transform: `translate3d(${x}px, 0px, 0)`,
               transition: touched || pause ? undefined : `transform ${slideSpeed}ms ${slideEasing}`,
             }}
             loadingElement={loadingElement}

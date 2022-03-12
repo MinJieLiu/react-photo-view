@@ -34,13 +34,13 @@ export const computePositionEdge = (position: number, scale: number, size: numbe
 
   let current = position;
   if (currentWidth <= innerSize) {
-    closedEdge = 'S';
+    closedEdge = 1;
     current = 0;
   } else if (position > 0 && outOffset - position <= 0) {
-    closedEdge = 'F';
+    closedEdge = 2;
     current = outOffset;
   } else if (position < 0 && outOffset + position <= 0) {
-    closedEdge = 'E';
+    closedEdge = 3;
     current = -outOffset;
   }
 

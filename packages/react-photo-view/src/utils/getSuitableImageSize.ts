@@ -1,3 +1,4 @@
+import { longModeRatio } from '../variables';
 import getRotateSize from './getRotateSize';
 
 /**
@@ -25,15 +26,15 @@ export default function getSuitableImageSize(naturalWidth: number, naturalHeight
     height = autoHeight;
   }
   // 长图模式
-  else if (naturalHeight / naturalWidth >= 3 && !isVertical) {
+  else if (naturalHeight / naturalWidth >= longModeRatio && !isVertical) {
     height = autoHeight;
     y = (height - currentHeight) / 2;
   } else {
     width = autoWidth;
   }
   return {
-    width: Math.floor(width),
-    height: Math.floor(height),
+    width,
+    height,
     x: 0,
     y,
     pause: true,

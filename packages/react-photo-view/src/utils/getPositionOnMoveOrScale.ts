@@ -1,3 +1,4 @@
+import { longModeRatio } from '../variables';
 import { computePositionEdge } from './edgeHandle';
 
 /**
@@ -29,9 +30,11 @@ export default function getPositionOnMoveOrScale(
   // 偏移位置
   const originX = clientX - (clientX - lastPositionX) * (toScale / scale) - centerClientX;
   const originY = clientY - (clientY - lastPositionY) * (toScale / scale) - centerClientY;
+  // 长图模式无左右反馈
+  const longModeEdge = height / width >= longModeRatio && width * toScale === innerWidth;
   // 超出边缘距离减半
   return {
-    x: originX + (closedEdgeX ? offsetX / 2 : offsetX),
+    x: originX + (longModeEdge ? 0 : closedEdgeX ? offsetX / 2 : offsetX),
     y: originY + (closedEdgeY ? offsetY / 2 : offsetY),
     lastCX: clientX,
     lastCY: clientY,

@@ -15,12 +15,12 @@ export default function useTargetScale(
 ) {
   const execRef = useRef(false);
 
-  const [{ top, scale }, updateState] = useSetState({ top: true, scale: realScale });
+  const [{ lead, scale }, updateState] = useSetState({ lead: true, scale: realScale });
 
   const moveScale = useDebounceCallback(
     async (current: number) => {
       updateEasing(true);
-      updateState({ top: false, scale: current });
+      updateState({ lead: false, scale: current });
     },
     { wait: speed },
   );
@@ -31,13 +31,13 @@ export default function useTargetScale(
       return;
     }
     updateEasing(false);
-    updateState({ top: true });
+    updateState({ lead: true });
 
     moveScale(realScale);
   }, [realScale]);
 
   // 运动开始
-  if (top) {
+  if (lead) {
     return [realWidth * scale, realHeight * scale, realScale / scale] as const;
   }
 

@@ -8,6 +8,7 @@ import DocBasic from '../../components/doc-basic';
 import DocMotion from '../../components/doc-motion';
 import DocCover from '../../components/doc-cover';
 import DocToolbar from '../../components/doc-toolbar';
+import DocRead from '../../components/doc-read';
 import DocButton from '../../components/doc-button';
 import DocLoop from '../../components/doc-loop';
 import DocBackdrop from '../../components/doc-backdrop';
@@ -165,6 +166,12 @@ export default function MyComponent() {
 以下示例实现了**旋转/全屏/放大/缩小**工具栏：
 
 <DocToolbar />
+
+## 长图模式
+
+移动设备加载长宽比例超过 `3` 倍的图片，默认会进入长图模式。即开始预览在图片顶部，图片宽度填充移动设备宽度：
+
+<DocRead />
 
 ## 触发节点
 

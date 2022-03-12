@@ -45,12 +45,18 @@ const PhotoView: React.FC<PhotoViewProps> = ({ src, render, width, height, child
     };
   }, []);
 
+  function invokeChildrenFn(eventName: string, e: React.SyntheticEvent) {
+    if (children) {
+      const eventFn = children.props[eventName];
+      if (eventFn) {
+        eventFn(e);
+      }
+    }
+  }
+
   const fn = useMethods({
     render(props: PhotoRenderParams) {
-      if (render) {
-        return render(props);
-      }
-      return undefined;
+      return render && render(props);
     },
     touchStart(e: React.TouchEvent) {
       const { clientX, clientY } = e.touches[0];
@@ -58,33 +64,18 @@ const PhotoView: React.FC<PhotoViewProps> = ({ src, render, width, height, child
         clientX,
         clientY,
       });
-      if (children) {
-        const { onTouchStart } = children.props;
-        if (onTouchStart) {
-          onTouchStart(e);
-        }
-      }
+      invokeChildrenFn('onTouchStart', e);
     },
     touchEnd(e: React.TouchEvent) {
       const { clientX, clientY } = e.changedTouches[0];
       if (position.clientX === clientX && position.clientY === clientY) {
         photoContext.show(key);
       }
-      if (children) {
-        const { onTouchEnd } = children.props;
-        if (onTouchEnd) {
-          onTouchEnd(e);
-        }
-      }
+      invokeChildrenFn('onTouchEnd', e);
     },
     click(e: React.MouseEvent) {
       photoContext.show(key);
-      if (children) {
-        const { onClick } = children.props;
-        if (onClick) {
-          onClick(e);
-        }
-      }
+      invokeChildrenFn('onClick', e);
     },
   });
 

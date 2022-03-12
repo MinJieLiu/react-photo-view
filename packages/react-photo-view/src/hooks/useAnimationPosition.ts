@@ -33,7 +33,7 @@ export default function useAnimationPosition(
   const translateY = miniMode ? (W ? T : centerHeight) : y + offsetY;
 
   // 最小值缩放
-  const minScale = W / (width * scale) || 0;
+  const minScale = W / (width * scale) || 0.01;
 
   // 适应 objectFit 保持缩略图宽高比
   const currentHeight = miniMode && FIT ? autoWidth * (H / W) : autoHeight;

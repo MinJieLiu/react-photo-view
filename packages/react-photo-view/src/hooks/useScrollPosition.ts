@@ -3,6 +3,17 @@ import getRotateSize from '../utils/getRotateSize';
 import { defaultSpeed, maxTouchTime } from '../variables';
 import useMethods from './useMethods';
 
+// 触边运动反馈
+const rebound = (start: number, bound: number, callback: (spatial: number) => boolean) =>
+  easeOutMove(
+    start,
+    bound,
+    callback,
+    defaultSpeed / 4,
+    (t) => t,
+    () => easeOutMove(bound, start, callback),
+  );
+
 /**
  * 物理滚动到具体位置
  */
@@ -12,15 +23,9 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
   callbackS: C,
 ) {
   const callback = useMethods({
-    X(spatial: number) {
-      return callbackX(spatial);
-    },
-    Y(spatial: number) {
-      return callbackY(spatial);
-    },
-    S(spatial: number) {
-      return callbackS(spatial);
-    },
+    X: (spatial: number) => callbackX(spatial),
+    Y: (spatial: number) => callbackY(spatial),
+    S: (spatial: number) => callbackS(spatial),
   });
 
   return (
@@ -34,26 +39,22 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
     rotate: number,
     touchedTime: number,
   ) => {
-    // 缩小的情况下不执行滚动逻辑，恢复居中位置
-    if (scale < 1) {
-      easeOutMove(x, 0, callback.X);
-      easeOutMove(y, 0, callback.Y);
-      easeOutMove(scale, 1, callback.S);
-      return;
-    }
-
-    const moveTime = Date.now() - touchedTime;
     const [currentWidth, currentHeight] = getRotateSize(rotate, width, height);
+    // 开始状态下边缘触发状态
+    const [beginEdgeX, beginX] = computePositionEdge(x, scale, currentWidth, innerWidth);
+    const [beginEdgeY, beginY] = computePositionEdge(y, scale, currentHeight, innerHeight);
+    const moveTime = Date.now() - touchedTime;
 
-    // 时间过长
-    if (moveTime >= maxTouchTime) {
-      const [isEdgeX, nextX] = computePositionEdge(x, scale, currentWidth, innerWidth);
-      if (isEdgeX) {
-        easeOutMove(x, nextX, callback.X);
+    // 时间过长、缩小的情况下不执行滚动逻辑，恢复居中位置
+    if (moveTime >= maxTouchTime || scale < 1) {
+      if (beginEdgeX) {
+        easeOutMove(x, beginX, callback.X);
       }
-      const [isEdgeY, nextY] = computePositionEdge(y, scale, currentHeight, innerHeight);
-      if (isEdgeY) {
-        easeOutMove(y, nextY, callback.Y);
+      if (beginEdgeY) {
+        easeOutMove(y, beginY, callback.Y);
+      }
+      if (scale < 1) {
+        easeOutMove(scale, 1, callback.S);
       }
       return;
     }
@@ -75,12 +76,20 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
 
       if (isEdgeX && !edgeX) {
         edgeX = true;
-        easeOutMove(nextX, currentX, callback.X);
+        if (beginEdgeX) {
+          easeOutMove(nextX, currentX, callback.X);
+        } else {
+          rebound(currentX, nextX + (nextX - currentX), callback.X);
+        }
       }
 
       if (isEdgeY && !edgeY) {
         edgeY = true;
-        easeOutMove(nextY, currentY, callback.Y);
+        if (beginEdgeY) {
+          easeOutMove(nextY, currentY, callback.Y);
+        } else {
+          rebound(currentY, nextY + (nextY - currentY), callback.Y);
+        }
       }
       // 同时接触边缘的情况下停止滚动
       if (edgeX && edgeY) {
@@ -145,9 +154,21 @@ function scrollMove(initialSpeed: number, callback: (spatial: number) => boolean
 }
 
 /**
+ * 缓动函数
+ */
+const easeOutQuart = (x: number) => 1 - (1 - x) ** 4;
+
+/**
  * 缓动回调
  */
-function easeOutMove(start: number, end: number, callback: (spatial: number) => boolean) {
+function easeOutMove(
+  start: number,
+  end: number,
+  callback: (spatial: number) => boolean,
+  speed = defaultSpeed,
+  easing = easeOutQuart,
+  complete?: () => void,
+) {
   const distance = end - start;
   if (distance === 0) {
     return;
@@ -157,28 +178,21 @@ function easeOutMove(start: number, end: number, callback: (spatial: number) => 
   let frameId = 0;
 
   const calcMove = () => {
-    const time = Math.min(1, (Date.now() - startTime) / defaultSpeed);
-    const result = callback(start + easeOutQuart(time) * distance);
+    const time = Math.min(1, (Date.now() - startTime) / speed);
+    const result = callback(start + easing(time) * distance);
 
     if (result && time < 1) {
       raf();
       return;
     }
-    caf();
+    cancelAnimationFrame(frameId);
+    if (time >= 1 && complete) {
+      complete();
+    }
   };
   raf();
 
   function raf() {
     frameId = requestAnimationFrame(calcMove);
   }
-  function caf() {
-    cancelAnimationFrame(frameId);
-  }
-}
-
-/**
- * 缓动函数
- */
-function easeOutQuart(x: number): number {
-  return 1 - Math.pow(1 - x, 4);
 }

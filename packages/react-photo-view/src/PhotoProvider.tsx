@@ -60,7 +60,7 @@ export default function PhotoProvider({ children, onIndexChange, onVisibleChange
         visible: true,
         index: currentIndex,
       });
-      if (typeof onVisibleChange === 'function') {
+      if (onVisibleChange) {
         onVisibleChange(true, currentIndex, state);
       }
     },
@@ -72,7 +72,7 @@ export default function PhotoProvider({ children, onIndexChange, onVisibleChange
         visible: false,
       });
 
-      if (typeof onVisibleChange === 'function') {
+      if (onVisibleChange) {
         onVisibleChange(false, index, state);
       }
     },
@@ -81,7 +81,7 @@ export default function PhotoProvider({ children, onIndexChange, onVisibleChange
         index: nextIndex,
       });
 
-      if (typeof onIndexChange === 'function') {
+      if (onIndexChange) {
         onIndexChange(nextIndex, state);
       }
     },
