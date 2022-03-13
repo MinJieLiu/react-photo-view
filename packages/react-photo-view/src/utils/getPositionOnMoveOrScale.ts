@@ -7,12 +7,12 @@ import { computePositionEdge } from './edgeHandle';
 export default function getPositionOnMoveOrScale(
   x: number,
   y: number,
-  clientX: number,
-  clientY: number,
   width: number,
   height: number,
   scale: number,
   toScale: number,
+  clientX: number = innerWidth / 2,
+  clientY: number = innerHeight / 2,
   offsetX: number = 0,
   offsetY: number = 0,
 ) {

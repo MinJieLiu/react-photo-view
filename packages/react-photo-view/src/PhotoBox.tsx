@@ -4,13 +4,21 @@ import getMultipleTouchPosition from './utils/getMultipleTouchPosition';
 import getPositionOnMoveOrScale from './utils/getPositionOnMoveOrScale';
 import { getReachType, computePositionEdge } from './utils/edgeHandle';
 import getRotateSize from './utils/getRotateSize';
-import { minStartTouchOffset, scaleBuffer } from './variables';
-import type { DataType, ReachMoveFunction, ReachFunction, PhotoTapFunction, BrokenElementParams } from './types';
-import type { ReachType, TouchStartType } from './types';
-import useSetState from './hooks/useSetState';
 import { limitScale } from './utils/limitTarget';
 import getSuitableImageSize from './utils/getSuitableImageSize';
 import useIsomorphicLayoutEffect from './hooks/useIsomorphicLayoutEffect';
+import { minStartTouchOffset, scaleBuffer } from './variables';
+import type {
+  DataType,
+  ReachMoveFunction,
+  ReachFunction,
+  PhotoTapFunction,
+  BrokenElementParams,
+  ExposedProperties,
+} from './types';
+import type { ReachType, TouchStartType } from './types';
+import useSetState from './hooks/useSetState';
+import useMethods from './hooks/useMethods';
 import useDebounceCallback from './hooks/useDebounceCallback';
 import useEventListener from './hooks/useEventListener';
 import useContinuousTap from './hooks/useContinuousTap';
@@ -40,10 +48,6 @@ export interface PhotoBoxProps {
   loadingElement?: JSX.Element;
   // 加载失败 Element
   brokenElement?: JSX.Element | ((photoProps: BrokenElementParams) => JSX.Element);
-  // 旋转状态
-  rotate?: number;
-  // 放大缩小
-  scale?: number;
 
   // Photo 点击事件
   onPhotoTap: PhotoTapFunction;
@@ -55,8 +59,8 @@ export interface PhotoBoxProps {
   onReachUp: ReachFunction;
   // Resize 事件
   onPhotoResize: () => void;
-  // 滚轮事件
-  onWheel: (scale: number) => void;
+  // 向父组件导出属性
+  expose: (state: ExposedProperties) => void;
   // 是否在当前操作中
   isActive: boolean;
 }
@@ -67,9 +71,9 @@ const initialState = {
   // 真实高度
   naturalHeight: undefined as number | undefined,
   // 宽度
-  width: 0,
+  width: undefined as number | undefined,
   // 高度
-  height: 0,
+  height: undefined as number | undefined,
   // 加载成功状态
   loaded: undefined as boolean | undefined,
   // 破碎状态
@@ -83,6 +87,10 @@ const initialState = {
   touched: false,
   // 背景处于触摸状态
   maskTouched: false,
+  // 旋转状态
+  rotate: 0,
+  // 放大缩小
+  scale: 1,
 
   // 触摸开始时 x 原始坐标
   CX: 0,
@@ -97,6 +105,8 @@ const initialState = {
   lastCX: 0,
   // 上一个触摸状态 y 原始坐标
   lastCY: 0,
+  // 上一个触摸状态的 scale
+  lastScale: 1,
 
   // 触摸开始时时间
   touchTime: 0,
@@ -111,7 +121,7 @@ const initialState = {
 };
 
 export default function PhotoBox({
-  item: { src, render, width: customWidth, height: customHeight, originRef },
+  item: { src, render, width: customWidth = 0, height: customHeight = 0, originRef },
   visible,
   speed,
   easing,
@@ -120,26 +130,24 @@ export default function PhotoBox({
   style,
   loadingElement,
   brokenElement,
-  rotate = 0,
-  scale = 1,
 
   onPhotoTap,
   onMaskTap,
   onReachMove,
   onReachUp,
   onPhotoResize,
-  onWheel,
   isActive,
+  expose,
 }: PhotoBoxProps) {
   const [state, updateState] = useSetState(initialState);
   const initialTouchRef = useRef<TouchStartType>(0);
   const mounted = useMountedRef();
 
   const {
-    naturalWidth = customWidth || 0,
-    naturalHeight = customHeight || 0,
-    width,
-    height,
+    naturalWidth = customWidth,
+    naturalHeight = customHeight,
+    width = customWidth,
+    height = customHeight,
     loaded = !src,
     broken,
     x,
@@ -147,17 +155,42 @@ export default function PhotoBox({
     touched,
     stopRaf,
     maskTouched,
+    rotate,
+    scale,
     CX,
     CY,
     lastX,
     lastY,
     lastCX,
     lastCY,
+    lastScale,
     touchTime,
     touchLength,
     pause,
     reach,
   } = state;
+
+  const fn = useMethods({
+    onScale: (current: number) => onScale(limitScale(current)),
+    onRotate(current: number) {
+      if (rotate !== current) {
+        expose({ rotate: current });
+        updateState({ rotate: current, ...getSuitableImageSize(naturalWidth, naturalHeight, current) });
+      }
+    },
+  });
+
+  // 默认为屏幕中心缩放
+  function onScale(current: number, clientX?: number, clientY?: number) {
+    if (scale !== current) {
+      expose({ scale: current });
+      updateState({
+        scale: current,
+        ...getPositionOnMoveOrScale(x, y, width, height, scale, current, clientX, clientY),
+        ...(current <= 1 && { x: 0, y: 0 }),
+      });
+    }
+  }
 
   const handleMove = useDebounceCallback(
     (nextClientX: number, nextClientY: number, currentTouchLength: number = 0) => {
@@ -207,21 +240,21 @@ export default function PhotoBox({
             naturalWidth / width,
             scaleBuffer,
           );
-          if (scale !== toScale) {
-            onWheel(toScale);
-          }
+          // 导出变量
+          expose({ scale: toScale });
           updateState({
             touchLength: currentTouchLength,
             reach: currentReach,
+            scale: toScale,
             ...getPositionOnMoveOrScale(
               x,
               y,
-              nextClientX,
-              nextClientY,
               width,
               height,
               scale,
               toScale,
+              nextClientX,
+              nextClientY,
               offsetX,
               offsetY,
             ),
@@ -250,23 +283,19 @@ export default function PhotoBox({
     (nextY) => updateRaf({ y: nextY }),
     (nextScale) => {
       if (mounted.current) {
-        onWheel(nextScale);
+        expose({ scale: nextScale });
+        updateState({ scale: nextScale });
       }
       return !touched && mounted.current;
     },
   );
 
   const handlePhotoTap = useContinuousTap(onPhotoTap, (currentClientX: number, currentClientY: number) => {
-    if (reach !== undefined) {
-      return;
+    if (!reach) {
+      // 若图片足够大，则放大适应的倍数
+      const endScale = scale !== 1 ? 1 : Math.max(2, naturalWidth / width);
+      onScale(endScale, currentClientX, currentClientY);
     }
-    // 若图片足够大，则放大适应的倍数
-    const endScale = scale !== 1 ? 1 : Math.max(2, naturalWidth / width);
-    onWheel(endScale);
-    updateState({
-      ...getPositionOnMoveOrScale(x, y, currentClientX, currentClientY, width, height, scale, endScale),
-      ...(endScale <= 1 && { x: 0, y: 0 }),
-    });
   });
 
   function handleUp(nextClientX: number, nextClientY: number) {
@@ -274,10 +303,6 @@ export default function PhotoBox({
     initialTouchRef.current = 0;
     if ((touched || maskTouched) && isActive) {
       const hasMove = CX !== nextClientX || CY !== nextClientY;
-      const toScale = limitScale(scale, naturalWidth / width || 1);
-      if (toScale !== scale) {
-        onWheel(toScale);
-      }
       updateState({
         touched: false,
         maskTouched: false,
@@ -286,7 +311,7 @@ export default function PhotoBox({
         reach: undefined,
       });
       // Go
-      slideToPosition(x, y, lastX, lastY, width, height, scale, rotate, touchTime);
+      slideToPosition(x, y, lastX, lastY, width, height, scale, lastScale, rotate, touchTime);
 
       onReachUp(nextClientX, nextClientY);
       // 触发 Tap 事件
@@ -338,8 +363,10 @@ export default function PhotoBox({
   );
 
   useIsomorphicLayoutEffect(() => {
-    updateState(getSuitableImageSize(naturalWidth, naturalHeight, rotate));
-  }, [rotate]);
+    if (isActive) {
+      expose({ scale, rotate, ...fn });
+    }
+  }, [isActive]);
 
   function handlePhotoLoad(params: IPhotoLoadedParams) {
     updateState({
@@ -357,25 +384,23 @@ export default function PhotoBox({
       lastCY: currentClientY,
       lastX: x,
       lastY: y,
+      lastScale: scale,
       touchLength: currentTouchLength,
       touchTime: Date.now(),
     });
   }
 
   function handleWheel(e: React.WheelEvent) {
-    if (reach !== undefined) {
-      return;
+    if (!reach) {
+      // 限制最大倍数和最小倍数
+      const toScale = limitScale(scale - e.deltaY / 100 / 2, naturalWidth / width);
+      updateState({
+        CX: e.clientX,
+        CY: e.clientY,
+        stopRaf: true,
+      });
+      onScale(toScale, e.clientX, e.clientY);
     }
-    // 限制最大倍数和最小倍数
-    const toScale = limitScale(scale - e.deltaY / 100 / 2, naturalWidth / width);
-    updateState({
-      CX: e.clientX,
-      CY: e.clientY,
-      stopRaf: true,
-      ...getPositionOnMoveOrScale(x, y, e.clientX, e.clientY, width, height, scale, toScale),
-      ...(toScale <= 1 && { x: 0, y: 0 }),
-    });
-    onWheel(toScale);
   }
 
   function handleMaskStart(e: { clientX: number; clientY: number }) {

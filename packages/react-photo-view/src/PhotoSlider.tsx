@@ -3,7 +3,7 @@ import type { DataType, PhotoProviderBase, OverlayRenderProps } from './types';
 import type { ReachType } from './types';
 import { defaultEasing, defaultSpeed, defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
 import isTouchDevice from './utils/isTouchDevice';
-import { limitNumber, limitScale } from './utils/limitTarget';
+import { limitNumber } from './utils/limitTarget';
 import useIsomorphicLayoutEffect from './hooks/useIsomorphicLayoutEffect';
 import useAdjacentImages from './hooks/useAdjacentImages';
 import useSetState from './hooks/useSetState';
@@ -33,13 +33,6 @@ export interface IPhotoSliderProps extends PhotoProviderBase {
   afterClose?: () => void;
 }
 
-type PhotoState = {
-  // 旋转
-  rotate: number;
-  // 缩放
-  scale: number;
-};
-
 type PhotoSliderState = {
   // 偏移量
   x: number;
@@ -59,8 +52,14 @@ type PhotoSliderState = {
   overlay: boolean;
   // 是否为最小状态，可下拉关闭
   minimal: boolean;
-  // 子组件状态集合
-  photoMap: Map<number | string, PhotoState>;
+  // 缩放
+  scale: number;
+  // 旋转
+  rotate: number;
+  // 缩放回调
+  onScale?: (scale: number) => void;
+  // 旋转回调
+  onRotate?: (rotate: number) => void;
 };
 
 const initialState: PhotoSliderState = {
@@ -73,7 +72,8 @@ const initialState: PhotoSliderState = {
   lastBg: undefined,
   overlay: true,
   minimal: true,
-  photoMap: new Map<number, PhotoState>(),
+  scale: 1,
+  rotate: 0,
 };
 
 export default function PhotoSlider(props: IPhotoSliderProps) {
@@ -118,7 +118,10 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     overlay,
     minimal,
 
-    photoMap,
+    scale,
+    rotate,
+    onScale,
+    onRotate,
   } = state;
 
   // 受控 index
@@ -153,9 +156,11 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     updateState(initialState);
   }, [realVisible]);
 
-  const { close, changeIndex, onRotate, onScale } = useMethods({
+  const { close, changeIndex } = useMethods({
     close(evt?: React.MouseEvent | React.TouchEvent) {
-      onRotate(0);
+      if (onRotate) {
+        onRotate(0);
+      }
       updateState({
         overlay: true,
         // 记录当前关闭时的透明度
@@ -188,12 +193,6 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       if (onIndexChange) {
         onIndexChange(enableLoop ? realLoopIndex : limitIndex);
       }
-    },
-    onRotate(rotate: number) {
-      handleMergePhotoMap({ rotate });
-    },
-    onScale(scale: number) {
-      handleMergePhotoMap({ scale: limitScale(scale) });
     },
   });
 
@@ -231,21 +230,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     virtualIndexRef.current = index;
   }
 
-  function handleMergePhotoMap(next: Partial<PhotoState>) {
-    const nextMap = new Map(photoMap);
-    if (currentImage) {
-      const key = currentImage.key;
-      updateState({
-        photoMap: nextMap.set(key, { ...nextMap.get(key)!, ...next }),
-      });
-    }
-  }
-
-  function onWheel(scale: number) {
-    handleMergePhotoMap({ scale });
-  }
-
-  function handleReachVerticalMove(clientY: number, scale?: number) {
+  function handleReachVerticalMove(clientY: number, nextScale?: number) {
     if (lastCY === undefined) {
       updateState({
         touched: true,
@@ -255,14 +240,13 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       });
       return;
     }
-    const offsetClientY = Math.abs(clientY - lastCY);
-    const opacity = limitNumber(maskOpacity, 0, maskOpacity - offsetClientY / 100 / 4);
+    const opacity = limitNumber(maskOpacity, 0, maskOpacity - Math.abs(clientY - lastCY) / 100 / 4);
 
     updateState({
       touched: true,
       lastCY,
-      bg: scale === 1 ? opacity : maskOpacity,
-      minimal: scale === 1,
+      bg: nextScale === 1 ? opacity : maskOpacity,
+      minimal: nextScale === 1,
     });
   }
 
@@ -295,11 +279,11 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     });
   }
 
-  function handleReachMove(reachPosition: ReachType, clientX: number, clientY: number, scale?: number) {
+  function handleReachMove(reachPosition: ReachType, clientX: number, clientY: number, nextScale?: number) {
     if (reachPosition === 'x') {
       handleReachHorizontalMove(clientX);
     } else if (reachPosition === 'y') {
-      handleReachVerticalMove(clientY, scale);
+      handleReachVerticalMove(clientY, nextScale);
     }
   }
 
@@ -344,20 +328,20 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   const currentOverlayVisible = overlay && !activeAnimation;
   // 关闭过程中使用下拉保存的透明度
   const currentOpacity = visible ? bg : lastBg;
-  const photoItem = currentImage ? photoMap.get(currentImage.key) : undefined;
   // 覆盖物参数
-  const overlayParams: OverlayRenderProps = {
-    images,
-    index,
-    visible,
-    onClose: close,
-    onIndexChange: changeIndex,
-    overlayVisible: currentOverlayVisible,
-    onRotate,
-    onScale,
-    scale: photoItem?.scale || 1,
-    rotate: photoItem?.rotate || 0,
-  };
+  const overlayParams: OverlayRenderProps | undefined = onScale &&
+    onRotate && {
+      images,
+      index,
+      visible,
+      onClose: close,
+      onIndexChange: changeIndex,
+      overlayVisible: currentOverlayVisible,
+      scale,
+      rotate,
+      onScale,
+      onRotate,
+    };
   // 动画时间
   const currentSpeed = speedFn ? speedFn(activeAnimation) : defaultSpeed;
   const currentEasing = easingFn ? easingFn(activeAnimation) : defaultEasing;
@@ -395,7 +379,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             {index + 1} / {imageLength}
           </div>
           <div className="PhotoView-Slider__BannerRight">
-            {toolbarRender && toolbarRender(overlayParams)}
+            {toolbarRender && overlayParams && toolbarRender(overlayParams)}
             <CloseIcon className="PhotoView-Slider__toolbarIcon" onClick={close} />
           </div>
         </div>
@@ -427,8 +411,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             brokenElement={brokenElement}
             onPhotoResize={handleResize}
             isActive={(currentImage && currentImage.key) === item.key}
-            onWheel={onWheel}
-            {...photoMap.get(item.key)}
+            expose={updateState}
           />
         );
       })}
@@ -446,7 +429,9 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
           )}
         </>
       )}
-      {overlayRender && <div className="PhotoView-Slider__Overlay">{overlayRender(overlayParams)}</div>}
+      {overlayRender && overlayParams && (
+        <div className="PhotoView-Slider__Overlay">{overlayRender(overlayParams)}</div>
+      )}
     </SlidePortal>
   );
 }

@@ -151,6 +151,17 @@ export interface OverlayRenderProps {
   onScale: (scale: number) => void;
 }
 
+export interface ExposedProperties {
+  // 缩放
+  scale?: number;
+  // 旋转
+  rotate?: number;
+  // 缩放回调
+  onScale?: (scale: number) => void;
+  // 旋转回调
+  onRotate?: (rotate: number) => void;
+}
+
 export type ReachMoveFunction = (reachPosition: ReachType, clientX: number, clientY: number, scale?: number) => void;
 
 export type ReachFunction = (clientX: number, clientY: number) => void;

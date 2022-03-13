@@ -1,5 +1,7 @@
 import { computePositionEdge } from '../utils/edgeHandle';
+import getPositionOnMoveOrScale from '../utils/getPositionOnMoveOrScale';
 import getRotateSize from '../utils/getRotateSize';
+import { limitScale } from '../utils/limitTarget';
 import { defaultSpeed, maxTouchTime } from '../variables';
 import useMethods from './useMethods';
 
@@ -36,6 +38,7 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
     width: number,
     height: number,
     scale: number,
+    lastScale: number,
     rotate: number,
     touchedTime: number,
   ) => {
@@ -45,16 +48,24 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
     const [beginEdgeY, beginY] = computePositionEdge(y, scale, currentHeight, innerHeight);
     const moveTime = Date.now() - touchedTime;
 
-    // 时间过长、缩小的情况下不执行滚动逻辑，恢复居中位置
-    if (moveTime >= maxTouchTime || scale < 1) {
-      if (beginEdgeX) {
-        easeOutMove(x, beginX, callback.X);
+    // 缩放调整至安全范围
+    const nextScale = limitScale(scale);
+
+    // 时间过长、超出安全范围的情况下不执行滚动逻辑，恢复安全范围
+    if (moveTime >= maxTouchTime || nextScale != scale || Math.abs(lastScale - scale) > 1) {
+      // 计算中心缩放点
+      const { x: nextX, y: nextY } = getPositionOnMoveOrScale(x, y, width, height, scale, nextScale);
+      const targetX = beginEdgeX ? beginX : nextX !== x ? nextX : null;
+      const targetY = beginEdgeY ? beginY : nextY !== y ? nextY : null;
+
+      if (targetX !== null) {
+        easeOutMove(x, targetX, callback.X);
       }
-      if (beginEdgeY) {
-        easeOutMove(y, beginY, callback.Y);
+      if (targetY !== null) {
+        easeOutMove(y, targetY, callback.Y);
       }
-      if (scale < 1) {
-        easeOutMove(scale, 1, callback.S);
+      if (nextScale != scale) {
+        easeOutMove(scale, nextScale, callback.S);
       }
       return;
     }
@@ -104,7 +115,7 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
 }
 
 // 加速度
-const acceleration = -0.002;
+const acceleration = -0.001;
 // 阻力
 const resistance = 0.0002;
 
