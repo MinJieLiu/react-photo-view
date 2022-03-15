@@ -6,6 +6,7 @@ import type { PhotoContextType } from './photo-context';
 import PhotoContext from './photo-context';
 import type { PhotoRenderParams } from './types';
 import isTouchDevice from './utils/isTouchDevice';
+import findAncestor from './utils/findAncestor';
 
 export interface PhotoViewProps {
   /**
@@ -28,9 +29,17 @@ export interface PhotoViewProps {
    * 子节点，一般为缩略图
    */
   children?: React.ReactElement;
+  /**
+   * 点击内容时是否打开预览
+   */
+  shouldOpenSlider?: (e: (React.TouchEvent | React.MouseEvent)) => boolean;
 }
 
-const PhotoView: React.FC<PhotoViewProps> = ({ src, render, width, height, children }) => {
+const defaultShouldOpenSlider = (e: React.TouchEvent | React.MouseEvent) => {
+  return findAncestor(e.target as HTMLElement, element => element.tagName === 'A') === null;
+};
+
+const PhotoView: React.FC<PhotoViewProps> = ({ src, render, width, height, children, shouldOpenSlider = defaultShouldOpenSlider }) => {
   const photoContext = useContext<PhotoContextType>(PhotoContext);
   const key = useInitial(() => photoContext.nextId());
   const [position, updatePosition] = useState({
@@ -69,12 +78,16 @@ const PhotoView: React.FC<PhotoViewProps> = ({ src, render, width, height, child
     touchEnd(e: React.TouchEvent) {
       const { clientX, clientY } = e.changedTouches[0];
       if (position.clientX === clientX && position.clientY === clientY) {
-        photoContext.show(key);
+        if (shouldOpenSlider(e)) {
+          photoContext.show(key);
+        }
       }
       invokeChildrenFn('onTouchEnd', e);
     },
     click(e: React.MouseEvent) {
-      photoContext.show(key);
+      if (shouldOpenSlider(e)) {
+        photoContext.show(key);
+      }
       invokeChildrenFn('onClick', e);
     },
   });
