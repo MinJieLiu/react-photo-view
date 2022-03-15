@@ -180,9 +180,16 @@ When loading images whose aspect ratio exceeds `3` times, the mobile device will
 
 If it is a custom component, you need to ensure that `onClick` (desktop), `onTouchStart` and `onTouchEnd` (mobile) events can be triggered normally, and forward `ref` to `HTMLElement` to ensure the correctness of opening and closing the animation source.
 
+By default, preview shows only when the event target is NOT descendent of an `<a />` element, in order to prevent triggering preview inside a link. You can pass `shouldOpenSlider` function to customize this behavior.
+
 ```jsx
-<PhotoView src={imageURL}>
+<PhotoView src={imageURL1}>
   <Button primary>Click</Button>
+</PhotoView>
+<PhotoView src={imageURL2}>
+  <Button secondary>
+    <a href="/">react-photo-view</a> is an awesome library!
+  </Button>
 </PhotoView>
 ```
 

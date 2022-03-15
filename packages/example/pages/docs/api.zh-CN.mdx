@@ -28,13 +28,14 @@ title: API
 
 ## PhotoView
 
-| Name     | Description                 | Type                                                | Default Value |
-| -------- | --------------------------- | --------------------------------------------------- | ------------- |
-| src      | 图片地址                    | string                                              |
-| render   | 自定义渲染，优先级比 src 低 | \(props: PhotoRenderParams\) =&gt; React\.ReactNode |
-| width    | 自定义渲染节点宽度          | number                                              |
-| height   | 自定义渲染节点高度          | number                                              |
-| children | 子节点，一般为缩略图        | React\.ReactElement                                 |
+| Name             | Description                 | Type                                                | Default Value |
+| ---------------- | --------------------------- | --------------------------------------------------- | ------------- |
+| src              | 图片地址                    | string                                              |
+| render           | 自定义渲染，优先级比 src 低 | \(props: PhotoRenderParams\) =&gt; React\.ReactNode |
+| width            | 自定义渲染节点宽度          | number                                              |
+| height           | 自定义渲染节点高度          | number                                              |
+| children         | 子节点，一般为缩略图        | React\.ReactElement                                 |
+| shouldOpenSlider | 点击内容时是否打开预览      | \(e: React.MouseEvent \| React\.TouchEvent) =&gt; boolean |
 
 ## DataType
 

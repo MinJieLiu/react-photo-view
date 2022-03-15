@@ -179,9 +179,16 @@ export default function MyComponent() {
 
 如果是自定义组件则需要保证 `onClick` （桌面端），`onTouchStart` 和 `onTouchEnd` （移动端）事件能正常触发，转发 `ref` 到 `HTMLElement` 上保证打开/关闭动画源的正确性。
 
+为了防止链接内的图片触发预览，默认只有当前触发点击事件的元素是不是 `<a />` 标签的子元素时，才会打开图片预览。如果需要改变这一行为，可以通过 `shouldOpenSlider` 方法实现自定义逻辑。
+
 ```jsx
-<PhotoView src={imageURL}>
+<PhotoView src={imageURL1}>
   <Button primary>Click</Button>
+</PhotoView>
+<PhotoView src={imageURL2}>
+  <Button secondary>
+    <a href="/">react-photo-view</a> is an awesome library!
+  </Button>
 </PhotoView>
 ```
 

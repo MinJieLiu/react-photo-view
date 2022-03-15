@@ -28,13 +28,14 @@ title: API
 
 ## PhotoView
 
-| Name     | Description                               | Type                                                | Default Value |
-| -------- | ----------------------------------------- | --------------------------------------------------- | ------------- |
-| src      | Image src                                 | string                                              |
-| render   | Custom rendering, lower priority than src | \(props: PhotoRenderParams\) =&gt; React\.ReactNode |
-| width    | Custom render node width                  | number                                              |
-| height   | Custom render node height                 | number                                              |
-| children | Child nodes, usually thumbnails           | React\.ReactElement                                 |
+| Name             | Description                                            | Type                                                      | Default Value |
+| ---------------- | ------------------------------------------------------ | --------------------------------------------------------- | ------------- |
+| src              | Image src                                              | string                                                    |
+| render           | Custom rendering, lower priority than src              | \(props: PhotoRenderParams\) =&gt; React\.ReactNode       |
+| width            | Custom render node width                               | number                                                    |
+| height           | Custom render node height                              | number                                                    |
+| children         | Child nodes, usually thumbnails                        | React\.ReactElement                                       |
+| shouldOpenSlider | Whether the slider should open when content is clicked | \(e: React.MouseEvent \| React\.TouchEvent) =&gt; boolean |
 
 ## DataType
 

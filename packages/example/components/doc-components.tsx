@@ -20,10 +20,11 @@ export const Image = React.forwardRef<HTMLImageElement, React.ImgHTMLAttributes<
 
 interface ButtonProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
   primary?: boolean;
+  secondary?: boolean;
   children?: React.ReactNode;
 }
 
-export const Button = React.forwardRef<HTMLDivElement, ButtonProps>(({ primary, className = '', ...props }, ref) => {
+export const Button = React.forwardRef<HTMLDivElement, ButtonProps>(({ primary, secondary, className = '', ...props }, ref) => {
   return (
     <div
       {...props}
@@ -31,7 +32,7 @@ export const Button = React.forwardRef<HTMLDivElement, ButtonProps>(({ primary, 
       className={`px-4 py-2 mr-2 rounded-md focus:outline-none cursor-pointer select-none ${
         primary
           ? 'bg-sky-600 text-white hover:bg-sky-700'
-          : 'border border-gray-300 hover:text-white hover:bg-sky-500 hover:border-sky-500'
+          : `border border-gray-300 hover:text-white hover:border-sky-500 ${secondary ? '' : 'hover:bg-sky-500'}`
       } ${className}`}
     />
   );
