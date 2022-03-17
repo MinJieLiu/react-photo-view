@@ -1,7 +1,6 @@
 import { computePositionEdge } from '../utils/edgeHandle';
 import getPositionOnMoveOrScale from '../utils/getPositionOnMoveOrScale';
 import getRotateSize from '../utils/getRotateSize';
-import { limitScale } from '../utils/limitTarget';
 import { defaultSpeed, maxTouchTime } from '../variables';
 import useMethods from './useMethods';
 
@@ -38,23 +37,21 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
     width: number,
     height: number,
     scale: number,
+    safeScale: number,
     lastScale: number,
     rotate: number,
     touchedTime: number,
   ) => {
     const [currentWidth, currentHeight] = getRotateSize(rotate, width, height);
     // 开始状态下边缘触发状态
-    const [beginEdgeX, beginX] = computePositionEdge(x, scale, currentWidth, innerWidth);
-    const [beginEdgeY, beginY] = computePositionEdge(y, scale, currentHeight, innerHeight);
+    const [beginEdgeX, beginX] = computePositionEdge(x, safeScale, currentWidth, innerWidth);
+    const [beginEdgeY, beginY] = computePositionEdge(y, safeScale, currentHeight, innerHeight);
     const moveTime = Date.now() - touchedTime;
 
-    // 缩放调整至安全范围
-    const nextScale = limitScale(scale);
-
     // 时间过长、超出安全范围的情况下不执行滚动逻辑，恢复安全范围
-    if (moveTime >= maxTouchTime || nextScale != scale || Math.abs(lastScale - scale) > 1) {
+    if (moveTime >= maxTouchTime || safeScale != scale || Math.abs(lastScale - scale) > 1) {
       // 计算中心缩放点
-      const { x: nextX, y: nextY } = getPositionOnMoveOrScale(x, y, width, height, scale, nextScale);
+      const { x: nextX, y: nextY } = getPositionOnMoveOrScale(x, y, width, height, scale, safeScale);
       const targetX = beginEdgeX ? beginX : nextX !== x ? nextX : null;
       const targetY = beginEdgeY ? beginY : nextY !== y ? nextY : null;
 
@@ -64,8 +61,8 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
       if (targetY !== null) {
         easeOutMove(y, targetY, callback.Y);
       }
-      if (nextScale != scale) {
-        easeOutMove(scale, nextScale, callback.S);
+      if (safeScale != scale) {
+        easeOutMove(scale, safeScale, callback.S);
       }
       return;
     }

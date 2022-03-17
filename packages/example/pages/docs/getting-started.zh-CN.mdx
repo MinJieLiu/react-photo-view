@@ -177,7 +177,7 @@ export default function MyComponent() {
 
 `<PhotoView>` 子组件可以是常规 `React.HTMLAttributes` 类型，如 `<img />`、`<div />` 等。
 
-如果是自定义组件则需要保证 `onClick` （桌面端），`onTouchStart` 和 `onTouchEnd` （移动端）事件能正常触发，转发 `ref` 到 `HTMLElement` 上保证打开/关闭动画源的正确性。
+如果是自定义组件则需要保证 `onClick` 事件能正常触发，转发 `ref` 到 `HTMLElement` 上保证打开/关闭动画源的正确性。
 
 ```jsx
 <PhotoView src={imageURL}>
@@ -297,7 +297,7 @@ function MyComponent() {
 
 ### 循环预览
 
-在 `<PhotoProvider />` 上添加参数 `loop` 可以更改循环预览数量。设为 `boolean` 启用/关闭，设为 `number` 类型则达到具体数量以开启循环预览，默认值为 `3` 张：
+在 `<PhotoProvider />` 上添加参数 `loop` 可以更改循环预览数量。设为 `boolean` 启用/关闭，设为 `number` 类型则超过具体数量以开启循环预览，默认值为 `3` 张：
 
 ```jsx
 <PhotoProvider loop={4} />

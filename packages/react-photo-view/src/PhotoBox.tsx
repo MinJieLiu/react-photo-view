@@ -204,10 +204,7 @@ export default function PhotoBox({
           // 初始移动距离不足
           if (isStillX && isStillY) {
             // 方向记录上次移动距离，以便平滑过渡
-            updateState({
-              lastCX: nextClientX,
-              lastCY: nextClientY,
-            });
+            updateState({ lastCX: nextClientX, lastCY: nextClientY });
             return;
           }
           // 设置响应状态
@@ -233,33 +230,22 @@ export default function PhotoBox({
         // 横向边缘触发、背景触发禁用当前滑动
         if (currentReach === 'x' || maskTouched) {
           updateState({ reach: 'x' });
-        } else {
-          // 目标倍数
-          const toScale = limitScale(
-            scale + ((currentTouchLength - touchLength) / 100 / 2) * scale,
-            naturalWidth / width,
-            scaleBuffer,
-          );
-          // 导出变量
-          expose({ scale: toScale });
-          updateState({
-            touchLength: currentTouchLength,
-            reach: currentReach,
-            scale: toScale,
-            ...getPositionOnMoveOrScale(
-              x,
-              y,
-              width,
-              height,
-              scale,
-              toScale,
-              nextClientX,
-              nextClientY,
-              offsetX,
-              offsetY,
-            ),
-          });
+          return;
         }
+        // 目标倍数
+        const toScale = limitScale(
+          scale + ((currentTouchLength - touchLength) / 100 / 2) * scale,
+          naturalWidth / width,
+          scaleBuffer,
+        );
+        // 导出变量
+        expose({ scale: toScale });
+        updateState({
+          touchLength: currentTouchLength,
+          reach: currentReach,
+          scale: toScale,
+          ...getPositionOnMoveOrScale(x, y, width, height, scale, toScale, nextClientX, nextClientY, offsetX, offsetY),
+        });
       }
     },
     {
@@ -302,7 +288,6 @@ export default function PhotoBox({
     // 重置响应状态
     initialTouchRef.current = 0;
     if ((touched || maskTouched) && isActive) {
-      const hasMove = CX !== nextClientX || CY !== nextClientY;
       updateState({
         touched: false,
         maskTouched: false,
@@ -310,15 +295,18 @@ export default function PhotoBox({
         stopRaf: false,
         reach: undefined,
       });
+      const safeScale = limitScale(scale, naturalWidth / width);
       // Go
-      slideToPosition(x, y, lastX, lastY, width, height, scale, lastScale, rotate, touchTime);
+      slideToPosition(x, y, lastX, lastY, width, height, scale, safeScale, lastScale, rotate, touchTime);
 
       onReachUp(nextClientX, nextClientY);
       // 触发 Tap 事件
-      if (!hasMove) {
+      if (CX === nextClientX && CY === nextClientY) {
         if (touched) {
           handlePhotoTap(nextClientX, nextClientY);
-        } else if (maskTouched) {
+          return;
+        }
+        if (maskTouched) {
           onMaskTap(nextClientX, nextClientY);
         }
       }
@@ -394,11 +382,7 @@ export default function PhotoBox({
     if (!reach) {
       // 限制最大倍数和最小倍数
       const toScale = limitScale(scale - e.deltaY / 100 / 2, naturalWidth / width);
-      updateState({
-        CX: e.clientX,
-        CY: e.clientY,
-        stopRaf: true,
-      });
+      updateState({ stopRaf: true });
       onScale(toScale, e.clientX, e.clientY);
     }
   }

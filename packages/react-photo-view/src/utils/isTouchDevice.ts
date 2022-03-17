@@ -1,6 +1,6 @@
 /**
  * 是否支持触摸设备
  */
-const isTouchDevice = typeof document !== 'undefined' && 'ontouchstart' in document.documentElement;
+const isTouchDevice = typeof window !== 'undefined' && 'ontouchstart' in window;
 
 export default isTouchDevice;

@@ -1,11 +1,10 @@
 import type React from 'react';
-import { Children, cloneElement, useContext, useEffect, useRef, useState } from 'react';
+import { Children, cloneElement, useContext, useEffect, useRef } from 'react';
 import useInitial from './hooks/useInitial';
 import useMethods from './hooks/useMethods';
 import type { PhotoContextType } from './photo-context';
 import PhotoContext from './photo-context';
 import type { PhotoRenderParams } from './types';
-import isTouchDevice from './utils/isTouchDevice';
 
 export interface PhotoViewProps {
   /**
@@ -33,10 +32,6 @@ export interface PhotoViewProps {
 const PhotoView: React.FC<PhotoViewProps> = ({ src, render, width, height, children }) => {
   const photoContext = useContext<PhotoContextType>(PhotoContext);
   const key = useInitial(() => photoContext.nextId());
-  const [position, updatePosition] = useState({
-    clientX: undefined as number | undefined,
-    clientY: undefined as number | undefined,
-  });
   const originRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -58,21 +53,6 @@ const PhotoView: React.FC<PhotoViewProps> = ({ src, render, width, height, child
     render(props: PhotoRenderParams) {
       return render && render(props);
     },
-    touchStart(e: React.TouchEvent) {
-      const { clientX, clientY } = e.touches[0];
-      updatePosition({
-        clientX,
-        clientY,
-      });
-      invokeChildrenFn('onTouchStart', e);
-    },
-    touchEnd(e: React.TouchEvent) {
-      const { clientX, clientY } = e.changedTouches[0];
-      if (position.clientX === clientX && position.clientY === clientY) {
-        photoContext.show(key);
-      }
-      invokeChildrenFn('onTouchEnd', e);
-    },
     click(e: React.MouseEvent) {
       photoContext.show(key);
       invokeChildrenFn('onClick', e);
@@ -91,18 +71,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({ src, render, width, height, child
   }, [src]);
 
   if (children) {
-    return Children.only(
-      cloneElement(
-        children,
-        isTouchDevice
-          ? {
-              onTouchStart: fn.touchStart,
-              onTouchEnd: fn.touchEnd,
-              ref: originRef,
-            }
-          : { onClick: fn.click, ref: originRef },
-      ),
-    );
+    return Children.only(cloneElement(children, { onClick: fn.click, ref: originRef }));
   }
   return null;
 };

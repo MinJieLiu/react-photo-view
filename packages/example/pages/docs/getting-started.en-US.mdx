@@ -178,7 +178,7 @@ When loading images whose aspect ratio exceeds `3` times, the mobile device will
 
 `<PhotoView>` child components can be of the regular `React.HTMLAttributes` type, such as `<img>`, `<div>`, etc.
 
-If it is a custom component, you need to ensure that `onClick` (desktop), `onTouchStart` and `onTouchEnd` (mobile) events can be triggered normally, and forward `ref` to `HTMLElement` to ensure the correctness of opening and closing the animation source.
+If it is a custom component, you need to ensure that `onClick` event can be triggered normally, and forward `ref` to `HTMLElement` to ensure the correctness of opening and closing the animation source.
 
 ```jsx
 <PhotoView src={imageURL}>
@@ -299,7 +299,7 @@ Add the `overlayRender` function to `<PhotoProvider>` to implement custom nodes.
 
 ### Loop preview
 
-Add parameter `loop` on `<PhotoProvider>` to change the number of loop previews. Set to `boolean` to enable and disable, set to `number` type to reach a specific number to enable loop preview, the default value is `3` sheets:
+Add parameter `loop` on `<PhotoProvider>` to change the number of loop previews. Set to `boolean` to enable and disable, set to `number` type to exceed the specific number to enable loop preview, the default value is `3` sheets:
 
 ```jsx
 <PhotoProvider loop={4} />

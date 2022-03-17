@@ -213,11 +213,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   });
 
   function handlePhotoTap(closeable: boolean | undefined) {
-    return closeable
-      ? close()
-      : updateState({
-          overlay: !overlay,
-        });
+    return closeable ? close() : updateState({ overlay: !overlay });
   }
 
   function handleResize() {

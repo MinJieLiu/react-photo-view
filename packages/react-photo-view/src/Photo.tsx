@@ -62,7 +62,8 @@ export default function Photo({
           alt=""
           {...restProps}
         />
-        {!loaded && (loadingElement || <Spinner className="PhotoView__icon" />)}
+        {!loaded &&
+          (<span className="PhotoView__icon">{loadingElement}</span> || <Spinner className="PhotoView__icon" />)}
       </>
     );
   }
@@ -70,11 +71,7 @@ export default function Photo({
   if (brokenElement) {
     return (
       <span className="PhotoView__icon">
-        {typeof brokenElement === 'function'
-          ? brokenElement({
-              src,
-            })
-          : brokenElement}
+        {typeof brokenElement === 'function' ? brokenElement({ src }) : brokenElement}
       </span>
     );
   }
