@@ -32,6 +32,7 @@ title: API
 | -------- | ----------------------------------------- | --------------------------------------------------- | ------------- |
 | src      | Image src                                 | string                                              |
 | render   | Custom rendering, lower priority than src | \(props: PhotoRenderParams\) =&gt; React\.ReactNode |
+| overlay  | Overlay                                   | React\.ReactNode                                    |
 | width    | Custom render node width                  | number                                              |
 | height   | Custom render node height                 | number                                              |
 | children | Child nodes, usually thumbnails           | React\.ReactElement                                 |
@@ -43,6 +44,7 @@ title: API
 | key       | Uniquely identifies                       | number \| string                                    | Required\*    |
 | src       | RESOURCE ADDRESS                          | string                                              |
 | render    | Custom rendering, lower priority than src | \(props: PhotoRenderParams\) =&gt; React\.ReactNode |
+| overlay   | Overlay                                   | React\.ReactNode                                    |
 | width     | Custom render node width                  | number                                              |
 | height    | Custom render node height                 | number                                              |
 | originRef | TRIGGER REF                               | React\.MutableRefObject&lt;HTMLElement \| null&gt;  |
@@ -57,6 +59,7 @@ title: API
 | visible        | Is it visible           | boolean                                                     | Required\*    |
 | onClose        | close event callback    | \(evt?: React\.MouseEvent \| React\.TouchEvent\) =&gt; void | Required\*    |
 | overlayVisible | Is the covering visible | boolean                                                     | Required\*    |
+| overlay        | Overlay                 | React\.ReactNode                                            | Required\*    |
 | rotate         | Current rotation angle  | number                                                      | Required\*    |
 | onRotate       | Rotation event callback | \(rotate: number\) =&gt; void                               | Required\*    |
 | scale          | Current zoom            | number                                                      | Required\*    |

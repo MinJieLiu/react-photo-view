@@ -404,7 +404,9 @@ export default function PhotoBox({
 
   function handleMouseDown(e: React.MouseEvent) {
     e.stopPropagation();
-    handleStart(e.clientX, e.clientY, 0);
+    if (e.button === 0) {
+      handleStart(e.clientX, e.clientY, 0);
+    }
   }
 
   // 计算位置

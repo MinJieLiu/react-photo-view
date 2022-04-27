@@ -159,6 +159,7 @@ The parameters provided by the `toolbarRender` function are:
 - `visible` - whether to see `boolean`
 - `onClose` - close event callback `() => void`
 - `overlayVisible` - whether the overlay is visible `boolean`
+- `overlay` - Overlay
 - `rotate` - the current rotation angle `number`
 - `onRotate` - Rotate event callback `(rotate: number) => void`
 - `scale` - the current scale `number`
@@ -293,7 +294,7 @@ function MyComponent() {
 
 ### Custom description
 
-Add the `overlayRender` function to `<PhotoProvider>` to implement custom nodes. The return value of the function parameter is the same as that of `toolbarRender`.
+Add the `overlayRender` function to `<PhotoProvider>` to implement custom nodes. **The return value of the function parameter is the same as that of `toolbarRender`**.
 
 <DocOverlay />
 

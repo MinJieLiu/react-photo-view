@@ -1,6 +1,6 @@
 {
   "name": "react-photo-view",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "An exquisite React photo preview component",
   "author": "MinJieLiu",
   "license": "Apache-2.0",
@@ -22,7 +22,7 @@
     "carousel"
   ],
   "scripts": {
-    "build": "rimraf ./dist && microbundle --jsx React.createElement --external react,react-dom --format cjs,esm,modern",
+    "build": "rimraf ./dist && microbundle --external react,react-dom --format cjs,esm,modern",
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
@@ -30,10 +30,10 @@
     "react-dom": ">=16.8.0"
   },
   "devDependencies": {
+    "@micro-web/microbundle": "^0.14.3",
     "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.11",
     "less": "^4.1.2",
-    "microbundle": "^0.14.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "rimraf": "^3.0.2"

@@ -32,6 +32,7 @@ title: API
 | -------- | --------------------------- | --------------------------------------------------- | ------------- |
 | src      | 图片地址                    | string                                              |
 | render   | 自定义渲染，优先级比 src 低 | \(props: PhotoRenderParams\) =&gt; React\.ReactNode |
+| overlay  | 图片覆盖物                  | React\.ReactNode                                    |
 | width    | 自定义渲染节点宽度          | number                                              |
 | height   | 自定义渲染节点高度          | number                                              |
 | children | 子节点，一般为缩略图        | React\.ReactElement                                 |
@@ -43,6 +44,7 @@ title: API
 | key       | 唯一标识                    | number \| string                                    | Required\*    |
 | src       | 资源地址                    | string                                              |
 | render    | 自定义渲染，优先级比 src 低 | \(props: PhotoRenderParams\) =&gt; React\.ReactNode |
+| overlay   | 图片覆盖物                  | React\.ReactNode                                    |
 | width     | 自定义渲染节点宽度          | number                                              |
 | height    | 自定义渲染节点高度          | number                                              |
 | originRef | 触发 ref                    | React\.MutableRefObject&lt;HTMLElement \| null&gt;  |
@@ -57,6 +59,7 @@ title: API
 | visible        | 是否可见       | boolean                                                     | Required\*    |
 | onClose        | 关闭事件回调   | \(evt?: React\.MouseEvent \| React\.TouchEvent\) =&gt; void | Required\*    |
 | overlayVisible | 覆盖物是否可见 | boolean                                                     | Required\*    |
+| overlay        | 图片覆盖物     | React\.ReactNode                                            | Required\*    |
 | rotate         | 当前旋转角度   | number                                                      | Required\*    |
 | onRotate       | 旋转事件回调   | \(rotate: number\) =&gt; void                               | Required\*    |
 | scale          | 当前缩放       | number                                                      | Required\*    |

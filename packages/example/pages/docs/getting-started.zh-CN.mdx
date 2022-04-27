@@ -158,6 +158,7 @@ export default function MyComponent() {
 - `visible` - 是否可见 `boolean`
 - `onClose` - 关闭事件回调 `() => void`
 - `overlayVisible` - 覆盖物是否可见 `boolean`
+- `overlay` - 图片覆盖物
 - `rotate` - 当前旋转角度 `number`
 - `onRotate` - 旋转事件回调 `(rotate: number) => void`
 - `scale` - 当前缩放 `number`
@@ -291,7 +292,7 @@ function MyComponent() {
 
 ### 自定义描述
 
-在 `<PhotoProvider />` 上添加 `overlayRender` 函数，可以实现自定义节点，函数参数返回值与 `toolbarRender` 一致。
+在 `<PhotoProvider />` 上添加 `overlayRender` 函数，可以实现自定义节点，**函数参数返回值与 `toolbarRender` 一致**。
 
 <DocOverlay />
 

@@ -16,6 +16,10 @@ export interface PhotoViewProps {
    */
   render?: (props: PhotoRenderParams) => React.ReactNode;
   /**
+   * 自定义覆盖节点
+   */
+  overlay?: React.ReactNode;
+  /**
    * 自定义渲染节点宽度
    */
   width?: number;
@@ -29,7 +33,7 @@ export interface PhotoViewProps {
   children?: React.ReactElement;
 }
 
-const PhotoView: React.FC<PhotoViewProps> = ({ src, render, width, height, children }) => {
+const PhotoView: React.FC<PhotoViewProps> = ({ src, render, overlay, width, height, children }) => {
   const photoContext = useContext<PhotoContextType>(PhotoContext);
   const key = useInitial(() => photoContext.nextId());
   const originRef = useRef<HTMLElement>(null);
@@ -65,6 +69,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({ src, render, width, height, child
       src,
       originRef,
       render: fn.render,
+      overlay,
       width,
       height,
     });

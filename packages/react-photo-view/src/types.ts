@@ -17,6 +17,10 @@ export interface DataType {
    */
   render?: (props: PhotoRenderParams) => React.ReactNode;
   /**
+   * 自定义覆盖节点
+   */
+  overlay?: React.ReactNode;
+  /**
    * 指定渲染节点宽度
    */
   width?: number;
@@ -133,6 +137,10 @@ export interface OverlayRenderProps {
    * 覆盖物是否可见
    */
   overlayVisible: boolean;
+  /**
+   * 自定义覆盖节点
+   */
+  overlay?: React.ReactNode;
   /**
    * 当前旋转角度
    */
