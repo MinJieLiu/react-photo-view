@@ -333,7 +333,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       onClose: close,
       onIndexChange: changeIndex,
       overlayVisible: currentOverlayVisible,
-      overlay: currentImage.overlay,
+      overlay: currentImage && currentImage.overlay,
       scale,
       rotate,
       onScale,
