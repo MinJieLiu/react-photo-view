@@ -100,6 +100,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     visible,
     onClose,
     afterClose,
+    portalContainer,
   } = props;
 
   const [state, updateState] = useSetState(initialState);
@@ -352,6 +353,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       }${className ? ` ${className}` : ''}`}
       role="dialog"
       onClick={(e) => e.stopPropagation()}
+      container={portalContainer}
     >
       {visible && <PreventScroll />}
       <div

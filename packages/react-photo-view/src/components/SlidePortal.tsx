@@ -2,8 +2,12 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import './SlidePortal.less';
 
-const SlidePortal: React.FC<React.HTMLAttributes<HTMLDivElement>> = (props) => {
-  return createPortal(<div {...props} />, document.body);
-};
+export interface ISliderPortalProps extends React.HTMLAttributes<HTMLDivElement> {
+  container?: HTMLElement;
+}
+
+function SlidePortal({ container = document.body, ...rest }: ISliderPortalProps) {
+  return createPortal(<div {...rest} />, container);
+}
 
 export default SlidePortal;
