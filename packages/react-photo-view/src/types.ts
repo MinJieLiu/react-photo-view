@@ -94,6 +94,10 @@ export interface PhotoProviderBase {
    * 自定义加载失败渲染
    */
   brokenElement?: JSX.Element | ((photoProps: BrokenElementParams) => JSX.Element);
+  /**
+   * @defaultValue document.body
+   */
+  portalContainer?: HTMLElement;
 }
 
 export type PhotoRenderParams = {
