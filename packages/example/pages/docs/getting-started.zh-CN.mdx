@@ -267,7 +267,7 @@ function MyComponent() {
 
         return (
           <div {...attrs}>
-            <div style={{ transform: `scale(${childScale})` }}>
+            <div style={{ transform: `scale(${childScale})`, width: elementSize, transformOrigin: '0 0' }}>
               <div>Hello world</div>
               <Button>button</Button>
               <input onMouseDown={(e) => e.stopPropagation()} />

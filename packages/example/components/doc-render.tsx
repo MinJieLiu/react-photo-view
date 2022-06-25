@@ -19,11 +19,10 @@ export default function DocDemo() {
             const childScale = scale === 1 ? scale + offset : 1 + offset;
 
             return (
-              <div
-                {...attrs}
-                className={`flex-none flex flex-col items-center justify-center bg-white ${attrs.className}`}
-              >
-                <div style={{ transform: `scale(${childScale})` }}>
+              <div {...attrs} className={`flex-none bg-white ${attrs.className || ''}`}>
+                <div
+                  style={{ transform: `scale(${childScale})`, width: elementSize, transformOrigin: '0 0', padding: 20 }}
+                >
                   <div className="mb-2">Hello world</div>
                   <Button className="mb-2 w-full" primary>
                     button

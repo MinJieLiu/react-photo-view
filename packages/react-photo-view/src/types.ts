@@ -61,9 +61,10 @@ export interface PhotoProviderBase {
   maskClosable?: boolean;
   /**
    * 默认背景透明度
+   * 设置 null 背景不响应下拉变化
    * @defaultValue 1
    */
-  maskOpacity?: number;
+  maskOpacity?: number | null;
   /**
    * 下拉是否可关闭
    * @defaultValue true

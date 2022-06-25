@@ -45,9 +45,9 @@ type PhotoSliderState = {
   // Reach 开始时 y 坐标
   lastCY: number | undefined;
   // 背景透明度
-  bg: number | undefined;
+  bg: number | null | undefined;
   // 上次关闭的背景透明度
-  lastBg: number | undefined;
+  lastBg: number | null | undefined;
   // 是否显示 overlay
   overlay: boolean;
   // 是否为最小状态，可下拉关闭
@@ -237,7 +237,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       });
       return;
     }
-    const opacity = limitNumber(maskOpacity, 0, maskOpacity - Math.abs(clientY - lastCY) / 100 / 4);
+    const opacity =
+      maskOpacity === null ? null : limitNumber(maskOpacity, 0.01, maskOpacity - Math.abs(clientY - lastCY) / 100 / 4);
 
     updateState({
       touched: true,
@@ -365,7 +366,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             : ''
         }`}
         style={{
-          background: `rgba(0, 0, 0, ${currentOpacity})`,
+          background: currentOpacity ? `rgba(0, 0, 0, ${currentOpacity})` : undefined,
           transitionTimingFunction: currentEasing,
           transitionDuration: `${touched ? 0 : currentSpeed}ms`,
           animationDuration: `${currentSpeed}ms`,

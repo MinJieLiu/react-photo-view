@@ -1,6 +1,6 @@
 import React from 'react';
 import { PhotoSlider } from 'react-photo-view';
-import { Button, ImageList, photoImages } from './doc-components';
+import { Button, ImageList, Overlay, photoImages } from './doc-components';
 
 export default function DocDemo() {
   const [visible, setVisible] = React.useState(false);
@@ -26,6 +26,15 @@ export default function DocDemo() {
         onClose={handleCloseSlider}
         index={index}
         onIndexChange={setIndex}
+        overlayRender={({ index, onIndexChange }) => (
+          <Overlay>
+            <div className="mb-1">index: {index}</div>
+            <div className="flex">
+              <Button onClick={() => onIndexChange(0)}>setIndex(0)</Button>
+              <Button onClick={() => onIndexChange(4)}>setIndex(4)</Button>
+            </div>
+          </Overlay>
+        )}
       />
     </ImageList>
   );
