@@ -47,11 +47,13 @@ export default function PhotoProvider({ children, onIndexChange, onVisibleChange
       }));
     },
     remove(key: number) {
-      const nextImages = images.filter((item) => item.key !== key);
-      const nextEndIndex = nextImages.length - 1;
-      updateState({
-        images: nextImages,
-        index: Math.min(nextEndIndex, index),
+      updateState((prev) => {
+        const nextImages = prev.images.filter((item) => item.key !== key);
+        const nextEndIndex = nextImages.length - 1;
+        return {
+          images: nextImages,
+          index: Math.min(nextEndIndex, index),
+        };
       });
     },
     show(key: number) {
