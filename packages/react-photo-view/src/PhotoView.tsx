@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type React from 'react';
-import { Children, cloneElement, useContext, useEffect, useRef } from 'react';
+import { Children, cloneElement, useContext, useEffect, useRef, useState } from 'react';
 import useInitial from './hooks/useInitial';
 import useMethods from './hooks/useMethods';
 import type { PhotoContextType } from './photo-context';
@@ -31,9 +32,13 @@ export interface PhotoViewProps {
    * 子节点，一般为缩略图
    */
   children?: React.ReactElement;
+  /**
+   * 触发的事件
+   */
+  triggers?: string[] | undefined;
 }
 
-const PhotoView: React.FC<PhotoViewProps> = ({ src, render, overlay, width, height, children }) => {
+const PhotoView: React.FC<PhotoViewProps> = ({ src, render, overlay, width, height, triggers = ["click"], children }) => {
   const photoContext = useContext<PhotoContextType>(PhotoContext);
   const key = useInitial(() => photoContext.nextId());
   const originRef = useRef<HTMLElement>(null);
@@ -57,11 +62,22 @@ const PhotoView: React.FC<PhotoViewProps> = ({ src, render, overlay, width, heig
     render(props: PhotoRenderParams) {
       return render && render(props);
     },
-    click(e: React.MouseEvent) {
+    show(eventName: string, e: React.MouseEvent) {
       photoContext.show(key);
-      invokeChildrenFn('onClick', e);
+      invokeChildrenFn(eventName, e);
     },
   });
+
+  const [eventListener, setEventListener] = useState({});
+  useEffect(() => {
+    const listener = {};
+    triggers.forEach(element => {
+      const firstChar = element.charAt(0);
+      const eventName = `on${element.replace(firstChar, firstChar.toUpperCase())}`;
+      listener[eventName] = fn.show.bind(null, eventName);
+    });
+    setEventListener(listener);
+  }, [])
 
   useEffect(() => {
     photoContext.update({
@@ -76,7 +92,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({ src, render, overlay, width, heig
   }, [src]);
 
   if (children) {
-    return Children.only(cloneElement(children, { onClick: fn.click, ref: originRef }));
+    return Children.only(cloneElement(children, { ...eventListener, ref: originRef }));
   }
   return null;
 };
