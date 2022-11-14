@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type React from 'react';
-import { Children, cloneElement, useContext, useEffect, useRef, useState } from 'react';
+import { Children, cloneElement, useContext, useEffect, useMemo, useRef } from 'react';
 import useInitial from './hooks/useInitial';
 import useMethods from './hooks/useMethods';
 import type { PhotoContextType } from './photo-context';
@@ -35,10 +35,18 @@ export interface PhotoViewProps {
   /**
    * 触发的事件
    */
-  triggers?: string[] | undefined;
+  triggers?: ('onClick' | 'onDoubleClick')[];
 }
 
-const PhotoView: React.FC<PhotoViewProps> = ({ src, render, overlay, width, height, triggers = ["click"], children }) => {
+const PhotoView: React.FC<PhotoViewProps> = ({
+  src,
+  render,
+  overlay,
+  width,
+  height,
+  triggers = ['onClick'],
+  children,
+}) => {
   const photoContext = useContext<PhotoContextType>(PhotoContext);
   const key = useInitial(() => photoContext.nextId());
   const originRef = useRef<HTMLElement>(null);
@@ -68,16 +76,13 @@ const PhotoView: React.FC<PhotoViewProps> = ({ src, render, overlay, width, heig
     },
   });
 
-  const [eventListener, setEventListener] = useState({});
-  useEffect(() => {
+  const eventListeners = useMemo(() => {
     const listener = {};
-    triggers.forEach(element => {
-      const firstChar = element.charAt(0);
-      const eventName = `on${element.replace(firstChar, firstChar.toUpperCase())}`;
+    triggers.forEach((eventName) => {
       listener[eventName] = fn.show.bind(null, eventName);
     });
-    setEventListener(listener);
-  }, [])
+    return listener;
+  }, []);
 
   useEffect(() => {
     photoContext.update({
@@ -92,7 +97,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({ src, render, overlay, width, heig
   }, [src]);
 
   if (children) {
-    return Children.only(cloneElement(children, { ...eventListener, ref: originRef }));
+    return Children.only(cloneElement(children, { ...eventListeners, ref: originRef }));
   }
   return null;
 };
