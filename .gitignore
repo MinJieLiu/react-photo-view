@@ -1,35 +1,42 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-**/node_modules
+node_modules
+.pnp
+.pnp.js
 
-# production
-**/dist
-.next
-dist-ssr
+# testing
+coverage
+
+# next.js
+.next/
+out/
+build
 
 # misc
-*.DS_Store
+.DS_Store
+*.pem
+
+# debug
 npm-debug.log*
-yarn-error.log
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-/coverage
-.idea
-package-lock.json
-*bak
+# local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# visual studio code
-.vscode
-.history
+# turbo
+.turbo
+
 *.log
-functions/*
-.temp/**
-
-# screenshot
-screenshot
-.firebase
-.eslintcache
-
-build
+.next
+dist
+dist-ssr
 *.local
-stats*
+.cache
+
+.pnpm-store

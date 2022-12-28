@@ -39,7 +39,6 @@ yarn add react-photo-view
 
 ```js
 import { PhotoProvider, PhotoView } from 'react-photo-view';
-import 'react-photo-view/dist/react-photo-view.css';
 
 function App() {
   return (

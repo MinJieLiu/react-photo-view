@@ -1,0 +1,9 @@
+{
+  "name": "tsup-config",
+  "version": "0.0.0",
+  "private": true,
+  "main": "tsup.config.js",
+  "devDependencies": {
+    "esbuild-plugin-styled-components": "workspace:*"
+  }
+}

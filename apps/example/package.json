@@ -1,0 +1,47 @@
+{
+  "name": "example",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist && rm -rf .next"
+  },
+  "babelMacros": {
+    "twin": {
+      "preset": "styled-components"
+    }
+  },
+  "dependencies": {
+    "mac-scrollbar": "^0.9.6",
+    "next": "12.3.3",
+    "nextra": "^2.0.1",
+    "nextra-theme-docs": "^2.0.1",
+    "react": "^17.x",
+    "react-dom": "^17.x",
+    "react-photo-view": "workspace:*",
+    "styled-components": "5.3.5"
+  },
+  "devDependencies": {
+    "@types/react": "^17.x",
+    "@types/react-dom": "^17.x",
+    "@types/styled-components": "5.1.26",
+    "babel-plugin-macros": "3.1.0",
+    "babel-plugin-styled-components": "2.0.7",
+    "babel-plugin-twin": "1.0.2",
+    "eslint-config-viewer": "workspace:*",
+    "prettier-config": "workspace:*",
+    "tailwindcss": "^3.2.4",
+    "tsconfig": "workspace:*",
+    "twin.macro": "3.0.1",
+    "typescript": "latest"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  }
+}

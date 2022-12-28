@@ -1,0 +1,9 @@
+{
+  "root": true,
+  "extends": ["viewer"],
+  "settings": {
+    "next": {
+      "rootDir": ["apps/*/"]
+    }
+  }
+}

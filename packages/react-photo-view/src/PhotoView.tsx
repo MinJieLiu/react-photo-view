@@ -1,41 +1,40 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import type React from 'react';
-import { Children, cloneElement, useContext, useEffect, useMemo, useRef } from 'react';
-import useInitial from './hooks/useInitial';
-import useMethods from './hooks/useMethods';
-import type { PhotoContextType } from './photo-context';
-import PhotoContext from './photo-context';
-import type { PhotoRenderParams } from './types';
+import type React from 'react'
+import { Children, cloneElement, useContext, useEffect, useMemo, useRef } from 'react'
+import useInitial from './hooks/useInitial'
+import useMethods from './hooks/useMethods'
+import type { PhotoContextType } from './photo-context'
+import PhotoContext from './photo-context'
+import type { PhotoRenderParams } from './types'
 
 export interface PhotoViewProps {
   /**
    * 图片地址
    */
-  src?: string;
+  src?: string
   /**
    * 自定义渲染，优先级比 src 低
    */
-  render?: (props: PhotoRenderParams) => React.ReactNode;
+  render?: (props: PhotoRenderParams) => React.ReactNode
   /**
    * 自定义覆盖节点
    */
-  overlay?: React.ReactNode;
+  overlay?: React.ReactNode
   /**
    * 自定义渲染节点宽度
    */
-  width?: number;
+  width?: number
   /**
    * 自定义渲染节点高度
    */
-  height?: number;
+  height?: number
   /**
    * 子节点，一般为缩略图
    */
-  children?: React.ReactElement;
+  children?: React.ReactElement
   /**
    * 触发的事件
    */
-  triggers?: ('onClick' | 'onDoubleClick')[];
+  triggers?: ('onClick' | 'onDoubleClick')[]
 }
 
 const PhotoView: React.FC<PhotoViewProps> = ({
@@ -47,42 +46,42 @@ const PhotoView: React.FC<PhotoViewProps> = ({
   triggers = ['onClick'],
   children,
 }) => {
-  const photoContext = useContext<PhotoContextType>(PhotoContext);
-  const key = useInitial(() => photoContext.nextId());
-  const originRef = useRef<HTMLElement>(null);
+  const photoContext = useContext<PhotoContextType>(PhotoContext)
+  const key = useInitial(() => photoContext.nextId())
+  const originRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     return () => {
-      photoContext.remove(key);
-    };
-  }, []);
+      photoContext.remove(key)
+    }
+  }, [photoContext])
 
   function invokeChildrenFn(eventName: string, e: React.SyntheticEvent) {
     if (children) {
-      const eventFn = children.props[eventName];
+      const eventFn = children.props[eventName]
       if (eventFn) {
-        eventFn(e);
+        eventFn(e)
       }
     }
   }
 
   const fn = useMethods({
     render(props: PhotoRenderParams) {
-      return render && render(props);
+      return render && render(props)
     },
     show(eventName: string, e: React.MouseEvent) {
-      photoContext.show(key);
-      invokeChildrenFn(eventName, e);
+      photoContext.show(key)
+      invokeChildrenFn(eventName, e)
     },
-  });
+  })
 
   const eventListeners = useMemo(() => {
-    const listener = {};
-    triggers.forEach((eventName) => {
-      listener[eventName] = fn.show.bind(null, eventName);
-    });
-    return listener;
-  }, []);
+    const listener: Record<string, any> = {}
+    triggers.forEach(eventName => {
+      listener[eventName] = fn.show.bind(null, eventName)
+    })
+    return listener
+  }, [])
 
   useEffect(() => {
     photoContext.update({
@@ -93,13 +92,13 @@ const PhotoView: React.FC<PhotoViewProps> = ({
       overlay,
       width,
       height,
-    });
-  }, [src]);
+    })
+  }, [src])
 
   if (children) {
-    return Children.only(cloneElement(children, { ...eventListeners, ref: originRef }));
+    return Children.only(cloneElement(children, { ...eventListeners, ref: originRef }))
   }
-  return null;
-};
+  return null
+}
 
-export default PhotoView;
+export default PhotoView

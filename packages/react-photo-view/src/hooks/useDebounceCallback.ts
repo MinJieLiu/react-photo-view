@@ -1,8 +1,8 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react'
 
 interface DebounceCallback<CallbackArguments extends any[]> {
-  (...args: CallbackArguments): void;
-  cancel: () => void;
+  (...args: CallbackArguments): void
+  cancel: () => void
 }
 
 export default function useDebounceCallback<CallbackArguments extends any[]>(
@@ -12,57 +12,57 @@ export default function useDebounceCallback<CallbackArguments extends any[]>(
     maxWait,
     wait = maxWait || 0,
   }: {
-    leading?: boolean;
-    maxWait?: number;
-    wait?: number;
+    leading?: boolean
+    maxWait?: number
+    wait?: number
   },
 ): DebounceCallback<CallbackArguments> {
-  const callbackRef = useRef(callback);
-  callbackRef.current = callback;
+  const callbackRef = useRef(callback)
+  callbackRef.current = callback
 
-  const prev = useRef(0);
-  const trailingTimeout = useRef<ReturnType<typeof setTimeout>>();
-  const clearTrailing = () => trailingTimeout.current && clearTimeout(trailingTimeout.current);
+  const prev = useRef(0)
+  const trailingTimeout = useRef<ReturnType<typeof setTimeout>>()
+  const clearTrailing = () => trailingTimeout.current && clearTimeout(trailingTimeout.current)
 
   const fn = useCallback(
     (...args: CallbackArguments) => {
-      const now = Date.now();
+      const now = Date.now()
 
       function call() {
-        prev.current = now;
-        clearTrailing();
-        callbackRef.current.apply(null, args);
+        prev.current = now
+        clearTrailing()
+        callbackRef.current.apply(null, args)
       }
-      const last = prev.current;
-      const offset = now - last;
+      const last = prev.current
+      const offset = now - last
       // leading
       if (last === 0) {
         if (leading) {
-          call();
+          call()
         }
-        prev.current = now;
+        prev.current = now
       }
 
       // body
       if (maxWait !== undefined) {
         if (offset > maxWait) {
-          call();
-          return;
+          call()
+          return
         }
       } else if (offset < wait) {
-        prev.current = now;
+        prev.current = now
       }
 
       // trailing
-      clearTrailing();
+      clearTrailing()
       trailingTimeout.current = setTimeout(() => {
-        call();
-        prev.current = 0;
-      }, wait);
+        call()
+        prev.current = 0
+      }, wait)
     },
     [wait, maxWait, leading],
-  );
-  (fn as DebounceCallback<CallbackArguments>).cancel = clearTrailing;
+  )
+  ;(fn as DebounceCallback<CallbackArguments>).cancel = clearTrailing
 
-  return fn as DebounceCallback<CallbackArguments>;
+  return fn as DebounceCallback<CallbackArguments>
 }

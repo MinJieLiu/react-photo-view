@@ -2,10 +2,7 @@
 
 **An exquisite React photo preview component**
 
-[![NPM version][npm-image]][npm-url]
-[![Downloads][downloads-image]][downloads-url]
-[![Minified size][min-size-image]][bundlephobia-url]
-[![Gzip size][gzip-size-image]][bundlephobia-url]
+[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][downloads-url] [![Minified size][min-size-image]][bundlephobia-url] [![Gzip size][gzip-size-image]][bundlephobia-url]
 
 ## Quick start
 

@@ -5,34 +5,50 @@
   "author": "MinJieLiu",
   "license": "Apache-2.0",
   "repository": "https://github.com/MinJieLiu/react-photo-view.git",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "pnpm -C ./packages/example dev",
-    "build": "pnpm -C ./packages/react-photo-view build && pnpm -C ./packages/example build",
-    "start": "pnpm -C ./packages/example start",
+    "build": "turbo run build",
+    "dev": "turbo run dev --no-cache --parallel --continue",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules",
     "prepare": "husky install",
-    "lint": "npm run lint:js && npm run lint:prettier",
-    "lint:js": "eslint --cache --ext .js,.jsx,.ts,.tsx --format=pretty packages/ --fix",
-    "lint:prettier": "prettier --check \"**/*\" --end-of-line auto --write",
-    "lint:style": "stylelint --fix \"**/*.less\" --syntax less",
-    "lint-staged": "lint-staged"
-  },
-  "lint-staged": {
-    "**/*.less": "stylelint --syntax less",
-    "**/*.{js,jsx,ts,tsx}": "eslint --fix --ext .js,.jsx,.ts,.tsx",
-    "**/*.{js,jsx,tsx,ts,less,md,json}": [
-      "prettier --write"
-    ]
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build --filter=./packages/* && pnpm release:only",
+    "release:only": "changeset publish"
   },
   "devDependencies": {
-    "@types/react": "^17.0.39",
-    "@types/react-dom": "^17.0.11",
-    "@umijs/fabric": "^2.10.1",
-    "husky": "^7.0.4",
-    "lint-staged": "^12.3.3",
-    "next": "^12.0.8",
-    "prettier": "^2.5.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "typescript": "^4.5.5"
-  }
+    "@changesets/changelog-github": "0.4.7",
+    "@changesets/cli": "^2.22.0",
+    "@commitlint/cli": "17.1.2",
+    "@commitlint/config-conventional": "17.1.0",
+    "eslint-config-viewer": "workspace:*",
+    "husky": "8.0.1",
+    "lint-staged": "13.0.3",
+    "prettier": "latest",
+    "prettier-config": "workspace:*",
+    "tailwind-config": "workspace:*",
+    "turbo": "latest"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "pnpm": ">=7.0.0"
+  },
+  "browserslist": {
+    "production": [
+      "last 3 versions",
+      "Chrome >= 90",
+      "Safari >= 13"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "packageManager": "pnpm@7.18.0"
 }

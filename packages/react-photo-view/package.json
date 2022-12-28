@@ -6,9 +6,28 @@
   "license": "Apache-2.0",
   "repository": "https://github.com/MinJieLiu/react-photo-view.git",
   "source": "src/index.ts",
-  "main": "./dist/react-photo-view.js",
-  "module": "./dist/react-photo-view.module.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "babelMacros": {
+    "twin": {
+      "preset": "styled-components"
+    }
+  },
   "keywords": [
     "react",
     "react component",
@@ -22,23 +41,45 @@
     "carousel"
   ],
   "scripts": {
-    "build": "rimraf ./dist && microbundle --external react,react-dom --format cjs,esm,modern",
-    "prepublishOnly": "npm run build"
+    "test": "jest",
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint src --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
   "peerDependencies": {
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
   },
   "devDependencies": {
-    "@micro-web/microbundle": "^0.14.3",
-    "@types/react": "^17.0.39",
-    "@types/react-dom": "^17.0.11",
-    "less": "^4.1.2",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "rimraf": "^3.0.2"
+    "@types/react": "^17.x",
+    "@types/react-dom": "^17.x",
+    "@types/styled-components": "5.1.26",
+    "eslint-config-viewer": "workspace:*",
+    "jest": "^27.5.1",
+    "jest-presets": "workspace:*",
+    "prettier-config": "workspace:*",
+    "react": "^17.x",
+    "react-dom": "^17.x",
+    "tailwind-config": "workspace:*",
+    "tailwindcss": "^3.2.4",
+    "tsconfig": "workspace:*",
+    "tsup": "^6.1.2",
+    "tsup-config": "workspace:*",
+    "twin.macro": "3.0.1",
+    "typescript": "latest"
   },
-  "files": [
-    "dist"
-  ]
+  "dependencies": {
+    "styled-components": "5.3.5"
+  },
+  "lint-staged": {
+    "src/**/*.{json,ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "jest": {
+    "preset": "jest-presets/jest/node"
+  }
 }

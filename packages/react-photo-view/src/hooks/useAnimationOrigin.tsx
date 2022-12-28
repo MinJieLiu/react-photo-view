@@ -1,8 +1,8 @@
-import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
-import { useState, useEffect, useRef } from 'react';
-import type { EasingMode, OriginRectType } from '../types';
-import useMethods from './useMethods';
-import { maxWaitAnimationTime } from '../variables';
+import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import type { EasingMode, OriginRectType } from '../types'
+import useMethods from './useMethods'
+import { maxWaitAnimationTime } from '../variables'
 
 const initialRect: OriginRectType = {
   T: 0,
@@ -11,7 +11,7 @@ const initialRect: OriginRectType = {
   H: 0,
   // 图像填充方式
   FIT: undefined,
-};
+}
 
 export default function useAnimationOrigin(
   visible: boolean | undefined,
@@ -24,51 +24,51 @@ export default function useAnimationOrigin(
   easingMode: EasingMode,
   originRect: OriginRectType,
 ] {
-  const [originRect, updateOriginRect] = useState(initialRect);
+  const [originRect, updateOriginRect] = useState(initialRect)
   // 动画状态
-  const [easingMode, updateEasingMode] = useState<EasingMode>(0);
-  const initialTime = useRef<number>();
+  const [easingMode, updateEasingMode] = useState<EasingMode>(0)
+  const initialTime = useRef<number>()
 
   const fn = useMethods({
     OK: () => visible && updateEasingMode(4),
-  });
+  })
 
   useEffect(() => {
     // 记录初始打开的时间
     if (!initialTime.current) {
-      initialTime.current = Date.now();
+      initialTime.current = Date.now()
     }
     if (!loaded) {
-      return;
+      return
     }
-    handleUpdateOrigin(originRef, updateOriginRect);
+    handleUpdateOrigin(originRef, updateOriginRect)
     // 打开动画处理
     if (visible) {
       // 小于最大允许动画时间，则执行缩放动画
       if (Date.now() - initialTime.current < maxWaitAnimationTime) {
-        updateEasingMode(1);
+        updateEasingMode(1)
         // 延时执行动画，保持 transition 生效
         requestAnimationFrame(() => {
-          updateEasingMode(2);
-          requestAnimationFrame(() => handleToShape(3));
-        });
-        setTimeout(fn.OK, speed);
-        return;
+          updateEasingMode(2)
+          requestAnimationFrame(() => handleToShape(3))
+        })
+        setTimeout(fn.OK, speed)
+        return
       }
       // 超出则不执行
-      updateEasingMode(4);
-      return;
+      updateEasingMode(4)
+      return
     }
     // 关闭动画处理
-    handleToShape(5);
-  }, [visible, loaded]);
+    handleToShape(5)
+  }, [visible, loaded])
 
   function handleToShape(currentShape: EasingMode) {
-    updateEasing(false);
-    updateEasingMode(currentShape);
+    updateEasing(false)
+    updateEasingMode(currentShape)
   }
 
-  return [easingMode, originRect];
+  return [easingMode, originRect]
 }
 
 /**
@@ -78,18 +78,20 @@ function handleUpdateOrigin(
   originRef: MutableRefObject<HTMLElement | null> | undefined,
   updateOriginRect: Dispatch<SetStateAction<typeof initialRect>>,
 ) {
-  const element = originRef && originRef.current;
+  const element = originRef && originRef.current
 
   if (element && element.nodeType === 1) {
     // 获取触发时节点位置
-    const { top, left, width, height } = element.getBoundingClientRect();
-    const isImage = element.tagName === 'IMG';
+    const { top, left, width, height } = element.getBoundingClientRect()
+    const isImage = element.tagName === 'IMG'
     updateOriginRect({
       T: top,
       L: left,
       W: width,
       H: height,
-      FIT: isImage ? (getComputedStyle(element).objectFit as 'contain' | 'cover' | 'fill' | undefined) : undefined,
-    });
+      FIT: isImage
+        ? (getComputedStyle(element).objectFit as 'contain' | 'cover' | 'fill' | undefined)
+        : undefined,
+    })
   }
 }
