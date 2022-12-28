@@ -1,5 +1,7 @@
 import type React from 'react'
 
+export type ModeType = 'drag' | 'slide'
+
 /**
  * 资源数据类型
  */
@@ -35,6 +37,13 @@ export interface DataType {
 }
 
 export interface PhotoProviderBase {
+  /**
+   * 模式，拖拽或滑动
+   * 非触屏设备下可以选择 drag 模式，支持图片在当前视图自由拖拽
+   * 触屏设备下强制 slide 模式
+   * @defaultValue 'slide'
+   */
+  mode?: ModeType
   /**
    * 是否循环预览，达到该数量则启用
    * @defaultValue 3
@@ -119,6 +128,10 @@ export interface BrokenElementParams {
 
 export interface OverlayRenderProps {
   /**
+   * 当前模式
+   */
+  mode: ModeType
+  /**
    * 图片列表
    */
   images: DataType[]
@@ -179,6 +192,8 @@ export type ReachMoveFunction = (
   reachPosition: ReachType,
   clientX: number,
   clientY: number,
+  deltaX: number,
+  deltaY: number,
   scale?: number,
 ) => void
 

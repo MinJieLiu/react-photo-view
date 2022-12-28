@@ -7,8 +7,11 @@ import useDebounceCallback from './useDebounceCallback'
  * 目标缩放延迟处理
  */
 export default function useTargetScale(
+  isDragMode: boolean,
   realWidth: number,
   realHeight: number,
+  naturalWidth: number,
+  naturalHeight: number,
   realScale: number,
   speed: number,
   updateEasing: (pause: boolean) => void,
@@ -26,21 +29,23 @@ export default function useTargetScale(
   )
 
   useIsomorphicLayoutEffect(() => {
-    if (!execRef.current) {
+    if (!execRef.current || isDragMode) {
       execRef.current = true
       return
     }
     updateEasing(false)
     updateState({ lead: true })
-
     moveScale(realScale)
-  }, [realScale])
+  }, [realScale, isDragMode])
 
-  // 运动开始
-  if (lead) {
-    return [realWidth * scale, realHeight * scale, realScale / scale] as const
+  if (isDragMode) {
+    return [naturalWidth * realScale, naturalHeight * realScale, realScale] as const
   }
 
+  if (lead) {
+    // 运动开始
+    return [realWidth * scale, realHeight * scale, realScale / scale] as const
+  }
   // 运动结束
   return [realWidth * realScale, realHeight * realScale, 1] as const
 }

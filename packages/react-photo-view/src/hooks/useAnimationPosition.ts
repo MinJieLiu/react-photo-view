@@ -3,6 +3,7 @@ import useAnimationOrigin from './useAnimationOrigin'
 import useTargetScale from './useTargetScale'
 
 export default function useAnimationPosition(
+  isDragMode: boolean,
   visible: boolean | undefined,
   originRef: MutableRefObject<HTMLElement | null> | undefined,
   loaded: boolean,
@@ -10,20 +11,26 @@ export default function useAnimationPosition(
   y: number,
   width: number,
   height: number,
+  naturalWidth: number,
+  naturalHeight: number,
   scale: number,
   speed: number,
   updateEasing: (pause: boolean) => void,
 ) {
   // 延迟更新 width/height
   const [autoWidth, autoHeight, autoScale] = useTargetScale(
+    isDragMode,
     width,
     height,
+    naturalWidth,
+    naturalHeight,
     scale,
     speed,
     updateEasing,
   )
   // 动画源处理
   const [easingMode, originRect] = useAnimationOrigin(
+    isDragMode,
     visible,
     originRef,
     loaded,
@@ -36,8 +43,8 @@ export default function useAnimationPosition(
   // 偏移量，x: 0, y: 0 居中为初始
   const centerWidth = innerWidth / 2
   const centerHeight = innerHeight / 2
-  const offsetX = centerWidth - (width * scale) / 2
-  const offsetY = centerHeight - (height * scale) / 2
+  const offsetX = centerWidth - ((isDragMode ? naturalWidth : width) * scale) / 2
+  const offsetY = centerHeight - ((isDragMode ? naturalHeight : height) * scale) / 2
   // 缩略图状态
   const miniMode = easingMode < 3 || easingMode > 4
   // 有缩略图时，则为缩略图的位置，否则居中

@@ -54,7 +54,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
     return () => {
       photoContext.remove(key)
     }
-  }, [photoContext])
+  }, [])
 
   function invokeChildrenFn(eventName: string, e: React.SyntheticEvent) {
     if (children) {

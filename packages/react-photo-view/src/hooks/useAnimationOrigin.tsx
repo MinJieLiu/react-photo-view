@@ -14,6 +14,7 @@ const initialRect: OriginRectType = {
 }
 
 export default function useAnimationOrigin(
+  isDragMode: boolean,
   visible: boolean | undefined,
   originRef: MutableRefObject<HTMLElement | null> | undefined,
   loaded: boolean,
@@ -41,6 +42,10 @@ export default function useAnimationOrigin(
     if (!loaded) {
       return
     }
+    if (isDragMode) {
+      handleToShape(3)
+      return
+    }
     handleUpdateOrigin(originRef, updateOriginRect)
     // 打开动画处理
     if (visible) {
@@ -61,7 +66,7 @@ export default function useAnimationOrigin(
     }
     // 关闭动画处理
     handleToShape(5)
-  }, [visible, loaded])
+  }, [visible, loaded, isDragMode])
 
   function handleToShape(currentShape: EasingMode) {
     updateEasing(false)

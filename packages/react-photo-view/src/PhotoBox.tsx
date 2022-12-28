@@ -30,6 +30,7 @@ import Photo from './Photo'
 import tw, { styled } from 'twin.macro'
 
 export interface PhotoBoxProps {
+  isDragMode?: boolean
   // 图片信息
   item: DataType
   // 是否可见
@@ -43,7 +44,7 @@ export interface PhotoBoxProps {
   // 图片类名
   className?: string
   // style
-  style?: object
+  style?: React.CSSProperties
   // 自定义 loading
   loadingElement?: JSX.Element
   // 加载失败 Element
@@ -51,6 +52,8 @@ export interface PhotoBoxProps {
 
   // Photo 点击事件
   onPhotoTap: PhotoTapFunction
+  // MouseDown 事件
+  onMouseDown: PhotoTapFunction
   // Mask 点击事件
   onMaskTap: PhotoTapFunction
   // 到达边缘滑动事件
@@ -125,13 +128,17 @@ const StyledView = styled.div`
   direction: ltr
 `
 
-const StyledWrap = tw(StyledView)`z-10 overflow-hidden`
+const StyledWrap = styled(StyledView)(({ isDragMode }: Record<'isDragMode', boolean>) => [
+  tw`z-10`,
+  !isDragMode && tw`overflow-hidden`,
+])
 
 const StyledBox = styled(StyledView)`
   transform-origin: left top;
 `
 
 export default function PhotoBox({
+  isDragMode = false,
   item: { src, render, width: customWidth = 0, height: customHeight = 0, originRef },
   visible,
   speed,
@@ -143,6 +150,7 @@ export default function PhotoBox({
   brokenElement,
 
   onPhotoTap,
+  onMouseDown,
   onMaskTap,
   onReachMove,
   onReachUp,
@@ -182,13 +190,13 @@ export default function PhotoBox({
   } = state
 
   const fn = useMethods({
-    onScale: (current: number) => onScale(limitScale(current)),
+    onScale: (current: number) => onScale(limitScale(current, isDragMode)),
     onRotate(current: number) {
       if (rotate !== current) {
         expose({ rotate: current })
         updateState({
           rotate: current,
-          ...getSuitableImageSize(naturalWidth, naturalHeight, current),
+          ...getSuitableImageSize(isDragMode, naturalWidth, naturalHeight, current),
         })
       }
     },
@@ -200,8 +208,20 @@ export default function PhotoBox({
       expose({ scale: current })
       updateState({
         scale: current,
-        ...getPositionOnMoveOrScale(x, y, width, height, scale, current, clientX, clientY),
-        ...(current <= 1 && { x: 0, y: 0 }),
+        ...getPositionOnMoveOrScale(
+          isDragMode,
+          x,
+          y,
+          width,
+          height,
+          naturalWidth,
+          naturalHeight,
+          scale,
+          current,
+          clientX,
+          clientY,
+        ),
+        ...((isDragMode ? current <= 0.3 : current <= 1) ? { x: 0, y: 0 } : {}),
       })
     }
   }
@@ -250,20 +270,27 @@ export default function PhotoBox({
             verticalCloseEdge,
             reach,
           )
-
           // 接触边缘
           if (currentReach !== undefined) {
-            onReachMove(currentReach, nextClientX, nextClientY, scale)
+            onReachMove(
+              currentReach,
+              nextClientX,
+              nextClientY,
+              nextClientX - CX,
+              nextClientY - CY,
+              scale,
+            )
           }
         }
         // 横向边缘触发、背景触发禁用当前滑动
-        if (currentReach === 'x' || maskTouched) {
+        if (currentReach === 'x' || maskTouched || isDragMode) {
           updateState({ reach: 'x' })
           return
         }
         // 目标倍数
         const toScale = limitScale(
           scale + ((currentTouchLength - touchLength) / 100 / 2) * scale,
+          isDragMode,
           naturalWidth / width,
           scaleBuffer,
         )
@@ -274,10 +301,13 @@ export default function PhotoBox({
           reach: currentReach,
           scale: toScale,
           ...getPositionOnMoveOrScale(
+            isDragMode,
             x,
             y,
             width,
             height,
+            naturalWidth,
+            naturalHeight,
             scale,
             toScale,
             nextClientX,
@@ -338,7 +368,7 @@ export default function PhotoBox({
         stopRaf: false,
         reach: undefined,
       })
-      const safeScale = limitScale(scale, naturalWidth / width)
+      const safeScale = limitScale(scale, isDragMode, naturalWidth / width)
       // Go
       slideToPosition(
         x,
@@ -396,8 +426,8 @@ export default function PhotoBox({
     'resize',
     useDebounceCallback(
       () => {
-        if (loaded && !touched) {
-          updateState(getSuitableImageSize(naturalWidth, naturalHeight, rotate))
+        if (loaded && !touched && !isDragMode) {
+          updateState(getSuitableImageSize(isDragMode, naturalWidth, naturalHeight, rotate))
           onPhotoResize()
         }
       },
@@ -415,7 +445,12 @@ export default function PhotoBox({
     updateState({
       ...params,
       ...(params.loaded &&
-        getSuitableImageSize(params.naturalWidth || 0, params.naturalHeight || 0, rotate)),
+        getSuitableImageSize(
+          isDragMode,
+          params.naturalWidth || 0,
+          params.naturalHeight || 0,
+          rotate,
+        )),
     })
   }
 
@@ -441,7 +476,8 @@ export default function PhotoBox({
   function handleWheel(e: React.WheelEvent) {
     if (!reach) {
       // 限制最大倍数和最小倍数
-      const toScale = limitScale(scale - e.deltaY / 100 / 2, naturalWidth / width)
+      const delta = isDragMode ? e.deltaY / 100 / 16 : e.deltaY / 100 / 2
+      const toScale = limitScale(scale - delta, isDragMode, naturalWidth / width)
       updateState({ stopRaf: true })
       onScale(toScale, e.clientX, e.clientY)
     }
@@ -465,6 +501,7 @@ export default function PhotoBox({
   function handleMouseDown(e: React.MouseEvent) {
     e.stopPropagation()
     if (e.button === 0) {
+      onMouseDown(e.clientX, e.clientY)
       handleStart(e.clientX, e.clientY, 0)
     }
   }
@@ -480,6 +517,7 @@ export default function PhotoBox({
     easingMode,
     FIT,
   ] = useAnimationPosition(
+    isDragMode,
     visible,
     originRef,
     loaded,
@@ -487,6 +525,8 @@ export default function PhotoBox({
     y,
     width,
     height,
+    naturalWidth,
+    naturalHeight,
     scale,
     speed,
     (isPause: boolean) => updateState({ pause: isPause }),
@@ -509,13 +549,16 @@ export default function PhotoBox({
       transition:
         // 初始状态无渐变
         easingMode > 2
-          ? `${transitionCSS}, opacity ${speed}ms ease, height ${transitionLayoutTime}ms ${easing}`
+          ? isDragMode
+            ? `width ${transitionLayoutTime}ms ${easing}, height ${transitionLayoutTime}ms ${easing}`
+            : `${transitionCSS}, opacity ${speed}ms ease, height ${transitionLayoutTime}ms ${easing}`
           : undefined,
     },
   }
 
   return (
     <StyledWrap
+      isDragMode={isDragMode}
       className={wrapClassName}
       style={style}
       onMouseDown={!isTouchDevice && isActive ? handleMaskStart : undefined}
@@ -523,8 +566,17 @@ export default function PhotoBox({
     >
       <StyledBox
         style={{
-          transform: `matrix(${currentScale}, 0, 0, ${currentScale}, ${translateX}, ${translateY})`,
-          transition: touched || pause ? undefined : transitionCSS,
+          transform: isDragMode
+            ? undefined
+            : `matrix(${currentScale}, 0, 0, ${currentScale}, ${translateX}, ${translateY})`,
+          left: isDragMode ? translateX : undefined,
+          top: isDragMode ? translateY : undefined,
+          transition:
+            isDragMode || touched || pause
+              ? isDragMode
+                ? `left ${transitionLayoutTime}ms ${easing}, top ${transitionLayoutTime}ms ${easing}`
+                : undefined
+              : transitionCSS,
           willChange: isActive ? 'transform' : undefined,
         }}
       >

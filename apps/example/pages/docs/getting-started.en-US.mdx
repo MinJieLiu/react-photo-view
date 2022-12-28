@@ -118,6 +118,10 @@ Add parameter `toolbarRender` function to `<PhotoProvider>`, which must return a
 
 ### Zoom in or zoom out
 
+- When `mode` is `drag` mode, the minimum scaling can reach `0.1`, and `1` is the original size
+
+- When `mode` is `slide` mode, the zoom minimum can reach `1`, and `1` is the current view size
+
 Add a `scale` control to achieve zoom in and out buttons:
 
 ```jsx
@@ -147,6 +151,7 @@ Add a `scale` control to achieve zoom in and out buttons:
 
 The parameters provided by the `toolbarRender` function are:
 
+- `mode` - current mode `drag` | `slide`
 - `images` - list of images `DataType[]`
 - `index` - the current index `number`
 - `onIndexChange` - index change callback `(index: number) => void`
@@ -189,6 +194,7 @@ In general, using `<PhotoProvider>` in combination with `<PhotoView>` already su
 
 The parameters of `<PhotoSlider>` are inherited from `<PhotoProvider>`. Several additional APIs are exposed:
 
+- `mode` - current mode `drag` | `slide`
 - `images` list of images, `DataType[]`
 - `visible` whether the controlled property `boolean` is visible
 - `onClose` close event callback `() => void`

@@ -1,3 +1,5 @@
+import isTouchDevice from './utils/isTouchDevice'
+
 /**
  * 最大触摸时间
  */
@@ -12,6 +14,11 @@ export const defaultSpeed = 400
  * 默认动画函数
  */
 export const defaultEasing = 'cubic-bezier(0.25, 0.8, 0.25, 1)'
+
+/**
+ * 默认拖拽动画函数
+ */
+export const defaultDragEasing = 'ease'
 
 /**
  * 最大滑动切换图片距离
@@ -37,6 +44,11 @@ export const defaultOpacity = 1
  * 最小缩放度
  */
 export const minScale = 1
+
+/**
+ * 拖拽模式最小缩放度
+ */
+export const minDragScale = 0.1
 
 /**
  * 最大缩放度（若图片足够大，则会超出）

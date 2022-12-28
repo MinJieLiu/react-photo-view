@@ -4,40 +4,41 @@ title: API
 
 ## PhotoProvider
 
-| Name               | Description                                                                  | Type                                                                       | Default Value                            |
-| ------------------ | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------- |
-| children           |                                                                              | React.ReactNode                                                            | Required\*                               |
-| onIndexChange      |                                                                              | (index: number, state: PhotoProviderState) =&gt; void                      |
-| onVisibleChange    |                                                                              | (visible: boolean, index: number, state: PhotoProviderState) =&gt; void    |
-| loop               | Whether to cycle the preview, when the number is reached, it will be enabled | boolean \| number                                                          | 3                                        |
-| speed              | animation speed                                                              | (type: ActiveAnimationType) =>number                                       | () => 400                                |
-| easing             | animation function                                                           | (type: ActiveAnimationType) =>string                                       | () => 'cubic-bezier(0.25, 0.8, 0.25, 1)' |
-| photoClosable      | Can the image be clicked to close                                            | boolean                                                                    |
-| maskClosable       | Whether the background click can be closed                                   | boolean                                                                    | true                                     |
-| maskOpacity        | Default background transparency                                              | number \| null                                                             | 1                                        |
-| pullClosable       | Whether the drop down can be closed                                          | boolean                                                                    | true                                     |
-| bannerVisible      | Navigation bar visible                                                       | boolean                                                                    | true                                     |
-| overlayRender      | Custom render overlays                                                       | \(overlayProps: OverlayRenderProps\) =&gt; React\.ReactNode                |
-| toolbarRender      | Customize the rendering toolbar                                              | \(overlayProps: OverlayRenderProps\) =&gt; React\.ReactNode                |
-| className          |                                                                              | string                                                                     |
-| maskClassName      |                                                                              | string                                                                     |
-| photoWrapClassName |                                                                              | string                                                                     |
-| photoClassName     |                                                                              | string                                                                     |
-| loadingElement     | Custom loading                                                               | JSX\.Element                                                               |
-| brokenElement      | Custom loading failed rendering                                              | JSX\.Element \| \(\(photoProps: BrokenElementParams\) =&gt; JSX\.Element\) |
-| portalContainer    | Custom portal target (e.g. for usage in web components)                      | HTMLElement                                                                | document.body                            |
+| Name               | Description                                                                                         | Type                                                                       | Default Value                            |
+| ------------------ | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------- |
+| mode               | Optional drag mode, free to drag pictures in the view, forced slide mode under touch screen devices | drag \| slide                                                              | slide                                    |
+| children           |                                                                                                     | React.ReactNode                                                            | Required\*                               |
+| onIndexChange      |                                                                                                     | (index: number, state: PhotoProviderState) =&gt; void                      |
+| onVisibleChange    |                                                                                                     | (visible: boolean, index: number, state: PhotoProviderState) =&gt; void    |
+| loop               | Whether to cycle the preview, when the number is reached, it will be enabled                        | boolean \| number                                                          | 3                                        |
+| speed              | animation speed                                                                                     | (type: ActiveAnimationType) =>number                                       | () => 400                                |
+| easing             | animation function                                                                                  | (type: ActiveAnimationType) =>string                                       | () => 'cubic-bezier(0.25, 0.8, 0.25, 1)' |
+| photoClosable      | Can the image be clicked to close                                                                   | boolean                                                                    |
+| maskClosable       | Whether the background click can be closed                                                          | boolean                                                                    | true                                     |
+| maskOpacity        | Default background transparency                                                                     | number \| null                                                             | 1                                        |
+| pullClosable       | Whether the drop down can be closed                                                                 | boolean                                                                    | true                                     |
+| bannerVisible      | Navigation bar visible                                                                              | boolean                                                                    | true                                     |
+| overlayRender      | Custom render overlays                                                                              | \(overlayProps: OverlayRenderProps\) =&gt; React\.ReactNode                |
+| toolbarRender      | Customize the rendering toolbar                                                                     | \(overlayProps: OverlayRenderProps\) =&gt; React\.ReactNode                |
+| className          |                                                                                                     | string                                                                     |
+| maskClassName      |                                                                                                     | string                                                                     |
+| photoWrapClassName |                                                                                                     | string                                                                     |
+| photoClassName     |                                                                                                     | string                                                                     |
+| loadingElement     | Custom loading                                                                                      | JSX\.Element                                                               |
+| brokenElement      | Custom loading failed rendering                                                                     | JSX\.Element \| \(\(photoProps: BrokenElementParams\) =&gt; JSX\.Element\) |
+| portalContainer    | Custom portal target (e.g. for usage in web components)                                             | HTMLElement                                                                | document.body                            |
 
 ## PhotoView
 
-| Name     | Description                               | Type                                                | Default Value |
-| -------- | ----------------------------------------- | --------------------------------------------------- | ------------- |
-| src      | Image src                                 | string                                              |
-| render   | Custom rendering, lower priority than src | \(props: PhotoRenderParams\) =&gt; React\.ReactNode |
-| overlay  | Overlay                                   | React\.ReactNode                                    |
-| width    | Custom render node width                  | number                                              |
-| height   | Custom render node height                 | number                                              |
-| children | Child nodes, usually thumbnails           | React\.ReactElement                                 |
-| triggers | The trigger mode which executes opening image action        | Array\<\"onClick\" \| \"onDoubleClick\"\>                            | [\"onClick\"]          |
+| Name     | Description                                          | Type                                                | Default Value |
+| -------- | ---------------------------------------------------- | --------------------------------------------------- | ------------- |
+| src      | Image src                                            | string                                              |
+| render   | Custom rendering, lower priority than src            | \(props: PhotoRenderParams\) =&gt; React\.ReactNode |
+| overlay  | Overlay                                              | React\.ReactNode                                    |
+| width    | Custom render node width                             | number                                              |
+| height   | Custom render node height                            | number                                              |
+| children | Child nodes, usually thumbnails                      | React\.ReactElement                                 |
+| triggers | The trigger mode which executes opening image action | Array\<\"onClick\" \| \"onDoubleClick\"\>           | [\"onClick\"] |
 
 ## DataType
 
@@ -55,6 +56,7 @@ title: API
 
 | Name           | Description             | Type                                                        | Default Value |
 | -------------- | ----------------------- | ----------------------------------------------------------- | ------------- |
+| mode           | Mode                    | drag \| slide                                               | Required\*    |
 | images         | Picture list            | DataType\[\]                                                | Required\*    |
 | index          | CURRENT INDEX           | number                                                      | Required\*    |
 | onIndexChange  | Index change callbak    | \(index: number\) =&gt; void                                | Required\*    |

@@ -5,10 +5,13 @@ import { computePositionEdge } from './edgeHandle'
  * 获取移动或缩放之后的中心点
  */
 export default function getPositionOnMoveOrScale(
+  isDragMode: boolean,
   x: number,
   y: number,
   width: number,
   height: number,
+  naturalWidth: number,
+  naturalHeight: number,
   scale: number,
   toScale: number,
   clientX: number = innerWidth / 2,
@@ -17,8 +20,18 @@ export default function getPositionOnMoveOrScale(
   offsetY: number = 0,
 ) {
   // 是否接触边缘
-  const [closedEdgeX] = computePositionEdge(x, toScale, width, innerWidth)
-  const [closedEdgeY] = computePositionEdge(y, toScale, height, innerHeight)
+  const [closedEdgeX] = computePositionEdge(
+    x,
+    toScale,
+    isDragMode ? naturalWidth : width,
+    innerWidth,
+  )
+  const [closedEdgeY] = computePositionEdge(
+    y,
+    toScale,
+    isDragMode ? naturalHeight : height,
+    innerHeight,
+  )
 
   const centerClientX = innerWidth / 2
   const centerClientY = innerHeight / 2
@@ -31,7 +44,9 @@ export default function getPositionOnMoveOrScale(
   const originX = clientX - (clientX - lastPositionX) * (toScale / scale) - centerClientX
   const originY = clientY - (clientY - lastPositionY) * (toScale / scale) - centerClientY
   // 长图模式无左右反馈
-  const longModeEdge = height / width >= longModeRatio && width * toScale === innerWidth
+  const longModeEdge =
+    (isDragMode ? naturalHeight / naturalWidth : height / width) >= longModeRatio &&
+    (isDragMode ? naturalWidth : width) * toScale === innerWidth
   // 超出边缘距离减半
   return {
     x: originX + (longModeEdge ? 0 : closedEdgeX ? offsetX / 2 : offsetX),

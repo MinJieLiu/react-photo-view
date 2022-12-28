@@ -3,8 +3,8 @@ const nextra = require('nextra')
 const withNextra = nextra({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.js',
-  unstable_stork: false,
-  unstable_contentDump: true,
+  // https://github.com/shuding/nextra/pull/389
+  unstable_flexsearch: true,
 })
 
 module.exports = withNextra({

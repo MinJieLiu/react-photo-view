@@ -5,15 +5,17 @@ import getRotateSize from './getRotateSize'
  * 获取图片合适的大小
  */
 export default function getSuitableImageSize(
+  isDragMode: boolean,
   naturalWidth: number,
   naturalHeight: number,
   rotate: number,
+  margin = 0,
 ) {
   const [currentWidth, currentHeight, isVertical] = getRotateSize(rotate, innerWidth, innerHeight)
 
-  let y = 0
-  let width = currentWidth
-  let height = currentHeight
+  let y = margin
+  let width = currentWidth - margin * 2
+  let height = currentHeight - margin * 2
 
   // 自适应宽高
   const autoWidth = (naturalWidth / naturalHeight) * currentHeight
@@ -36,11 +38,13 @@ export default function getSuitableImageSize(
   } else {
     width = autoWidth
   }
-  return {
+  const state: Record<string, number | boolean> = {
     width,
     height,
-    x: 0,
+    x: margin,
     y,
     pause: true,
   }
+  if (isDragMode) state.scale = Math.min(height / naturalHeight, width / naturalWidth, 1)
+  return state
 }

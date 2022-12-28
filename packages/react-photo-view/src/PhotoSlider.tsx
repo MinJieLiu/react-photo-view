@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import type { DataType, PhotoProviderBase, OverlayRenderProps } from './types'
 import type { ReachType } from './types'
 import {
@@ -7,6 +7,7 @@ import {
   defaultOpacity,
   horizontalOffset,
   maxMoveOffset,
+  defaultDragEasing,
 } from './variables'
 import isTouchDevice from './utils/isTouchDevice'
 import { limitNumber } from './utils/limitTarget'
@@ -43,6 +44,8 @@ export interface IPhotoSliderProps extends PhotoProviderBase {
 type PhotoSliderState = {
   // 偏移量
   x: number
+  // 偏移量
+  y: number
   // 图片处于触摸的状态
   touched: boolean
   // 是否暂停 transition
@@ -71,6 +74,7 @@ type PhotoSliderState = {
 
 const initialState: PhotoSliderState = {
   x: 0,
+  y: 0,
   touched: false,
   pause: false,
   lastCX: undefined,
@@ -110,6 +114,7 @@ const StyledArrowRight = tw(StyledArrow)`right-0`
 
 export default function PhotoSlider(props: IPhotoSliderProps) {
   const {
+    mode: modeProp = 'slide',
     loop = 3,
     speed: speedFn,
     easing: easingFn,
@@ -135,11 +140,17 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     portalContainer,
   } = props
 
+  const isDragMode = useMemo(() => {
+    if (isTouchDevice) return false
+    return modeProp === 'drag'
+  }, [modeProp])
+
   const [state, updateState] = useSetState(initialState)
   const [innerIndex, updateInnerIndex] = useState(0)
 
   const {
     x,
+    y,
     touched,
     pause,
 
@@ -156,7 +167,6 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     onScale,
     onRotate,
   } = state
-
   // 受控 index
   const isControlled = props.hasOwnProperty('index')
   const index = isControlled ? controlledIndex : innerIndex
@@ -277,7 +287,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     updateState({
       touched: true,
       lastCY,
-      bg: nextScale === 1 ? opacity : maskOpacity,
+      bg: nextScale === 1 && !isDragMode ? opacity : maskOpacity,
       minimal: nextScale === 1,
     })
   }
@@ -311,14 +321,46 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       pause: false,
     })
   }
+  // 拖拽模式下的起始位置
+  const dragModeDownPosition = useRef({ x, y })
+
+  function handleMouseDown() {
+    dragModeDownPosition.current = { x, y }
+  }
+
+  function handleReachDragMove(clientX: number, clientY: number, deltaX: number, deltaY: number) {
+    if (lastCX === undefined || lastCY === undefined) {
+      updateState({
+        touched: true,
+        lastCX: clientX,
+        lastCY: clientY,
+        x,
+        y,
+        pause: false,
+      })
+      return
+    }
+    updateState({
+      touched: true,
+      lastCX: lastCX,
+      lastCY: lastCY,
+      x: dragModeDownPosition.current.x + deltaX,
+      y: dragModeDownPosition.current.y + deltaY,
+      pause: false,
+    })
+  }
 
   function handleReachMove(
     reachPosition: ReachType,
     clientX: number,
     clientY: number,
+    deltaX: number,
+    deltaY: number,
     nextScale?: number,
   ) {
-    if (reachPosition === 'x') {
+    if (isDragMode) {
+      handleReachDragMove(clientX, clientY, deltaX, deltaY)
+    } else if (reachPosition === 'x') {
       handleReachHorizontalMove(clientX)
     } else if (reachPosition === 'y') {
       handleReachVerticalMove(clientY, nextScale)
@@ -328,6 +370,12 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   function handleReachUp(clientX: number, clientY: number) {
     const offsetClientX = clientX - (lastCX ?? clientX)
     const offsetClientY = clientY - (lastCY ?? clientY)
+    if (isDragMode) {
+      updateState({
+        touched: false,
+      })
+      return
+    }
     let willClose = false
     // 下一张
     if (offsetClientX < -maxMoveOffset) {
@@ -369,6 +417,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   // 覆盖物参数
   const overlayParams: OverlayRenderProps | undefined = onScale &&
     onRotate && {
+      mode: isDragMode ? 'drag' : 'slide',
       images,
       index,
       visible,
@@ -383,7 +432,11 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     }
   // 动画时间
   const currentSpeed = speedFn ? speedFn(activeAnimation) : defaultSpeed
-  const currentEasing = easingFn ? easingFn(activeAnimation) : defaultEasing
+  const currentEasing = easingFn
+    ? easingFn(activeAnimation)
+    : isDragMode
+    ? defaultDragEasing
+    : defaultEasing
   const slideSpeed = speedFn ? speedFn(3) : defaultSpeed + 200
   const slideEasing = easingFn ? easingFn(3) : defaultEasing
 
@@ -454,12 +507,15 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             onReachMove={handleReachMove}
             onReachUp={handleReachUp}
             onPhotoTap={() => handlePhotoTap(photoClosable)}
+            onMouseDown={handleMouseDown}
             onMaskTap={() => handlePhotoTap(maskClosable)}
+            isDragMode={isDragMode}
             wrapClassName={photoWrapClassName}
             className={photoClassName}
             style={{
+              opacity: isDragMode ? (nextIndex === index ? 1 : 0) : undefined,
               left: `${(innerWidth + horizontalOffset) * nextIndex}px`,
-              transform: `translate3d(${x}px, 0px, 0)`,
+              transform: `translate3d(${x}px, ${y}px, 0)`,
               transition: touched || pause ? undefined : `transform ${slideSpeed}ms ${slideEasing}`,
             }}
             loadingElement={loadingElement}

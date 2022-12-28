@@ -117,6 +117,10 @@ export default function MyComponent() {
 
 ### 放大/缩小
 
+- 在 `mode` 为 `drag` 模式下，缩放最小可达 `0.1`，`1` 为原始尺寸大小
+
+- 在 `mode` 为 `slide` 模式下，缩放最小可达 `1`，`1` 为当前视图大小
+
 添加对 `scale` 的控制即可实现放大/缩小按钮：
 
 ```jsx
@@ -146,6 +150,7 @@ export default function MyComponent() {
 
 `toolbarRender` 函数提供的参数有：
 
+- `mode` - 当前模式 `drag` | `slide`
 - `images` - 图片列表 `DataType[]`
 - `index` - 当前索引 `number`
 - `onIndexChange` - 索引改变回调 `(index: number) => void`
@@ -188,6 +193,7 @@ export default function MyComponent() {
 
 `<PhotoSlider />` 的参数继承自 `<PhotoProvider />`。会额外暴露几个 API：
 
+- `mode` - 当前模式 `drag` | `slide`
 - `images` 图片列表，`DataType[]`
 - `visible` 是否可见受控属性 `boolean`
 - `onClose` 关闭事件回调 `() => void`

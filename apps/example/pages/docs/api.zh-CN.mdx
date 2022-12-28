@@ -4,28 +4,29 @@ title: API
 
 ## PhotoProvider
 
-| Name               | Description                    | Type                                                                       | Default Value                            |
-| ------------------ | ------------------------------ | -------------------------------------------------------------------------- | ---------------------------------------- |
-| children           |                                | React.ReactNode                                                            | Required\*                               |
-| onIndexChange      |                                | (index: number, state: PhotoProviderState) =&gt; void                      |
-| onVisibleChange    |                                | (visible: boolean, index: number, state: PhotoProviderState) =&gt; void    |
-| loop               | 是否循环预览，达到该数量则启用 | boolean \| number                                                          | 3                                        |
-| speed              | 动画速度                       | (type: ActiveAnimationType) =>number                                       | () => 400                                |
-| easing             | 动画函数                       | (type: ActiveAnimationType) =>string                                       | () => 'cubic-bezier(0.25, 0.8, 0.25, 1)' |
-| photoClosable      | 图片点击是否可关闭             | boolean                                                                    |
-| maskClosable       | 背景点击是否可关闭             | boolean                                                                    | true                                     |
-| maskOpacity        | 默认背景透明度                 | number \| null                                                             | 1                                        |
-| pullClosable       | 下拉是否可关闭                 | boolean                                                                    | true                                     |
-| bannerVisible      | 导航条 visible                 | boolean                                                                    | true                                     |
-| overlayRender      | 自定义渲染覆盖物               | \(overlayProps: OverlayRenderProps\) =&gt; React\.ReactNode                |
-| toolbarRender      | 自定义渲染工具栏               | \(overlayProps: OverlayRenderProps\) =&gt; React\.ReactNode                |
-| className          |                                | string                                                                     |
-| maskClassName      |                                | string                                                                     |
-| photoWrapClassName |                                | string                                                                     |
-| photoClassName     |                                | string                                                                     |
-| loadingElement     | 自定义 loading                 | JSX\.Element                                                               |
-| brokenElement      | 自定义加载失败渲染             | JSX\.Element \| \(\(photoProps: BrokenElementParams\) =&gt; JSX\.Element\) |
-| portalContainer    |                                | HTMLElement                                                                | document.body                            |
+| Name               | Description                                                   | Type                                                                       | Default Value                            |
+| ------------------ | ------------------------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------- |
+| mode               | 可选 drag 模式，视图内自由拖拽图片，触屏设备下强制 slide 模式 | drag \| slide                                                              | slide                                    |
+| children           |                                                               | React.ReactNode                                                            | Required\*                               |
+| onIndexChange      |                                                               | (index: number, state: PhotoProviderState) =&gt; void                      |
+| onVisibleChange    |                                                               | (visible: boolean, index: number, state: PhotoProviderState) =&gt; void    |
+| loop               | 是否循环预览，达到该数量则启用                                | boolean \| number                                                          | 3                                        |
+| speed              | 动画速度                                                      | (type: ActiveAnimationType) =>number                                       | () => 400                                |
+| easing             | 动画函数                                                      | (type: ActiveAnimationType) =>string                                       | () => 'cubic-bezier(0.25, 0.8, 0.25, 1)' |
+| photoClosable      | 图片点击是否可关闭                                            | boolean                                                                    |
+| maskClosable       | 背景点击是否可关闭                                            | boolean                                                                    | true                                     |
+| maskOpacity        | 默认背景透明度                                                | number \| null                                                             | 1                                        |
+| pullClosable       | 下拉是否可关闭                                                | boolean                                                                    | true                                     |
+| bannerVisible      | 导航条 visible                                                | boolean                                                                    | true                                     |
+| overlayRender      | 自定义渲染覆盖物                                              | \(overlayProps: OverlayRenderProps\) =&gt; React\.ReactNode                |
+| toolbarRender      | 自定义渲染工具栏                                              | \(overlayProps: OverlayRenderProps\) =&gt; React\.ReactNode                |
+| className          |                                                               | string                                                                     |
+| maskClassName      |                                                               | string                                                                     |
+| photoWrapClassName |                                                               | string                                                                     |
+| photoClassName     |                                                               | string                                                                     |
+| loadingElement     | 自定义 loading                                                | JSX\.Element                                                               |
+| brokenElement      | 自定义加载失败渲染                                            | JSX\.Element \| \(\(photoProps: BrokenElementParams\) =&gt; JSX\.Element\) |
+| portalContainer    |                                                               | HTMLElement                                                                | document.body                            |
 
 ## PhotoView
 
@@ -37,7 +38,7 @@ title: API
 | width    | 自定义渲染节点宽度          | number                                              |
 | height   | 自定义渲染节点高度          | number                                              |
 | children | 子节点，一般为缩略图        | React\.ReactElement                                 |
-| triggers | 触发打开图片的方式        | Array\<\"onClick\" \| \"onDoubleClick\"\>                            | [\"onClick\"]          |
+| triggers | 触发打开图片的方式          | Array\<\"onClick\" \| \"onDoubleClick\"\>           | [\"onClick\"] |
 
 ## DataType
 
@@ -55,6 +56,7 @@ title: API
 
 | Name           | Description    | Type                                                        | Default Value |
 | -------------- | -------------- | ----------------------------------------------------------- | ------------- |
+| mode           | 模式           | drag \| slide                                               | Required\*    |
 | images         | 图片列表       | DataType\[\]                                                | Required\*    |
 | index          | 当前索引       | number                                                      | Required\*    |
 | onIndexChange  | 索引改变回调   | \(index: number\) =&gt; void                                | Required\*    |
