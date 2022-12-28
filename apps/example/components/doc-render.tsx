@@ -19,7 +19,7 @@ export default function DocDemo() {
             const childScale = scale === 1 ? scale + offset : 1 + offset
 
             return (
-              <div {...attrs} tw={`flex-none bg-white ${attrs.className || ''}`}>
+              <div {...attrs} tw="flex-none bg-white" className={attrs.className}>
                 <div
                   style={{
                     transform: `scale(${childScale})`,
