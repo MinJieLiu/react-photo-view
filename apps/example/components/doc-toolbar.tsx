@@ -12,7 +12,7 @@ const FullScreenIcon = (props: React.HTMLAttributes<any>) => {
   }, [])
   return (
     <svg
-      tw="PhotoView-Slider__toolbarIcon"
+      tw="box-border p-2.5 fill-white opacity-75 cursor-pointer transition-opacity ease-linear delay-200 hover:opacity-100"
       fill="white"
       width="44"
       height="44"
@@ -48,7 +48,7 @@ export default function DocDemo() {
         return (
           <>
             <svg
-              tw="PhotoView-Slider__toolbarIcon"
+              tw="box-border p-2.5 fill-white opacity-75 cursor-pointer transition-opacity ease-linear delay-200 hover:opacity-100"
               width="44"
               height="44"
               viewBox="0 0 768 768"
@@ -58,7 +58,7 @@ export default function DocDemo() {
               <path d="M384 640.5q105 0 180.75-75.75t75.75-180.75-75.75-180.75-180.75-75.75-180.75 75.75-75.75 180.75 75.75 180.75 180.75 75.75zM384 64.5q132 0 225.75 93.75t93.75 225.75-93.75 225.75-225.75 93.75-225.75-93.75-93.75-225.75 93.75-225.75 225.75-93.75zM415.5 223.5v129h129v63h-129v129h-63v-129h-129v-63h129v-129h63z" />
             </svg>
             <svg
-              tw="PhotoView-Slider__toolbarIcon"
+              tw="box-border p-2.5 fill-white opacity-75 cursor-pointer transition-opacity ease-linear delay-200 hover:opacity-100"
               width="44"
               height="44"
               viewBox="0 0 768 768"
@@ -68,7 +68,7 @@ export default function DocDemo() {
               <path d="M384 640.5q105 0 180.75-75.75t75.75-180.75-75.75-180.75-180.75-75.75-180.75 75.75-75.75 180.75 75.75 180.75 180.75 75.75zM384 64.5q132 0 225.75 93.75t93.75 225.75-93.75 225.75-225.75 93.75-225.75-93.75-93.75-225.75 93.75-225.75 225.75-93.75zM223.5 352.5h321v63h-321v-63z" />
             </svg>
             <svg
-              tw="PhotoView-Slider__toolbarIcon"
+              tw="box-border p-2.5 fill-white opacity-75 cursor-pointer transition-opacity ease-linear delay-200 hover:opacity-100"
               onClick={() => onRotate(rotate + 90)}
               width="44"
               height="44"
@@ -79,7 +79,7 @@ export default function DocDemo() {
             </svg>
             {document.fullscreenEnabled && <FullScreenIcon onClick={toggleFullScreen} />}
             <svg
-              tw="PhotoView-Slider__toolbarIcon"
+              tw="box-border p-2.5 fill-white opacity-75 cursor-pointer transition-opacity ease-linear delay-200 hover:opacity-100"
               onClick={() => {
                 setImages(prev => {
                   const result = [...prev]

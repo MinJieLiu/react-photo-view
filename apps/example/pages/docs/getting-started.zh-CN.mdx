@@ -128,8 +128,8 @@ export default function MyComponent() {
   toolbarRender={({ onScale, scale }) => {
     return (
       <>
-        <svg onClick={() => onScale(scale + 1)} />
-        <svg onClick={() => onScale(scale - 1)} />
+        <svg tw="box-border p-2.5 fill-white opacity-75 cursor-pointer transition-opacity ease-linear delay-200 hover:opacity-100" onClick={() => onScale(scale + 1)} />
+        <svg tw="box-border p-2.5 fill-white opacity-75 cursor-pointer transition-opacity ease-linear delay-200 hover:opacity-100" onClick={() => onScale(scale - 1)} />
       </>
     );
   }}
@@ -143,7 +143,7 @@ export default function MyComponent() {
 ```jsx
 <PhotoProvider
   toolbarRender={({ rotate, onRotate }) => {
-    return <svg onClick={() => onRotate(rotate + 90)} />;
+    return <svg tw="box-border p-2.5 fill-white opacity-75 cursor-pointer transition-opacity ease-linear delay-200 hover:opacity-100" onClick={() => onRotate(rotate + 90)} />;
   }}
 />
 ```

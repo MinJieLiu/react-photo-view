@@ -129,8 +129,8 @@ Add a `scale` control to achieve zoom in and out buttons:
   toolbarRender={({ onScale, scale }) => {
     return (
       <>
-        <svg onClick={() => onScale(scale + 1)} />
-        <svg onClick={() => onScale(scale - 1)} />
+        <svg tw="box-border p-2.5 fill-white opacity-75 cursor-pointer transition-opacity ease-linear delay-200 hover:opacity-100" onClick={() => onScale(scale + 1)} />
+        <svg tw="box-border p-2.5 fill-white opacity-75 cursor-pointer transition-opacity ease-linear delay-200 hover:opacity-100" onClick={() => onScale(scale - 1)} />
       </>
     );
   }}
@@ -144,7 +144,7 @@ Add a `scale` control to achieve zoom in and out buttons:
 ```jsx
 <PhotoProvider
   toolbarRender={({ rotate, onRotate }) => {
-    return <svg onClick={() => onRotate(rotate + 90)} />;
+    return <svg tw="box-border p-2.5 fill-white opacity-75 cursor-pointer transition-opacity ease-linear delay-200 hover:opacity-100" onClick={() => onRotate(rotate + 90)} />;
   }}
 />
 ```
