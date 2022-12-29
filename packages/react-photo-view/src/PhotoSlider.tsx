@@ -454,10 +454,12 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
           </div>
           <div tw="flex items-center h-full">
             {toolbarRender && overlayParams && toolbarRender(overlayParams)}
-            <CloseIcon
-              tw="box-border p-2.5 fill-white opacity-75 cursor-pointer transition-opacity ease-linear delay-200 hover:opacity-100"
-              onClick={close}
-            />
+            {!toolbarRender && (
+              <CloseIcon
+                tw="box-border p-2.5 fill-white opacity-75 cursor-pointer transition-opacity ease-linear delay-200 hover:opacity-100"
+                onClick={close}
+              />
+            )}
           </div>
         </div>
       )}
