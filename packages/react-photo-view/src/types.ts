@@ -192,8 +192,6 @@ export type ReachMoveFunction = (
   reachPosition: ReachType,
   clientX: number,
   clientY: number,
-  deltaX: number,
-  deltaY: number,
   scale?: number,
 ) => void
 

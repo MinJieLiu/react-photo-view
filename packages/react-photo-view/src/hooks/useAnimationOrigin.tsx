@@ -27,7 +27,7 @@ export default function useAnimationOrigin(
 ] {
   const [originRect, updateOriginRect] = useState(initialRect)
   // 动画状态
-  const [easingMode, updateEasingMode] = useState<EasingMode>(0)
+  const [easingMode, updateEasingMode] = useState<EasingMode>(isDragMode ? 4 : 0)
   const initialTime = useRef<number>()
 
   const fn = useMethods({
@@ -42,13 +42,11 @@ export default function useAnimationOrigin(
     if (!loaded) {
       return
     }
-    if (isDragMode) {
-      handleToShape(3)
-      return
-    }
     handleUpdateOrigin(originRef, updateOriginRect)
-    // 打开动画处理
+    if (isDragMode) return
+
     if (visible) {
+      // 打开动画处理
       // 小于最大允许动画时间，则执行缩放动画
       if (Date.now() - initialTime.current < maxWaitAnimationTime) {
         updateEasingMode(1)

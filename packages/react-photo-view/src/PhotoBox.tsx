@@ -7,7 +7,7 @@ import getRotateSize from './utils/getRotateSize'
 import { limitScale } from './utils/limitTarget'
 import getSuitableImageSize from './utils/getSuitableImageSize'
 import useIsomorphicLayoutEffect from './hooks/useIsomorphicLayoutEffect'
-import { minStartTouchOffset, scaleBuffer } from './variables'
+import { minDragScale, minScale, minStartTouchOffset, scaleBuffer } from './variables'
 import type {
   DataType,
   ReachMoveFunction,
@@ -52,8 +52,6 @@ export interface PhotoBoxProps {
 
   // Photo 点击事件
   onPhotoTap: PhotoTapFunction
-  // MouseDown 事件
-  onMouseDown: PhotoTapFunction
   // Mask 点击事件
   onMaskTap: PhotoTapFunction
   // 到达边缘滑动事件
@@ -150,7 +148,6 @@ export default function PhotoBox({
   brokenElement,
 
   onPhotoTap,
-  onMouseDown,
   onMaskTap,
   onReachMove,
   onReachUp,
@@ -221,7 +218,7 @@ export default function PhotoBox({
           clientX,
           clientY,
         ),
-        ...((isDragMode ? current <= 0.3 : current <= 1) ? { x: 0, y: 0 } : {}),
+        ...((isDragMode ? current < minDragScale : current <= minScale) ? { x: 0, y: 0 } : {}),
       })
     }
   }
@@ -272,19 +269,18 @@ export default function PhotoBox({
           )
           // 接触边缘
           if (currentReach !== undefined) {
-            onReachMove(
-              currentReach,
-              nextClientX,
-              nextClientY,
-              nextClientX - CX,
-              nextClientY - CY,
-              scale,
-            )
+            onReachMove(currentReach, nextClientX, nextClientY, scale)
           }
         }
         // 横向边缘触发、背景触发禁用当前滑动
         if (currentReach === 'x' || maskTouched || isDragMode) {
-          updateState({ reach: 'x' })
+          const state: Partial<typeof initialState> = { reach: 'x' }
+          if (isDragMode) {
+            state.x = lastX + offsetX
+            state.y = lastY + offsetY
+            state.pause = false
+          }
+          updateState(state)
           return
         }
         // 目标倍数
@@ -349,7 +345,7 @@ export default function PhotoBox({
   const handlePhotoTap = useContinuousTap(
     onPhotoTap,
     (currentClientX: number, currentClientY: number) => {
-      if (!reach) {
+      if (!reach && !isDragMode) {
         // 若图片足够大，则放大适应的倍数
         const endScale = scale !== 1 ? 1 : Math.max(2, naturalWidth / width)
         onScale(endScale, currentClientX, currentClientY)
@@ -370,19 +366,21 @@ export default function PhotoBox({
       })
       const safeScale = limitScale(scale, isDragMode, naturalWidth / width)
       // Go
-      slideToPosition(
-        x,
-        y,
-        lastX,
-        lastY,
-        width,
-        height,
-        scale,
-        safeScale,
-        lastScale,
-        rotate,
-        touchTime,
-      )
+      if (!isDragMode) {
+        slideToPosition(
+          x,
+          y,
+          lastX,
+          lastY,
+          width,
+          height,
+          scale,
+          safeScale,
+          lastScale,
+          rotate,
+          touchTime,
+        )
+      }
 
       onReachUp(nextClientX, nextClientY)
       // 触发 Tap 事件
@@ -426,8 +424,13 @@ export default function PhotoBox({
     'resize',
     useDebounceCallback(
       () => {
-        if (loaded && !touched && !isDragMode) {
-          updateState(getSuitableImageSize(isDragMode, naturalWidth, naturalHeight, rotate))
+        if (loaded && !touched) {
+          if (isDragMode) {
+            updateState({
+              x: 0,
+              y: 0,
+            })
+          } else updateState(getSuitableImageSize(isDragMode, naturalWidth, naturalHeight, rotate))
           onPhotoResize()
         }
       },
@@ -501,7 +504,6 @@ export default function PhotoBox({
   function handleMouseDown(e: React.MouseEvent) {
     e.stopPropagation()
     if (e.button === 0) {
-      onMouseDown(e.clientX, e.clientY)
       handleStart(e.clientX, e.clientY, 0)
     }
   }

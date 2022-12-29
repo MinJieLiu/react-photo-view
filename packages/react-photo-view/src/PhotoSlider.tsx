@@ -264,7 +264,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       x: -(innerWidth + horizontalOffset) * index,
       lastCX: undefined,
       lastCY: undefined,
-      pause: true,
+      pause: isDragMode ? false : true,
     })
     virtualIndexRef.current = index
   }
@@ -321,45 +321,15 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       pause: false,
     })
   }
-  // 拖拽模式下的起始位置
-  const dragModeDownPosition = useRef({ x, y })
-
-  function handleMouseDown() {
-    dragModeDownPosition.current = { x, y }
-  }
-
-  function handleReachDragMove(clientX: number, clientY: number, deltaX: number, deltaY: number) {
-    if (lastCX === undefined || lastCY === undefined) {
-      updateState({
-        touched: true,
-        lastCX: clientX,
-        lastCY: clientY,
-        x,
-        y,
-        pause: false,
-      })
-      return
-    }
-    updateState({
-      touched: true,
-      lastCX: lastCX,
-      lastCY: lastCY,
-      x: dragModeDownPosition.current.x + deltaX,
-      y: dragModeDownPosition.current.y + deltaY,
-      pause: false,
-    })
-  }
 
   function handleReachMove(
     reachPosition: ReachType,
     clientX: number,
     clientY: number,
-    deltaX: number,
-    deltaY: number,
     nextScale?: number,
   ) {
     if (isDragMode) {
-      handleReachDragMove(clientX, clientY, deltaX, deltaY)
+      // handleReachDragMove
     } else if (reachPosition === 'x') {
       handleReachHorizontalMove(clientX)
     } else if (reachPosition === 'y') {
@@ -507,7 +477,6 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             onReachMove={handleReachMove}
             onReachUp={handleReachUp}
             onPhotoTap={() => handlePhotoTap(photoClosable)}
-            onMouseDown={handleMouseDown}
             onMaskTap={() => handlePhotoTap(maskClosable)}
             isDragMode={isDragMode}
             wrapClassName={photoWrapClassName}
