@@ -27,7 +27,7 @@ export default function useAnimationOrigin(
 ] {
   const [originRect, updateOriginRect] = useState(initialRect)
   // 动画状态
-  const [easingMode, updateEasingMode] = useState<EasingMode>(isDragMode ? 4 : 0)
+  const [easingMode, updateEasingMode] = useState<EasingMode>(isDragMode ? 3 : 0)
   const initialTime = useRef<number>()
 
   const fn = useMethods({

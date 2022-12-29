@@ -43,7 +43,7 @@ export default function getSuitableImageSize(
     height,
     x: margin,
     y,
-    pause: true,
+    pause: isDragMode ? false : true,
   }
   if (isDragMode) state.scale = Math.min(height / naturalHeight, width / naturalWidth, 1)
   return state

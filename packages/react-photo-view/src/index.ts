@@ -3,3 +3,5 @@ import PhotoView from './PhotoView'
 import PhotoSlider from './PhotoSlider'
 
 export { PhotoProvider, PhotoView, PhotoSlider }
+
+export * from './types'

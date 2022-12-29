@@ -580,10 +580,10 @@ export default function PhotoBox({
           left: isDragMode ? translateX : undefined,
           top: isDragMode ? translateY : undefined,
           transition:
-            isDragMode || touched || pause
-              ? isDragMode
-                ? `left ${transitionLayoutTime}ms ${easing}, top ${transitionLayoutTime}ms ${easing}`
-                : undefined
+            touched || pause
+              ? undefined
+              : isDragMode
+              ? `left ${transitionLayoutTime}ms ${easing}, top ${transitionLayoutTime}ms ${easing}`
               : transitionCSS,
           willChange: isActive ? 'transform' : undefined,
         }}
