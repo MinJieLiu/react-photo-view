@@ -463,7 +463,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
           </div>
         </div>
       )}
-      {adjacentImages.map((item: DataType, currentIndex) => {
+      {adjacentImages.map((item, currentIndex) => {
         // 截取之前的索引位置
         const nextIndex =
           !enableLoop && index === 0
@@ -493,7 +493,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             loadingElement={loadingElement}
             brokenElement={brokenElement}
             onPhotoResize={handleResize}
-            isActive={(currentImage && currentImage.key) === item.key}
+            isActive={!item.isCloned && (currentImage && currentImage.key) === item.key}
             expose={updateState}
             enableMouseZoom={enableMouseZoom}
           />
