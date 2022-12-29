@@ -132,6 +132,10 @@ export interface BrokenElementParams {
 
 export interface OverlayRenderProps {
   /**
+   * 当前预览图片是否加载中
+   */
+  loading: boolean
+  /**
    * 当前模式
    */
   mode: ModeType
@@ -182,6 +186,8 @@ export interface OverlayRenderProps {
 }
 
 export interface ExposedProperties {
+  // 是否加载中
+  loading?: boolean
   // 缩放
   scale?: number
   // 旋转

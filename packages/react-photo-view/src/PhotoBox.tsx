@@ -442,9 +442,13 @@ export default function PhotoBox({
 
   useIsomorphicLayoutEffect(() => {
     if (isActive) {
-      expose({ scale, rotate, ...fn })
+      expose({ scale, rotate, loading: !loaded, ...fn })
     }
   }, [isActive])
+
+  useIsomorphicLayoutEffect(() => {
+    expose({ loading: !loaded })
+  }, [loaded])
 
   function handlePhotoLoad(params: IPhotoLoadedParams) {
     updateState({

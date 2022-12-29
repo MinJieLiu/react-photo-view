@@ -42,6 +42,8 @@ export interface IPhotoSliderProps extends PhotoProviderBase {
 }
 
 type PhotoSliderState = {
+  // 当前预览图片是否加载中
+  loading: boolean
   // 偏移量
   x: number
   // 偏移量
@@ -73,6 +75,7 @@ type PhotoSliderState = {
 }
 
 const initialState: PhotoSliderState = {
+  loading: false,
   x: 0,
   y: 0,
   touched: false,
@@ -150,6 +153,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   const [innerIndex, updateInnerIndex] = useState(0)
 
   const {
+    loading,
+
     x,
     y,
     touched,
@@ -388,6 +393,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   // 覆盖物参数
   const overlayParams: OverlayRenderProps | undefined = onScale &&
     onRotate && {
+      loading,
       mode: isDragMode ? 'drag' : 'slide',
       images,
       index,
