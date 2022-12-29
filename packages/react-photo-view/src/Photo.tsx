@@ -58,7 +58,7 @@ export default function Photo({
       <>
         <img
           css={[
-            tw`cursor-grab active:cursor-grabbing`,
+            tw`cursor-grab active:cursor-grabbing bg-white`,
             css`
               max-width: initial;
             `,
