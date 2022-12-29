@@ -377,6 +377,8 @@ export default function PhotoBox({
           lastY,
           width,
           height,
+          naturalWidth,
+          naturalHeight,
           scale,
           safeScale,
           lastScale,

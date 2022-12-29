@@ -36,6 +36,8 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
     lastY: number,
     width: number,
     height: number,
+    naturalWidth: number,
+    naturalHeight: number,
     scale: number,
     safeScale: number,
     lastScale: number,
@@ -51,7 +53,17 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
     // 时间过长、超出安全范围的情况下不执行滚动逻辑，恢复安全范围
     if (moveTime >= maxTouchTime || safeScale != scale || Math.abs(lastScale - scale) > 1) {
       // 计算中心缩放点
-      const { x: nextX, y: nextY } = getPositionOnMoveOrScale(x, y, width, height, scale, safeScale)
+      const { x: nextX, y: nextY } = getPositionOnMoveOrScale(
+        false,
+        x,
+        y,
+        width,
+        height,
+        naturalWidth,
+        naturalHeight,
+        scale,
+        safeScale,
+      )
       const targetX = beginEdgeX ? beginX : nextX !== x ? nextX : null
       const targetY = beginEdgeY ? beginY : nextY !== y ? nextY : null
 
