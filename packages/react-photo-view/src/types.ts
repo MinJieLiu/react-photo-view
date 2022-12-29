@@ -108,6 +108,10 @@ export interface PhotoProviderBase {
    * @defaultValue document.body
    */
   portalContainer?: HTMLElement
+  /**
+   * 是否开启鼠标缩放
+   */
+  enableMouseZoom?: boolean
 }
 
 export type PhotoRenderParams = {

@@ -64,6 +64,8 @@ export interface PhotoBoxProps {
   expose: (state: ExposedProperties) => void
   // 是否在当前操作中
   isActive: boolean
+  // 是否开启鼠标缩放
+  enableMouseZoom?: boolean
 }
 
 const initialState = {
@@ -146,7 +148,7 @@ export default function PhotoBox({
   style,
   loadingElement,
   brokenElement,
-
+  enableMouseZoom = true,
   onPhotoTap,
   onMaskTap,
   onReachMove,
@@ -477,7 +479,7 @@ export default function PhotoBox({
   }
 
   function handleWheel(e: React.WheelEvent) {
-    if (!reach) {
+    if (!reach && enableMouseZoom) {
       // 限制最大倍数和最小倍数
       const delta = isDragMode ? e.deltaY / 100 / 16 : e.deltaY / 100 / 2
       const toScale = limitScale(scale - delta, isDragMode, naturalWidth / width)

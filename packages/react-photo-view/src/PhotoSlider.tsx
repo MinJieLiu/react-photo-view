@@ -138,6 +138,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     onClose,
     afterClose,
     portalContainer,
+    enableMouseZoom = true,
   } = props
 
   const isDragMode = useMemo(() => {
@@ -492,6 +493,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             onPhotoResize={handleResize}
             isActive={(currentImage && currentImage.key) === item.key}
             expose={updateState}
+            enableMouseZoom={enableMouseZoom}
           />
         )
       })}
