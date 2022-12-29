@@ -196,6 +196,7 @@ export default function PhotoBox({
         updateState({
           rotate: current,
           ...getSuitableImageSize(isDragMode, naturalWidth, naturalHeight, current),
+          scale,
         })
       }
     },
