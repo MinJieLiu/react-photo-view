@@ -475,7 +475,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
           !enableLoop && index === 0
             ? index + currentIndex
             : virtualIndexRef.current - 1 + currentIndex
-
+        const isActive = !item.isCloned && (currentImage && currentImage.key) === item.key
         return (
           <PhotoBox
             key={enableLoop ? `${item.key}/${item.src}/${nextIndex}` : item.key}
@@ -491,7 +491,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             wrapClassName={photoWrapClassName}
             className={photoClassName}
             style={{
-              opacity: isDragMode ? (nextIndex === index ? 1 : 0) : undefined,
+              opacity: isDragMode ? (isActive ? 1 : 0) : undefined,
               left: `${(innerWidth + horizontalOffset) * nextIndex}px`,
               transform: `translate3d(${x}px, ${y}px, 0)`,
               transition: touched || pause ? undefined : `transform ${slideSpeed}ms ${slideEasing}`,
@@ -499,7 +499,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             loadingElement={loadingElement}
             brokenElement={brokenElement}
             onPhotoResize={handleResize}
-            isActive={!item.isCloned && (currentImage && currentImage.key) === item.key}
+            isActive={isActive}
             expose={updateState}
             enableMouseZoom={enableMouseZoom}
           />
