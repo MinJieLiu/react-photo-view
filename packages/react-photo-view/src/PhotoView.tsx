@@ -36,6 +36,10 @@ export interface PhotoViewProps {
    * 触发的事件
    */
   triggers?: ('onClick' | 'onDoubleClick')[];
+  /**
+   * 点击图片是否阻止浏览器默认事件
+   */
+  preventDefault?: boolean;
 }
 
 const PhotoView: React.FC<PhotoViewProps> = ({
@@ -58,6 +62,9 @@ const PhotoView: React.FC<PhotoViewProps> = ({
   }, []);
 
   function invokeChildrenFn(eventName: string, e: React.SyntheticEvent) {
+    if (preventDefault) {
+       e.preventDefault()
+    }
     if (children) {
       const eventFn = children.props[eventName];
       if (eventFn) {
