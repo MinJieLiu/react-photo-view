@@ -1,6 +1,7 @@
 {
-  "name": "root",
+  "name": "react-photo-view-patch-1",
   "private": true,
+  "version": "1.2.3",
   "description": "An exquisite React photo preview component",
   "author": "MinJieLiu",
   "license": "Apache-2.0",
