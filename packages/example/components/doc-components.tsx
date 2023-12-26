@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropsWithChildren } from "react";
 import photo1 from '../images/1.jpg';
 import photo2 from '../images/2.jpg';
 import photo3 from '../images/3.jpg';
@@ -8,7 +8,7 @@ import photo6 from '../images/6.jpg';
 
 export const photoImages = [photo1.src, photo2.src, photo3.src, photo4.src, photo5.src, photo6.src];
 
-export const ImageList: React.FC = ({ children }) => {
+export const ImageList = ({ children }: PropsWithChildren) => {
   return <div className="flex flex-wrap items-center my-6">{children}</div>;
 };
 
@@ -37,7 +37,7 @@ export const Button = React.forwardRef<HTMLDivElement, ButtonProps>(({ primary, 
   );
 });
 
-export const Overlay: React.FC = ({ children }) => {
+export const Overlay= ({ children }: PropsWithChildren) => {
   return (
     <div className="absolute left-0 bottom-0 p-2 w-full min-h-24 text-sm text-slate-300 z-50 bg-black/50">
       {children}

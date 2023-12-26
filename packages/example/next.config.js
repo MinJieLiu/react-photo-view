@@ -2,15 +2,21 @@ const nextra = require('nextra');
 
 const withNextra = nextra({
   theme: 'nextra-theme-docs',
-  themeConfig: './theme.config.js',
-  unstable_stork: false,
-  unstable_contentDump: true,
+  themeConfig: './theme.config.jsx',
+  staticImage: true,
+  flexsearch: {
+    codeblocks: false,
+  },
+  defaultShowCopyCode: true,
 });
 
 module.exports = withNextra({
   i18n: {
     locales: ['zh-CN', 'en-US'],
     defaultLocale: 'zh-CN',
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
   redirects: () => {
     return [

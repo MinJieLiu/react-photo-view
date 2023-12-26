@@ -49,7 +49,7 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
     const moveTime = Date.now() - touchedTime;
 
     // 时间过长、超出安全范围的情况下不执行滚动逻辑，恢复安全范围
-    if (moveTime >= maxTouchTime || safeScale != scale || Math.abs(lastScale - scale) > 1) {
+    if (moveTime >= maxTouchTime || safeScale !== scale || Math.abs(lastScale - scale) > 1) {
       // 计算中心缩放点
       const { x: nextX, y: nextY } = getPositionOnMoveOrScale(x, y, width, height, scale, safeScale);
       const targetX = beginEdgeX ? beginX : nextX !== x ? nextX : null;
@@ -61,7 +61,7 @@ export default function useScrollPosition<C extends (spatial: number) => boolean
       if (targetY !== null) {
         easeOutMove(y, targetY, callback.Y);
       }
-      if (safeScale != scale) {
+      if (safeScale !== scale) {
         easeOutMove(scale, safeScale, callback.S);
       }
       return;
@@ -122,7 +122,7 @@ const resistance = 0.0002;
 function scrollMove(initialSpeed: number, callback: (spatial: number) => boolean) {
   let v = initialSpeed;
   let s = 0;
-  let lastTime: number | undefined = undefined;
+  let lastTime: number | undefined;
   let frameId = 0;
 
   const calcMove = (now: number) => {
@@ -134,9 +134,9 @@ function scrollMove(initialSpeed: number, callback: (spatial: number) => boolean
     const a = direction * acceleration;
     const f = Math.sign(-v) * v ** 2 * resistance;
     const ds = v * dt + ((a + f) * dt ** 2) / 2;
-    v = v + (a + f) * dt;
+    v += (a + f) * dt;
 
-    s = s + ds;
+    s += ds;
     // move to s
     lastTime = now;
 

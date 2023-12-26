@@ -1,3 +1,1 @@
-const fabric = require('@umijs/fabric');
-
-module.exports = fabric.stylelint;
+module.exports = require('@micro-web/standard/stylelint.cjs');

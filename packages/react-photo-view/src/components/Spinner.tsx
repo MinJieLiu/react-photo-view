@@ -1,7 +1,8 @@
 import React from 'react';
 import './Spinner.less';
 
-function Spinner({ className, ...props }: React.HTMLAttributes<HTMLElement>) {
+// eslint-disable-next-line react/prop-types
+function Spinner({ className = '', ...props }: React.HTMLAttributes<HTMLElement>) {
   return (
     <div className={`PhotoView__Spinner ${className}`} {...props}>
       <svg viewBox="0 0 32 32" width="36" height="36" fill="white">

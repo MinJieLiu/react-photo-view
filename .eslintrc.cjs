@@ -1,11 +1,7 @@
 module.exports = {
-  extends: [require.resolve('@umijs/fabric/dist/eslint')],
+  extends: [require.resolve('@micro-web/standard/eslint.cjs')],
   rules: {
-    'arrow-body-style': 0,
-    'jsx-a11y/label-has-for': 0,
-    'no-confusing-arrow': 0,
-    'no-nested-ternary': 0,
-    'no-console': 2,
-    'react/no-this-in-sfc': 0,
+    'no-return-assign': 0,
+    'no-restricted-globals': 0,
   },
 };

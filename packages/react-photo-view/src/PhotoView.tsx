@@ -1,5 +1,5 @@
-import React, { useImperativeHandle } from 'react';
-import { Children, cloneElement, useContext, useEffect, useMemo, useRef } from 'react';
+import type React from 'react';
+import { useImperativeHandle, Children, cloneElement, useContext, useEffect, useMemo, useRef } from 'react';
 import useInitial from './hooks/useInitial';
 import useMethods from './hooks/useMethods';
 import type { PhotoContextType } from './photo-context';

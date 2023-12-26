@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
-import type { DataType, PhotoProviderBase, OverlayRenderProps } from './types';
-import type { ReachType } from './types';
+import type { DataType, PhotoProviderBase, OverlayRenderProps, ReachType } from './types';
 import { defaultEasing, defaultSpeed, defaultOpacity, horizontalOffset, maxMoveOffset } from './variables';
 import isTouchDevice from './utils/isTouchDevice';
 import { limitNumber } from './utils/limitTarget';
@@ -209,6 +208,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
         case 'Escape':
           close();
           break;
+        default:
       }
     }
   });
@@ -271,7 +271,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
 
     updateState({
       touched: true,
-      lastCX: lastCX,
+      lastCX,
       x: -(innerWidth + horizontalOffset) * virtualIndexRef.current + offsetClientX,
       pause: false,
     });
@@ -362,8 +362,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
           activeAnimation === 1
             ? ' PhotoView-Slider__fadeIn'
             : activeAnimation === 2
-            ? ' PhotoView-Slider__fadeOut'
-            : ''
+              ? ' PhotoView-Slider__fadeOut'
+              : ''
         }`}
         style={{
           background: currentOpacity ? `rgba(0, 0, 0, ${currentOpacity})` : undefined,

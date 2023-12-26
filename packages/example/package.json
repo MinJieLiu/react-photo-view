@@ -7,19 +7,19 @@
     "start": "next start"
   },
   "dependencies": {
-    "mac-scrollbar": "^0.9.6",
-    "next": "^12.0.8",
-    "nextra": "^2.0.0-alpha.24",
-    "nextra-theme-docs": "^2.0.0-alpha.23",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "mac-scrollbar": "^0.13.6",
+    "next": "^14.0.4",
+    "nextra": "^2.13.2",
+    "nextra-theme-docs": "^2.13.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-photo-view": "link:../react-photo-view"
   },
   "devDependencies": {
-    "@types/node": "^16.11.26",
-    "@types/react": "^17.0.39",
-    "autoprefixer": "^10.4.2",
-    "postcss": "^8.4.6",
-    "tailwindcss": "^3.0.23"
+    "@types/node": "^18.19.3",
+    "@types/react": "^18.2.45",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0"
   }
 }

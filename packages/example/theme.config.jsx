@@ -8,19 +8,18 @@ const Vercel = ({ height = 20 }) => (
 );
 
 export default {
-  projectLink: 'https://github.com/MinJieLiu/react-photo-view', // GitHub link in the navbar
+  project: {
+    link: 'https://github.com/MinJieLiu/react-photo-view',
+  },
+  useNextSeoProps() {
+    return {
+      titleTemplate: '%s – react-photo-view',
+    };
+  },
   docsRepositoryBase: 'https://github.com/MinJieLiu/react-photo-view/tree/master/example', // base URL for the docs repository
-  titleSuffix: ' – react-photo-view',
-  search: true,
-  unstable_flexsearch: true,
-  floatTOC: true,
-  nextLinks: true,
-  prevLinks: true,
-  customSearch: null,
   darkMode: true,
-  footer: true,
-  footerText: () => {
-    return (
+  footer: {
+    text: (
       <a
         href="https://vercel.com/?utm_source=swr"
         target="_blank"
@@ -32,18 +31,9 @@ export default {
           <Vercel />
         </span>
       </a>
-    );
+    ),
   },
-
-  footerEditLink: ({ locale }) => {
-    switch (locale) {
-      case 'zh-CN':
-        return '在 GitHub 上编辑本页 →';
-      default:
-        return 'Edit this page on GitHub →';
-    }
-  },
-  logo: <span>react-photo-view</span>,
+  logo: <span className="mx-2 font-extrabold hidden md:inline select-none">react-photo-view</span>,
   head: (
     <>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />

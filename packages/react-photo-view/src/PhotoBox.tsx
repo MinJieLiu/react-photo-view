@@ -15,8 +15,9 @@ import type {
   PhotoTapFunction,
   BrokenElementParams,
   ExposedProperties,
+  ReachType,
+  TouchStartType,
 } from './types';
-import type { ReachType, TouchStartType } from './types';
 import useSetState from './hooks/useSetState';
 import useMethods from './hooks/useMethods';
 import useDebounceCallback from './hooks/useDebounceCallback';
@@ -214,7 +215,7 @@ export default function PhotoBox({
         const offsetX = nextClientX - lastCX;
         const offsetY = nextClientY - lastCY;
         // 边缘触发状态
-        let currentReach: ReachType = undefined;
+        let currentReach: ReachType;
         if (currentTouchLength === 0) {
           // 边缘超出状态
           const [horizontalCloseEdge] = computePositionEdge(offsetX + lastX, scale, currentWidth, innerWidth);

@@ -1,5 +1,4 @@
-import type { CloseEdgeType } from '../types';
-import type { ReachType, TouchStartType } from '../types';
+import type { CloseEdgeType, ReachType, TouchStartType } from '../types';
 
 /**
  * 获取接触边缘类型
@@ -12,7 +11,8 @@ export const getReachType = (
 ): ReachType => {
   if ((horizontalCloseEdge && initialTouchState === 1) || reachPosition === 'x') {
     return 'x';
-  } else if ((verticalCloseEdge && initialTouchState > 1) || reachPosition === 'y') {
+  }
+  if ((verticalCloseEdge && initialTouchState > 1) || reachPosition === 'y') {
     return 'y';
   }
   return undefined;
@@ -30,7 +30,7 @@ export const computePositionEdge = (position: number, scale: number, size: numbe
   const currentWidth = size * scale;
   // 图片超出的宽度
   const outOffset = (currentWidth - innerSize) / 2;
-  let closedEdge: CloseEdgeType = undefined;
+  let closedEdge: CloseEdgeType;
 
   let current = position;
   if (currentWidth <= innerSize) {
