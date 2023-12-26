@@ -410,7 +410,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             loadingElement={loadingElement}
             brokenElement={brokenElement}
             onPhotoResize={handleResize}
-            isActive={(currentImage && currentImage.key) === item.key}
+            isActive={virtualIndexRef.current === nextIndex}
             expose={updateState}
           />
         );
