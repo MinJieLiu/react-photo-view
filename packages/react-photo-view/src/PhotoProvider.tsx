@@ -46,6 +46,16 @@ export default function PhotoProvider({ children, onIndexChange, onVisibleChange
         images: prev.images.concat(imageItem),
       }));
     },
+    open(imageItems: DataType[], i: number) {
+      updateState({
+        images: imageItems,
+        visible: true,
+        index: i,
+      });
+      if (onVisibleChange) {
+        onVisibleChange(true, index, state);
+      }
+    },
     remove(key: number) {
       updateState((prev) => {
         const nextImages = prev.images.filter((item) => item.key !== key);

@@ -122,7 +122,7 @@ const initialState = {
 };
 
 export default function PhotoBox({
-  item: { src, render, width: customWidth = 0, height: customHeight = 0, originRef },
+  item: { src, webpSrc, render, width: customWidth = 0, height: customHeight = 0, originRef },
   visible,
   speed,
   easing,
@@ -455,6 +455,7 @@ export default function PhotoBox({
       >
         {src ? (
           <Photo
+            webpSrc={webpSrc}
             src={src}
             loaded={loaded}
             broken={broken}

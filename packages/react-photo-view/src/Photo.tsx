@@ -13,6 +13,7 @@ export interface IPhotoLoadedParams {
 
 export interface IPhotoProps extends React.HTMLAttributes<HTMLElement> {
   src: string;
+  webpSrc?: string;
   loaded: boolean;
   broken: boolean;
   onPhotoLoad: (params: IPhotoLoadedParams) => void;
@@ -22,6 +23,7 @@ export interface IPhotoProps extends React.HTMLAttributes<HTMLElement> {
 
 export default function Photo({
   src,
+  webpSrc,
   loaded,
   broken,
   className,
@@ -54,16 +56,19 @@ export default function Photo({
   if (src && !broken) {
     return (
       <>
-        <img
-          className={`PhotoView__Photo${className ? ` ${className}` : ''}`}
-          src={src}
-          onLoad={handleImageLoaded}
-          onError={handleImageBroken}
-          alt=""
-          {...restProps}
-        />
+        <picture>
+          {webpSrc && <source srcSet={webpSrc} type="image/webp"/>}
+          <img
+            className={`PhotoView__Photo${className ? ` ${className}` : ''}`}
+            src={src}
+            onLoad={handleImageLoaded}
+            onError={handleImageBroken}
+            alt=""
+            {...restProps}
+          />
+        </picture>
         {!loaded &&
-          (<span className="PhotoView__icon">{loadingElement}</span> || <Spinner className="PhotoView__icon" />)}
+          (<span className="PhotoView__icon">{loadingElement}</span> || <Spinner className="PhotoView__icon"/>)}
       </>
     );
   }

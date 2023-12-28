@@ -356,7 +356,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       onClick={(e) => e.stopPropagation()}
       container={portalContainer}
     >
-      {visible && <PreventScroll />}
+      {visible && <PreventScroll/>}
       <div
         className={`PhotoView-Slider__Backdrop${maskClassName ? ` ${maskClassName}` : ''}${
           activeAnimation === 1
@@ -380,7 +380,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
           </div>
           <div className="PhotoView-Slider__BannerRight">
             {toolbarRender && overlayParams && toolbarRender(overlayParams)}
-            <CloseIcon className="PhotoView-Slider__toolbarIcon" onClick={close} />
+            <CloseIcon className="PhotoView-Slider__toolbarIcon" onClick={close}/>
           </div>
         </div>
       )}
@@ -419,12 +419,12 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
         <>
           {(enableLoop || index !== 0) && (
             <div className="PhotoView-Slider__ArrowLeft" onClick={() => changeIndex(index - 1, true)}>
-              <ArrowLeft />
+              <ArrowLeft/>
             </div>
           )}
           {(enableLoop || index + 1 < imageLength) && (
             <div className="PhotoView-Slider__ArrowRight" onClick={() => changeIndex(index + 1, true)}>
-              <ArrowRight />
+              <ArrowRight/>
             </div>
           )}
         </>

@@ -5,6 +5,7 @@ export type UpdateItemType = (dataType: DataType) => void;
 
 export interface PhotoContextType {
   show: (key: number) => void;
+  open: (imageItems: DataType[], i: number) => void;
   update: UpdateItemType;
   remove: (key: number) => void;
   nextId: () => number;

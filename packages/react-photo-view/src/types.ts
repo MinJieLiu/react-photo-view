@@ -13,6 +13,14 @@ export interface DataType {
    */
   src?: string;
   /**
+   * webp 资源地址
+   */
+  webpSrc?: string;
+  /**
+   * 缩略图地址
+   */
+  thumbnail?: string;
+  /**
    * 自定义渲染，优先级比 src 低
    */
   render?: (props: PhotoRenderParams) => React.ReactNode;
