@@ -425,8 +425,8 @@ export default function PhotoBox({
     onTouchStart: isTouchDevice ? handleTouchStart : undefined,
     onWheel: handleWheel,
     style: {
-      width: currentWidth,
-      height: currentHeight,
+      width: currentWidth + 'px',
+      height: currentHeight + 'px',
       opacity,
       objectFit: easingMode === 4 ? undefined : FIT,
       transform: rotate ? `rotate(${rotate}deg)` : undefined,
