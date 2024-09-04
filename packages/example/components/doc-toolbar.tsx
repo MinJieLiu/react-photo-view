@@ -36,10 +36,19 @@ export default function DocDemo() {
   }
   return (
     <PhotoProvider
-      // @ts-ignore
-      toolbarRender={({ rotate, onRotate, onScale, scale, index }) => {
+      toolbarRender={({ rotate, onRotate, onScale, scale, index, onFlipX, onFlipY, flipX, flipY, onReset }) => {
         return (
           <>
+            <svg
+              className="PhotoView-Slider__toolbarIcon"
+              width="44"
+              height="44"
+              viewBox="0 0 24 24"
+              fill="white"
+              onClick={() => onReset()}
+            >
+              <path d="M12 5V2L8 6l4 4V7c3.31 0 6 2.69 6 6 0 2.97-2.17 5.43-5 5.91v2.02c3.95-.49 7-3.85 7-7.93 0-4.42-3.58-8-8-8m-6 8c0-1.65.67-3.15 1.76-4.24L6.34 7.34C4.9 8.79 4 10.79 4 13c0 4.08 3.05 7.44 7 7.93v-2.02c-2.83-.48-5-2.94-5-5.91" />
+            </svg>
             <svg
               className="PhotoView-Slider__toolbarIcon"
               width="44"
@@ -70,6 +79,30 @@ export default function DocDemo() {
             >
               <path d="M565.5 202.5l75-75v225h-225l103.5-103.5c-34.5-34.5-82.5-57-135-57-106.5 0-192 85.5-192 192s85.5 192 192 192c84 0 156-52.5 181.5-127.5h66c-28.5 111-127.5 192-247.5 192-141 0-255-115.5-255-256.5s114-256.5 255-256.5c70.5 0 135 28.5 181.5 75z" />
             </svg>
+
+            <svg
+              className="PhotoView-Slider__toolbarIcon"
+              onClick={() => onFlipX(!flipX)}
+              width="44"
+              height="44"
+              fill="white"
+              viewBox="0 0 24 24"
+              color="red"
+            >
+              <path d="M6.99 11 3 15l3.99 4v-3H14v-2H6.99zM21 9l-3.99-4v3H10v2h7.01v3z" />
+            </svg>
+            <svg
+              className="PhotoView-Slider__toolbarIcon"
+              onClick={() => onFlipY(!flipY)}
+              width="44"
+              height="44"
+              fill="white"
+              viewBox="0 0 24 24"
+              color="erd"
+            >
+              <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99zM9 3 5 6.99h3V14h2V6.99h3z" />
+            </svg>
+
             {document.fullscreenEnabled && <FullScreenIcon onClick={toggleFullScreen} />}
             <svg
               className="PhotoView-Slider__toolbarIcon"

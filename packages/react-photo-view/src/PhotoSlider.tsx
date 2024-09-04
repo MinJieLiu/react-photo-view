@@ -55,10 +55,18 @@ type PhotoSliderState = {
   scale: number;
   // 旋转
   rotate: number;
+  flipX: boolean;
+  flipY: boolean;
+  // 缩放回调
+  onFlipX?: (flip: boolean) => void;
+  // 缩放回调
+  onFlipY?: (flip: boolean) => void;
   // 缩放回调
   onScale?: (scale: number) => void;
-  // 旋转回调
+  // 缩放回调
   onRotate?: (rotate: number) => void;
+  // 缩放回调
+  onReset?: () => void;
 };
 
 const initialState: PhotoSliderState = {
@@ -73,6 +81,8 @@ const initialState: PhotoSliderState = {
   minimal: true,
   scale: 1,
   rotate: 0,
+  flipX: false,
+  flipY: false,
 };
 
 export default function PhotoSlider(props: IPhotoSliderProps) {
@@ -122,6 +132,13 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     rotate,
     onScale,
     onRotate,
+
+    flipX,
+    flipY,
+    onFlipX,
+    onFlipY,
+
+    onReset,
   } = state;
 
   // 受控 index
@@ -328,7 +345,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
   const currentOpacity = visible ? bg : lastBg;
   // 覆盖物参数
   const overlayParams: OverlayRenderProps | undefined = onScale &&
-    onRotate && {
+    onRotate && onFlipX && onFlipY && onReset && {
       images,
       index,
       visible,
@@ -340,6 +357,11 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
       rotate,
       onScale,
       onRotate,
+      flipX,
+      onFlipX,
+      flipY,
+      onFlipY,
+      onReset,
     };
   // 动画时间
   const currentSpeed = speedFn ? speedFn(activeAnimation) : defaultSpeed;

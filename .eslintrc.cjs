@@ -3,5 +3,6 @@ module.exports = {
   rules: {
     'no-return-assign': 0,
     'no-restricted-globals': 0,
+    'max-lines-per-function': ['error', { 'max': 400 }]
   },
 };

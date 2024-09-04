@@ -108,6 +108,8 @@ export type PhotoRenderParams = {
   attrs: Partial<React.HTMLAttributes<HTMLElement>>;
   scale: number;
   rotate: number;
+  flipX: boolean; 
+  flipY: boolean; 
 };
 
 /**
@@ -162,6 +164,11 @@ export interface OverlayRenderProps {
    * 缩放事件回调
    */
   onScale: (scale: number) => void;
+  flipX: boolean;
+  onFlipX: (flip: boolean) => void;
+  flipY: boolean;
+  onFlipY: (flip: boolean) => void;
+  onReset: () => void;
 }
 
 export interface ExposedProperties {
@@ -173,6 +180,10 @@ export interface ExposedProperties {
   onScale?: (scale: number) => void;
   // 旋转回调
   onRotate?: (rotate: number) => void;
+  flipX?: boolean;
+  onFlipX?: (flip: boolean) => void;
+  flipY?: boolean;
+  onFlipY?: (flip: boolean) => void;
 }
 
 export type ReachMoveFunction = (reachPosition: ReachType, clientX: number, clientY: number, scale?: number) => void;

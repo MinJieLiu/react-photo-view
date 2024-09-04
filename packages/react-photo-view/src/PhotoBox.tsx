@@ -119,6 +119,8 @@ const initialState = {
   stopRaf: true,
   // 当前边缘触发状态
   reach: undefined as ReachType,
+  flipX: false,
+  flipY: false,
 };
 
 export default function PhotoBox({
@@ -169,6 +171,8 @@ export default function PhotoBox({
     touchLength,
     pause,
     reach,
+    flipX,
+    flipY,
   } = state;
 
   const fn = useMethods({
@@ -178,6 +182,24 @@ export default function PhotoBox({
         expose({ rotate: current });
         updateState({ rotate: current, ...getSuitableImageSize(naturalWidth, naturalHeight, current) });
       }
+    },
+    onFlipX(flip: boolean) {
+      expose({ flipX: flip });
+      updateState({ flipX: flip });
+    },
+    onFlipY(flip: boolean) {
+      expose({ flipY: flip });
+      updateState({ flipY: flip });
+    },
+    onReset() {
+      const newState = {
+        flipY: initialState.flipY,
+        flipX: initialState.flipX,
+        scale: initialState.scale,
+        rotate: initialState.rotate,
+      }; 
+      expose(newState);
+      updateState(newState);
     },
   });
 
@@ -429,7 +451,7 @@ export default function PhotoBox({
       height: `${currentHeight}px`,
       opacity,
       objectFit: easingMode === 4 ? undefined : FIT,
-      transform: rotate ? `rotate(${rotate}deg)` : undefined,
+      transform: `${(rotate ? `rotate(${rotate}deg)` : '')} scaleX(${flipX ? '-1' : '1' }) scaleY(${flipY ? '-1' : '1' })`,
       transition:
         // 初始状态无渐变
         easingMode > 2
@@ -464,7 +486,7 @@ export default function PhotoBox({
             brokenElement={brokenElement}
           />
         ) : (
-          render && render({ attrs, scale: currentScale, rotate })
+          render && render({ attrs, scale: currentScale, rotate, flipX, flipY })
         )}
       </div>
     </div>
