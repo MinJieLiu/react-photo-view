@@ -17,6 +17,7 @@ import type {
   ExposedProperties,
   ReachType,
   TouchStartType,
+  IPhotoLoadedParams,
 } from './types';
 import useSetState from './hooks/useSetState';
 import useMethods from './hooks/useMethods';
@@ -26,7 +27,6 @@ import useContinuousTap from './hooks/useContinuousTap';
 import useScrollPosition from './hooks/useScrollPosition';
 import useAnimationPosition from './hooks/useAnimationPosition';
 import useMountedRef from './hooks/useMountedRef';
-import type { IPhotoLoadedParams } from './Photo';
 import Photo from './Photo';
 import './PhotoBox.less';
 
@@ -486,7 +486,7 @@ export default function PhotoBox({
             brokenElement={brokenElement}
           />
         ) : (
-          render && render({ attrs, scale: currentScale, rotate, flipX, flipY })
+          render && render({ attrs, scale: currentScale, rotate, flipX, flipY }, handlePhotoLoad)
         )}
       </div>
     </div>

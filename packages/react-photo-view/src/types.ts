@@ -1,5 +1,12 @@
 import type React from 'react';
 
+export interface IPhotoLoadedParams {
+  loaded?: boolean;
+  naturalWidth?: number;
+  naturalHeight?: number;
+  broken?: boolean;
+}
+
 /**
  * 资源数据类型
  */
@@ -15,7 +22,13 @@ export interface DataType {
   /**
    * 自定义渲染，优先级比 src 低
    */
-  render?: (props: PhotoRenderParams) => React.ReactNode;
+  render?: (
+    props: PhotoRenderParams,
+    /**
+     * 旋转回调
+     */
+    onPhotoLoad?: (params: IPhotoLoadedParams) => void
+  ) => React.ReactNode;
   /**
    * 自定义覆盖节点
    */
@@ -161,7 +174,7 @@ export interface OverlayRenderProps {
    */
   scale: number;
   /**
-   * 缩放事件回调
+   * 旋转回调
    */
   onScale: (scale: number) => void;
   flipX: boolean;

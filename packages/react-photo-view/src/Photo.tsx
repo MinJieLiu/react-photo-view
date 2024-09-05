@@ -1,15 +1,8 @@
 import React from 'react';
 import Spinner from './components/Spinner';
 import useMountedRef from './hooks/useMountedRef';
-import type { BrokenElementParams } from './types';
+import type { BrokenElementParams, IPhotoLoadedParams } from './types';
 import './Photo.less';
-
-export interface IPhotoLoadedParams {
-  loaded?: boolean;
-  naturalWidth?: number;
-  naturalHeight?: number;
-  broken?: boolean;
-}
 
 export interface IPhotoProps extends React.HTMLAttributes<HTMLElement> {
   src: string;
