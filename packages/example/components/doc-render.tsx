@@ -13,7 +13,7 @@ export default function DocDemo() {
           height={elementSize}
           // @ts-ignore
           render={({ scale, attrs }) => {
-            const width = attrs.style!.width as number;
+            const width = parseFloat((attrs?.style?.width ?? 0) as string);
             const offset = (width - elementSize) / elementSize;
             // 保持子节点的 scale 的稳定
             const childScale = scale === 1 ? scale + offset : 1 + offset;
