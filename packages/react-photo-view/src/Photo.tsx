@@ -59,11 +59,16 @@ export default function Photo({
           src={src}
           onLoad={handleImageLoaded}
           onError={handleImageBroken}
+          draggable={false}
           alt=""
           {...restProps}
         />
         {!loaded &&
-          (<span className="PhotoView__icon">{loadingElement}</span> || <Spinner className="PhotoView__icon" />)}
+          (loadingElement ? (
+            <span className="PhotoView__icon">{loadingElement}</span>
+          ) : (
+            <Spinner className="PhotoView__icon" />
+          ))}
       </>
     );
   }
