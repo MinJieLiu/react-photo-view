@@ -7,7 +7,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "mac-scrollbar": "^0.13.6",
+    "mac-scrollbar": "^0.13.8",
     "next": "^14.0.4",
     "nextra": "^2.13.2",
     "nextra-theme-docs": "^2.13.2",

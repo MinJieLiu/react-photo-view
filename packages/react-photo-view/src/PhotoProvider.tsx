@@ -9,7 +9,6 @@ export interface PhotoProviderProps extends PhotoProviderBase {
   children: React.ReactNode;
   onIndexChange?: (index: number, state: PhotoProviderState) => void;
   onVisibleChange?: (visible: boolean, index: number, state: PhotoProviderState) => void;
-  direction?: 'ltr' | 'rtl';
 }
 
 type PhotoProviderState = {
