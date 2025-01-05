@@ -262,7 +262,7 @@ function MyComponent() {
       width={elementSize}
       height={elementSize}
       render={({ scale, attrs }) => {
-        const width = attrs.style.width;
+        const width = parseFloat((attrs?.style?.width ?? 0) as string);
         const offset = (width - elementSize) / elementSize;
         const childScale = scale === 1 ? scale + offset : 1 + offset;
 
