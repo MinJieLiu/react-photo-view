@@ -30,6 +30,8 @@ export interface IPhotoSliderProps extends PhotoProviderBase {
   onClose: (evt?: React.MouseEvent | React.TouchEvent) => void;
   // 关闭动画结束后回调
   afterClose?: () => void;
+
+  direction?: 'ltr' | 'rtl';
 }
 
 type PhotoSliderState = {
@@ -100,6 +102,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     onClose,
     afterClose,
     portalContainer,
+    direction = 'rtl',
   } = props;
 
   const [state, updateState] = useSetState(initialState);
@@ -403,8 +406,8 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             wrapClassName={photoWrapClassName}
             className={photoClassName}
             style={{
-              left: `${(innerWidth + horizontalOffset) * nextIndex}px`,
-              transform: `translate3d(${x}px, 0px, 0)`,
+              [direction === 'rtl' ? 'right' : 'left']: `${(innerWidth + horizontalOffset) * nextIndex}px`,
+              transform: `translate3d(${x * (direction === 'rtl' ? -1 : 1)}px, 0px, 0)`,
               transition: touched || pause ? undefined : `transform ${slideSpeed}ms ${slideEasing}`,
             }}
             loadingElement={loadingElement}
