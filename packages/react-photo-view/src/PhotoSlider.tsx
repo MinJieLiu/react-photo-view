@@ -26,6 +26,8 @@ export interface IPhotoSliderProps extends PhotoProviderBase {
   onIndexChange?: (index: number) => void;
   // 可见
   visible: boolean;
+  // 是否被更高层级元素覆盖
+  isCovered?: boolean;
   // 关闭回调
   onClose: (evt?: React.MouseEvent | React.TouchEvent) => void;
   // 关闭动画结束后回调
@@ -102,6 +104,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
     onClose,
     afterClose,
     portalContainer,
+    isCovered = false,
   } = props;
 
   const [state, updateState] = useSetState(initialState);
@@ -398,6 +401,7 @@ export default function PhotoSlider(props: IPhotoSliderProps) {
             speed={currentSpeed}
             easing={currentEasing}
             visible={visible}
+            isCovered={isCovered}
             onReachMove={handleReachMove}
             onReachUp={handleReachUp}
             onPhotoTap={() => handlePhotoTap(photoClosable)}

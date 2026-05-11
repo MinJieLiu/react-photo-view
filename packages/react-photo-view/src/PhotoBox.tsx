@@ -35,6 +35,8 @@ export interface PhotoBoxProps {
   item: DataType;
   // 是否可见
   visible: boolean;
+  // 是否被更高层级元素覆盖
+  isCovered?: boolean;
   // 动画时间
   speed: number;
   // 动画函数
@@ -124,6 +126,7 @@ const initialState = {
 export default function PhotoBox({
   item: { src, render, width: customWidth = 0, height: customHeight = 0, originRef },
   visible,
+  isCovered = false,
   speed,
   easing,
   wrapClassName,
@@ -322,7 +325,7 @@ export default function PhotoBox({
     handleUp(e.clientX, e.clientY);
   });
   useEventListener(
-    isTouchDevice ? 'touchmove' : undefined,
+    isTouchDevice && !isCovered ? 'touchmove' : undefined,
     (e) => {
       e.preventDefault();
       const position = getMultipleTouchPosition(e);
@@ -331,7 +334,7 @@ export default function PhotoBox({
     { passive: false },
   );
   useEventListener(
-    isTouchDevice ? 'touchend' : undefined,
+    isTouchDevice && !isCovered ? 'touchend' : undefined,
     ({ changedTouches }) => {
       const touch = changedTouches[0];
       handleUp(touch.clientX, touch.clientY);
