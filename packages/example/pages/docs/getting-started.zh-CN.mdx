@@ -336,6 +336,14 @@ function MyComponent() {
 
 <DocClose />
 
+### 移动端高层级元素
+
+如果在移动端打开图片后，又有包含 Touch 操作的更高层级元素（诸如 Modal, Drawer）需要展示，可以通过传递 `isCovered` 来取消掉内部 的 Touch 事件监听，防止高层级元素中的滚动事件或其它 Touch 事件失效；
+
+```jsx
+<PhotoProvider isCovered={isAnyOtherOverlayVisible} />
+```
+
 ## 自定义反馈
 
 `<PhotoView />` 如果加载失败，默认渲染空节点，你很可能需要根据当前 UI 设置属于自己的错误反馈节点。

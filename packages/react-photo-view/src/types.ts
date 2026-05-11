@@ -99,6 +99,10 @@ export interface PhotoProviderBase {
    * @defaultValue document.body
    */
   portalContainer?: HTMLElement;
+  /**
+   * 是否被更高层级元素覆盖
+   */
+  isCovered?: boolean
 }
 
 export type PhotoRenderParams = {

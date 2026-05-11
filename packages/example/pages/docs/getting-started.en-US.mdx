@@ -338,6 +338,14 @@ Set `bannerVisible` to `false` to hide the top area:
 
 <DocClose />
 
+### High-Level Elements on Mobile
+
+If, after opening an image on mobile, another higher-level element containing touch interactions (such as a Modal or Drawer) also needs to be displayed, you can pass `isCovered` to disable the internal touch event listeners. This prevents scroll events or other touch interactions within the higher-level element from becoming unresponsive.
+
+```jsx
+<PhotoProvider isCovered={isAnyOtherOverlayVisible} />
+```
+
 ## Custom feedback
 
 `<PhotoView>` If loading fails, empty nodes are rendered by default, and you may need to set your own error feedback nodes according to the current UI.
