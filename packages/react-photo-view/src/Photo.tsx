@@ -16,8 +16,8 @@ export interface IPhotoProps extends React.HTMLAttributes<HTMLElement> {
   loaded: boolean;
   broken: boolean;
   onPhotoLoad: (params: IPhotoLoadedParams) => void;
-  loadingElement?: JSX.Element;
-  brokenElement?: JSX.Element | ((photoProps: BrokenElementParams) => JSX.Element);
+  loadingElement?: React.JSX.Element;
+  brokenElement?: React.JSX.Element | ((photoProps: BrokenElementParams) => React.JSX.Element);
 }
 
 export default function Photo({

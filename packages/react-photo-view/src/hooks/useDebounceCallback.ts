@@ -21,7 +21,7 @@ export default function useDebounceCallback<CallbackArguments extends any[]>(
   callbackRef.current = callback;
 
   const prev = useRef(0);
-  const trailingTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const trailingTimeout = useRef<ReturnType<typeof setTimeout>>(null);
   const clearTrailing = () => trailingTimeout.current && clearTimeout(trailingTimeout.current);
 
   const fn = useCallback(

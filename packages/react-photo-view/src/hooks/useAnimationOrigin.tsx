@@ -27,7 +27,7 @@ export default function useAnimationOrigin(
   const [originRect, updateOriginRect] = useState(initialRect);
   // 动画状态
   const [easingMode, updateEasingMode] = useState<EasingMode>(0);
-  const initialTime = useRef<number>();
+  const initialTime = useRef<number>(null);
 
   const fn = useMethods({
     OK: () => visible && updateEasingMode(4),

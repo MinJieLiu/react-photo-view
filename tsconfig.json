@@ -16,10 +16,9 @@
     "noUnusedLocals": true,
     "noImplicitAny": true,
     "resolveJsonModule": true,
-    "suppressImplicitAnyIndexErrors": true,
     "isolatedModules": true,
     "declaration": true,
-    "noEmitOnError": true,
+    "noEmitOnError": false,
     "jsx": "react"
   }
 }

@@ -46,9 +46,9 @@ export interface PhotoBoxProps {
   // style
   style?: object;
   // 自定义 loading
-  loadingElement?: JSX.Element;
+  loadingElement?: React.JSX.Element;
   // 加载失败 Element
-  brokenElement?: JSX.Element | ((photoProps: BrokenElementParams) => JSX.Element);
+  brokenElement?: React.JSX.Element | ((photoProps: BrokenElementParams) => React.JSX.Element);
 
   // Photo 点击事件
   onPhotoTap: PhotoTapFunction;

@@ -9,7 +9,7 @@
     "dev": "pnpm -C ./packages/example dev",
     "build": "pnpm -C ./packages/react-photo-view build && pnpm -C ./packages/example build",
     "start": "pnpm -C ./packages/example start",
-    "prepare": "husky install",
+    "prepare": "husky",
     "lint": "npm run lint:js && npm run lint:prettier",
     "lint:js": "eslint --cache --ext .js,.jsx,.ts,.tsx --format=pretty packages/ --fix",
     "lint:prettier": "prettier --check \"**/*\" --end-of-line auto --write",
@@ -25,14 +25,14 @@
   },
   "devDependencies": {
     "@micro-web/standard": "^1.2.2",
-    "@types/react": "^18.2.45",
-    "@types/react-dom": "^18.2.18",
-    "husky": "^7.0.4",
-    "lint-staged": "^12.3.3",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
     "next": "^14.0.4",
-    "prettier": "^3.1.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "typescript": "^4.9.5"
+    "prettier": "^3.9.6",
+    "react": "^19",
+    "react-dom": "^19",
+    "typescript": "^5.1.0"
   }
 }
