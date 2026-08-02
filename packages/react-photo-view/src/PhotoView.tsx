@@ -1,10 +1,19 @@
 import type React from 'react';
-import { useImperativeHandle, Children, cloneElement, useContext, useEffect, useMemo, useRef } from 'react';
+import type { RefObject } from 'react';
+import { Children, cloneElement, useContext, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import useInitial from './hooks/useInitial';
 import useMethods from './hooks/useMethods';
 import type { PhotoContextType } from './photo-context';
 import PhotoContext from './photo-context';
 import type { PhotoRenderParams } from './types';
+
+type Event = (e: React.MouseEvent<Element, MouseEvent>) => void;
+type EventStore = { [key: string]: Event };
+
+interface ChilProps {
+  ref: RefObject<HTMLElement | null>;
+  eventListeners: EventStore;
+}
 
 export interface PhotoViewProps {
   /**
@@ -30,7 +39,8 @@ export interface PhotoViewProps {
   /**
    * 子节点，一般为缩略图
    */
-  children?: React.ReactElement;
+  children?: React.ReactElement<ChilProps, any>;
+
   /**
    * 触发的事件
    */
@@ -50,7 +60,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
   const key = useInitial(() => photoContext.nextId());
   const originRef = useRef<HTMLElement>(null);
 
-  useImperativeHandle((children as React.FunctionComponentElement<HTMLElement>)?.ref, () => originRef.current);
+  useImperativeHandle(children?.props.ref, () => originRef.current as HTMLElement);
 
   useEffect(() => {
     return () => {
@@ -60,6 +70,8 @@ const PhotoView: React.FC<PhotoViewProps> = ({
 
   function invokeChildrenFn(eventName: string, e: React.SyntheticEvent) {
     if (children) {
+      // suppressImplicitAnyIndexErrors has been removed
+      // @ts-ignore
       const eventFn = children.props[eventName];
       if (eventFn) {
         eventFn(e);
@@ -78,7 +90,7 @@ const PhotoView: React.FC<PhotoViewProps> = ({
   });
 
   const eventListeners = useMemo(() => {
-    const listener = {};
+    const listener: EventStore = {};
     triggers.forEach((eventName) => {
       listener[eventName] = fn.show.bind(null, eventName);
     });
